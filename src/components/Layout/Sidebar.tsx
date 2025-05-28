@@ -71,12 +71,12 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, o
       )}
       
       <aside className={cn(
-        "fixed top-0 left-0 z-50 h-full bg-gray-900 text-white transition-all duration-300 ease-in-out",
+        "fixed top-0 left-0 z-50 h-screen bg-gray-900 text-white transition-all duration-300 ease-in-out",
         "lg:relative lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         isCollapsed ? "w-16" : "w-64"
       )}>
-        <div className={cn("p-4", isCollapsed && "px-2")}>
+        <div className={cn("p-4 h-full flex flex-col", isCollapsed && "px-2")}>
           <div className={cn(
             "flex items-center gap-2 mb-8",
             isCollapsed && "justify-center"
@@ -89,7 +89,7 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, o
             )}
           </div>
 
-          <nav className="space-y-1">
+          <nav className="space-y-1 flex-1 overflow-y-auto">
             {menuItems.map((item) => (
               <div key={item.id}>
                 <Button
