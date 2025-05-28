@@ -23,9 +23,9 @@ const transformAtivoFromDB = (ativo: any): Ativo => {
       id: ativo.localizacoes.id,
       nome: ativo.localizacoes.nome
     } : undefined,
-    dono_negocio: ativo.users ? {
-      id: ativo.users.id,
-      name: ativo.users.name
+    dono_negocio: ativo.dono_negocio ? {
+      id: ativo.dono_negocio.id,
+      name: ativo.dono_negocio.name
     } : undefined,
     grupo_responsavel: ativo.groups ? {
       id: ativo.groups.id,
@@ -49,7 +49,7 @@ export const useAtivos = () => {
           fabricantes(id, nome),
           contratos(id, numero_contrato),
           localizacoes(id, nome),
-          users(id, name),
+          dono_negocio:users!dono_negocio_id(id, name),
           groups(id, name)
         `)
         .order('nome');
