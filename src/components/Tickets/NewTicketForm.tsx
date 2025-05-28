@@ -35,7 +35,13 @@ const NewTicketForm = ({ onSuccess }: NewTicketFormProps) => {
   });
 
   const onSubmit = (data: TicketInsert) => {
-    createTicket(data);
+    // Handle the "unassigned" case by setting assigned_to to null
+    const ticketData = {
+      ...data,
+      assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to
+    };
+    
+    createTicket(ticketData);
     if (onSuccess) {
       onSuccess();
     }
@@ -153,14 +159,14 @@ const NewTicketForm = ({ onSuccess }: NewTicketFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Atribuir para</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione um técnico" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Não atribuído</SelectItem>
+                        <SelectItem value="unassigned">Não atribuído</SelectItem>
                         {profiles.map((profile) => (
                           <SelectItem key={profile.id} value={profile.id}>
                             {profile.full_name || profile.email}

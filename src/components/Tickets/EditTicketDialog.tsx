@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -32,7 +31,7 @@ const EditTicketDialog = ({ ticket, open, onOpenChange }: EditTicketDialogProps)
       priority: ticket?.priority || 'medium',
       status: ticket?.status || 'open',
       client_name: ticket?.client_name || '',
-      assigned_to: ticket?.assigned_to || null
+      assigned_to: ticket?.assigned_to || 'unassigned'
     }
   });
 
@@ -45,14 +44,20 @@ const EditTicketDialog = ({ ticket, open, onOpenChange }: EditTicketDialogProps)
         priority: ticket.priority,
         status: ticket.status,
         client_name: ticket.client_name,
-        assigned_to: ticket.assigned_to
+        assigned_to: ticket.assigned_to || 'unassigned'
       });
     }
   }, [ticket, form]);
 
   const onSubmit = (data: TicketUpdate) => {
     if (ticket) {
-      updateTicket({ id: ticket.id, updates: data });
+      // Handle the "unassigned" case by setting assigned_to to null
+      const ticketData = {
+        ...data,
+        assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to
+      };
+      
+      updateTicket({ id: ticket.id, updates: ticketData });
       onOpenChange(false);
     }
   };
@@ -224,14 +229,14 @@ const EditTicketDialog = ({ ticket, open, onOpenChange }: EditTicketDialogProps)
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Atribuir para</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={field.onChange} value={field.value || 'unassigned'}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione um técnico" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Não atribuído</SelectItem>
+                        <SelectItem value="unassigned">Não atribuído</SelectItem>
                         {profiles.map((profile) => (
                           <SelectItem key={profile.id} value={profile.id}>
                             {profile.full_name || profile.email}
