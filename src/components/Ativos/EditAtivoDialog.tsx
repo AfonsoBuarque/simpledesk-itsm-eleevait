@@ -71,21 +71,68 @@ interface EditAtivoDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const getDefaultFormValues = (): AtivoFormData => ({
+  nome: '',
+  tipo_id: '',
+  descricao: '',
+  status_operacional: '',
+  ambiente: '',
+  localizacao_id: '',
+  fabricante_id: '',
+  modelo: '',
+  numero_serie: '',
+  patrimonio: '',
+  sistema_operacional: '',
+  versao_firmware: '',
+  virtualizacao_tipo: '',
+  data_aquisicao: '',
+  data_instalacao: '',
+  data_garantia_inicio: '',
+  data_garantia_fim: '',
+  prazo_renovacao: '',
+  ciclo_vida_esperado: undefined,
+  data_retirada: '',
+  ultima_auditoria: '',
+  proxima_auditoria: '',
+  cliente_id: '',
+  dono_negocio_id: '',
+  grupo_responsavel_id: '',
+  departamento_id: '',
+  centro_de_custo: '',
+  valor_aquisicao: undefined,
+  valor_atual: undefined,
+  taxa_depreciacao: undefined,
+  valor_residual: undefined,
+  tipo_aquisicao: '',
+  business_criticality: '',
+  sla_esperado: '',
+  situacao_legal: '',
+  observacoes_negocio: '',
+  contrato_id: '',
+  nivel_acesso: '',
+  classificacao_dados: '',
+  requer_criptografia: false,
+  vulnerabilidades_conhecidas: '',
+  parent_id: '',
+  host_parent_id: '',
+  relacionado_a_chamados: false,
+  auditoria_status: '',
+  politica_retirada: '',
+});
+
 export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogProps) => {
   const updateAtivoMutation = useUpdateAtivo();
 
   const form = useForm<AtivoFormData>({
     resolver: zodResolver(ativoSchema),
-    defaultValues: {
-      nome: '',
-      requer_criptografia: false,
-      relacionado_a_chamados: false,
-    },
+    defaultValues: getDefaultFormValues(),
   });
 
   useEffect(() => {
     if (ativo && open) {
-      form.reset({
+      console.log('EditAtivoDialog - Loading ativo data:', ativo);
+      
+      const formData: AtivoFormData = {
         nome: ativo.nome || '',
         tipo_id: ativo.tipo_id || '',
         descricao: ativo.descricao || '',
@@ -132,11 +179,15 @@ export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogPr
         relacionado_a_chamados: ativo.relacionado_a_chamados || false,
         auditoria_status: ativo.auditoria_status || '',
         politica_retirada: ativo.politica_retirada || '',
-      });
+      };
+
+      console.log('EditAtivoDialog - Setting form data:', formData);
+      form.reset(formData);
     }
   }, [ativo, open, form]);
 
   const onSubmit = async (data: AtivoFormData) => {
+    console.log('EditAtivoDialog - Submitting data:', data);
     try {
       await updateAtivoMutation.mutateAsync({ id: ativo.id, ...data });
       onOpenChange(false);
