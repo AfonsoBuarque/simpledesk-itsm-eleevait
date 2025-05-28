@@ -814,6 +814,175 @@ export type Database = {
           },
         ]
       }
+      solicitacoes: {
+        Row: {
+          anexos: Json | null
+          atendente_id: string | null
+          ativos_envolvidos: Json | null
+          atualizado_em: string | null
+          atualizado_por: string | null
+          avaliacao_usuario: number | null
+          canal_origem: string | null
+          categoria_id: string | null
+          cliente_id: string | null
+          criado_em: string | null
+          criado_por: string | null
+          data_abertura: string | null
+          data_fechamento: string | null
+          data_limite_resolucao: string | null
+          data_limite_resposta: string | null
+          data_primeiro_contato: string | null
+          data_resolucao: string | null
+          descricao: string | null
+          grupo_responsavel_id: string | null
+          id: string
+          impacto: string | null
+          notas_internas: string | null
+          numero: string
+          origem_id: string | null
+          prioridade: string | null
+          sla_id: string | null
+          solicitante_id: string | null
+          status: string | null
+          tags: Json | null
+          tipo: string | null
+          titulo: string
+          urgencia: string | null
+        }
+        Insert: {
+          anexos?: Json | null
+          atendente_id?: string | null
+          ativos_envolvidos?: Json | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          avaliacao_usuario?: number | null
+          canal_origem?: string | null
+          categoria_id?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          data_abertura?: string | null
+          data_fechamento?: string | null
+          data_limite_resolucao?: string | null
+          data_limite_resposta?: string | null
+          data_primeiro_contato?: string | null
+          data_resolucao?: string | null
+          descricao?: string | null
+          grupo_responsavel_id?: string | null
+          id?: string
+          impacto?: string | null
+          notas_internas?: string | null
+          numero: string
+          origem_id?: string | null
+          prioridade?: string | null
+          sla_id?: string | null
+          solicitante_id?: string | null
+          status?: string | null
+          tags?: Json | null
+          tipo?: string | null
+          titulo: string
+          urgencia?: string | null
+        }
+        Update: {
+          anexos?: Json | null
+          atendente_id?: string | null
+          ativos_envolvidos?: Json | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          avaliacao_usuario?: number | null
+          canal_origem?: string | null
+          categoria_id?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          data_abertura?: string | null
+          data_fechamento?: string | null
+          data_limite_resolucao?: string | null
+          data_limite_resposta?: string | null
+          data_primeiro_contato?: string | null
+          data_resolucao?: string | null
+          descricao?: string | null
+          grupo_responsavel_id?: string | null
+          id?: string
+          impacto?: string | null
+          notas_internas?: string | null
+          numero?: string
+          origem_id?: string | null
+          prioridade?: string | null
+          sla_id?: string | null
+          solicitante_id?: string | null
+          status?: string | null
+          tags?: Json | null
+          tipo?: string | null
+          titulo?: string
+          urgencia?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_atendente_id_fkey"
+            columns: ["atendente_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_servico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_grupo_responsavel_id_fkey"
+            columns: ["grupo_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_origem_id_fkey"
+            columns: ["origem_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_sla_id_fkey"
+            columns: ["sla_id"]
+            isOneToOne: false
+            referencedRelation: "slas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           assigned_to: string | null

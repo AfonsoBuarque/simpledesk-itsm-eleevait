@@ -15,6 +15,7 @@ import GroupManagement from '@/components/Groups/GroupManagement';
 import ClientManagement from '@/components/Clients/ClientManagement';
 import SLAManagement from '@/components/SLAs/SLAManagement';
 import CategoriaManagement from '@/components/Categorias/CategoriaManagement';
+import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
 
 const Index: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>('dashboard');
@@ -56,6 +57,8 @@ const Index: React.FC = () => {
         return <SLAManagement />;
       case 'categoria':
         return <CategoriaManagement />;
+      case 'solicitacoes':
+        return <SolicitacaoManagement />;
       default:
         return <DashboardOverview />;
     }
