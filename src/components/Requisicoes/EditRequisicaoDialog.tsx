@@ -47,6 +47,20 @@ interface EditRequisicaoDialogProps {
   onClose: () => void;
 }
 
+// Função para converter data ISO para formato datetime-local
+const formatDateForInput = (isoDate?: string) => {
+  if (!isoDate) return '';
+  
+  try {
+    // Remove timezone info e converte para formato datetime-local
+    const date = new Date(isoDate);
+    return date.toISOString().slice(0, 16);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return '';
+  }
+};
+
 export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequisicaoDialogProps) => {
   const { updateRequisicao } = useRequisicoes();
   const { categorias } = useCategorias();
@@ -129,8 +143,8 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
         grupo_responsavel_id: requisicao.grupo_responsavel_id || '',
         atendente_id: requisicao.atendente_id || '',
         canal_origem: requisicao.canal_origem,
-        data_limite_resposta: requisicao.data_limite_resposta || '',
-        data_limite_resolucao: requisicao.data_limite_resolucao || '',
+        data_limite_resposta: formatDateForInput(requisicao.data_limite_resposta),
+        data_limite_resolucao: formatDateForInput(requisicao.data_limite_resolucao),
         notas_internas: requisicao.notas_internas || '',
       });
       
