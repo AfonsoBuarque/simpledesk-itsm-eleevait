@@ -7,8 +7,10 @@ import TicketList from '@/components/Tickets/TicketList';
 import SLADashboard from '@/components/SLA/SLADashboard';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
+  const { loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [activeModule, setActiveModule] = React.useState('dashboard');
@@ -48,6 +50,16 @@ const Index = () => {
         return <DashboardOverview />;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg">Carregando ServiceMaster ITSM...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/ui/use-toast';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -20,6 +23,24 @@ interface HeaderProps {
 }
 
 const Header = ({ onMenuClick, currentClient = "TechCorp", isCollapsed, onToggleCollapse }: HeaderProps) => {
+  const { profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer logout.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+      });
+    }
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -87,15 +108,23 @@ const Header = ({ onMenuClick, currentClient = "TechCorp", isCollapsed, onToggle
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>João Silva</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {profile?.full_name || 'Usuário'}
+            </DropdownMenuLabel>
             <DropdownMenuLabel className="text-xs text-gray-600 font-normal">
-              Técnico Nível 2
+              {profile?.role === 'admin' && 'Administrador'}
+              {profile?.role === 'manager' && 'Gerente'}
+              {profile?.role === 'technician' && 'Técnico'}
+              {profile?.role === 'user' && 'Usuário'}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Perfil</DropdownMenuItem>
             <DropdownMenuItem>Configurações</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Sair</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
