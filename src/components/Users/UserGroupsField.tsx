@@ -9,11 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
-
-interface Group {
-  id: string;
-  name: string;
-}
+import { Group } from '@/types/user';
 
 interface UserFormData {
   name?: string;

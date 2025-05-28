@@ -5,13 +5,9 @@ import { UserBasicFields } from './UserBasicFields';
 import { UserRoleFields } from './UserRoleFields';
 import { UserClientField } from './UserClientField';
 import { UserGroupsField } from './UserGroupsField';
+import { Group } from '@/types/user';
 
 interface Client {
-  id: string;
-  name: string;
-}
-
-interface Group {
   id: string;
   name: string;
 }
