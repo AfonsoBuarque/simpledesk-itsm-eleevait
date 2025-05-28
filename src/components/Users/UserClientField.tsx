@@ -42,33 +42,39 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
     <FormField
       control={control}
       name="client_id"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Cliente (Multi-Cliente)</FormLabel>
-          <Select 
-            onValueChange={(value) => {
-              const newValue = value === 'no-client' ? '' : value;
-              field.onChange(newValue);
-            }} 
-            value={field.value || 'no-client'}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um cliente (opcional)" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="no-client">Sem cliente específico</SelectItem>
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        console.log('UserClientField - current field value:', field.value);
+        console.log('UserClientField - clients available:', clients);
+        
+        return (
+          <FormItem>
+            <FormLabel>Cliente (Multi-Cliente)</FormLabel>
+            <Select 
+              onValueChange={(value) => {
+                console.log('UserClientField - value changed to:', value);
+                const newValue = value === 'no-client' ? '' : value;
+                field.onChange(newValue);
+              }} 
+              value={field.value || 'no-client'}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente (opcional)" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="no-client">Sem cliente específico</SelectItem>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 };

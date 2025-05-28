@@ -67,9 +67,12 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
 
   useEffect(() => {
     if (user && open) {
+      console.log('Loading user data for edit:', user);
+      
       const loadUserData = async () => {
         try {
           const userGroups = await getUserGroups(user.id);
+          console.log('User groups loaded for edit:', userGroups);
           
           const formData = {
             name: user.name || '',
@@ -82,8 +85,23 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
             groups: userGroups.map(g => g.id),
           };
           
+          console.log('Form data being set:', formData);
+          
           // Reset form with all data
           form.reset(formData);
+          
+          // Force update form values individually to ensure they are set
+          setTimeout(() => {
+            form.setValue('name', formData.name);
+            form.setValue('email', formData.email);
+            form.setValue('phone', formData.phone || '');
+            form.setValue('department', formData.department || '');
+            form.setValue('role', formData.role);
+            form.setValue('client_id', formData.client_id);
+            form.setValue('status', formData.status);
+            form.setValue('groups', formData.groups);
+            console.log('Form values after manual set:', form.getValues());
+          }, 50);
           
         } catch (error) {
           console.error('Error loading user data:', error);
@@ -108,6 +126,8 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
   }, [user, open, getUserGroups, form]);
 
   const onSubmit = async (data: UserFormData) => {
+    console.log('Submitting user data:', data);
+    
     const formData = {
       name: data.name,
       email: data.email,
