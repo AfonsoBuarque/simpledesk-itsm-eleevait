@@ -10,6 +10,7 @@ interface Profile {
   role: string;
   department: string | null;
   phone: string | null;
+  client_id: string | null;
 }
 
 export const useAuth = () => {
