@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Bell, User, Search, Menu } from 'lucide-react';
+import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -16,14 +15,24 @@ import {
 interface HeaderProps {
   onMenuClick: () => void;
   currentClient?: string;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-const Header = ({ onMenuClick, currentClient = "TechCorp" }: HeaderProps) => {
+const Header = ({ onMenuClick, currentClient = "TechCorp", isCollapsed, onToggleCollapse }: HeaderProps) => {
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onMenuClick}>
+        <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden">
           <Menu className="h-5 w-5" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onToggleCollapse}
+          className="hidden lg:flex"
+        >
+          {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
         </Button>
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-blue-600">ServiceMaster</h1>

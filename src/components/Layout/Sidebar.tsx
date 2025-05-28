@@ -23,6 +23,8 @@ interface SidebarProps {
   onClose: () => void;
   activeModule: string;
   onModuleChange: (module: string) => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 const menuItems = [
@@ -47,10 +49,11 @@ const menuItems = [
   { id: 'settings', label: 'Configurações', icon: Settings }
 ];
 
-const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange }: SidebarProps) => {
+const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, onToggleCollapse }: SidebarProps) => {
   const [expandedItems, setExpandedItems] = React.useState<string[]>(['tickets']);
 
   const toggleExpanded = (itemId: string) => {
+    if (isCollapsed) return;
     setExpandedItems(prev => 
       prev.includes(itemId) 
         ? prev.filter(id => id !== itemId)
@@ -68,17 +71,22 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange }: SidebarProps
       )}
       
       <aside className={cn(
-        "fixed top-0 left-0 z-50 h-full bg-gray-900 text-white transition-transform duration-300 ease-in-out",
+        "fixed top-0 left-0 z-50 h-full bg-gray-900 text-white transition-all duration-300 ease-in-out",
         "lg:relative lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full",
-        "w-64"
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        isCollapsed ? "w-16" : "w-64"
       )}>
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-8">
+        <div className={cn("p-4", isCollapsed && "px-2")}>
+          <div className={cn(
+            "flex items-center gap-2 mb-8",
+            isCollapsed && "justify-center"
+          )}>
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <AlertTriangle className="h-5 w-5" />
             </div>
-            <h2 className="text-lg font-bold">ServiceMaster ITSM</h2>
+            {!isCollapsed && (
+              <h2 className="text-lg font-bold">ServiceMaster ITSM</h2>
+            )}
           </div>
 
           <nav className="space-y-1">
@@ -87,34 +95,50 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange }: SidebarProps
                 <Button
                   variant={activeModule === item.id ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start text-left",
+                    "w-full justify-start text-left relative group",
                     activeModule === item.id 
                       ? "bg-blue-600 text-white hover:bg-blue-700" 
-                      : "text-gray-300 hover:text-white hover:bg-gray-800"
+                      : "text-gray-300 hover:text-white hover:bg-gray-800",
+                    isCollapsed && "justify-center p-2"
                   )}
                   onClick={() => {
-                    if (item.children) {
+                    if (item.children && !isCollapsed) {
                       toggleExpanded(item.id);
                     } else {
                       onModuleChange(item.id);
                     }
                   }}
                 >
-                  <item.icon className="h-4 w-4 mr-3" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.badge && (
-                    <Badge variant="destructive" className="ml-2 text-xs">
-                      {item.badge}
-                    </Badge>
+                  <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && (
+                    <>
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge && (
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
+                      {item.children && (
+                        expandedItems.includes(item.id) 
+                          ? <ChevronDown className="h-4 w-4" />
+                          : <ChevronRight className="h-4 w-4" />
+                      )}
+                    </>
                   )}
-                  {item.children && (
-                    expandedItems.includes(item.id) 
-                      ? <ChevronDown className="h-4 w-4" />
-                      : <ChevronRight className="h-4 w-4" />
+                  
+                  {isCollapsed && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                      {item.label}
+                      {item.badge && (
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </Button>
 
-                {item.children && expandedItems.includes(item.id) && (
+                {item.children && expandedItems.includes(item.id) && !isCollapsed && (
                   <div className="ml-4 mt-1 space-y-1">
                     {item.children.map((child) => (
                       <Button

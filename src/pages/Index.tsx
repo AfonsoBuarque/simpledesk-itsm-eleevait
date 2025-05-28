@@ -10,6 +10,7 @@ import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [activeModule, setActiveModule] = React.useState('dashboard');
 
   const handleMenuClick = () => {
@@ -18,6 +19,10 @@ const Index = () => {
 
   const handleSidebarClose = () => {
     setSidebarOpen(false);
+  };
+
+  const handleToggleCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const renderContent = () => {
@@ -51,10 +56,16 @@ const Index = () => {
         onClose={handleSidebarClose}
         activeModule={activeModule}
         onModuleChange={setActiveModule}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={handleToggleCollapse}
       />
       
       <div className="flex-1 flex flex-col">
-        <Header onMenuClick={handleMenuClick} />
+        <Header 
+          onMenuClick={handleMenuClick}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+        />
         
         <main className="flex-1 p-6 overflow-auto">
           {renderContent()}
