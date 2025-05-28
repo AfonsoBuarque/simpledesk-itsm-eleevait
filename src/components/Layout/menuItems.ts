@@ -18,7 +18,8 @@ import {
   AlertCircle,
   HelpCircle,
   ArrowUpDown,
-  Bug
+  Bug,
+  Tags
 } from 'lucide-react';
 
 export const menuItems = [
@@ -65,7 +66,8 @@ export const menuItems = [
     icon: Settings,
     children: [
       { id: 'clients', label: 'Clientes', icon: Users },
-      { id: 'sla-config', label: 'SLA', icon: Clock }
+      { id: 'sla-config', label: 'SLA', icon: Clock },
+      { id: 'categoria', label: 'Categoria', icon: Tags }
     ]
   }
 ];
