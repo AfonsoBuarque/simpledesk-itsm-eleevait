@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -10,6 +11,7 @@ import ClientManagement from '@/components/Clients/ClientManagement';
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
 import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
+import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManagement';
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
 import { useAuth } from '@/hooks/useAuth';

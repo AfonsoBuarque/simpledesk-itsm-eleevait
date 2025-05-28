@@ -52,6 +52,7 @@ export type Database = {
           data_fim: string | null
           data_inicio: string | null
           fabricante_id: string | null
+          fornecedor_id: string | null
           id: string
           localizacao_id: string | null
           nome_contrato: string | null
@@ -72,6 +73,7 @@ export type Database = {
           data_fim?: string | null
           data_inicio?: string | null
           fabricante_id?: string | null
+          fornecedor_id?: string | null
           id?: string
           localizacao_id?: string | null
           nome_contrato?: string | null
@@ -92,6 +94,7 @@ export type Database = {
           data_fim?: string | null
           data_inicio?: string | null
           fabricante_id?: string | null
+          fornecedor_id?: string | null
           id?: string
           localizacao_id?: string | null
           nome_contrato?: string | null
@@ -119,6 +122,13 @@ export type Database = {
             columns: ["fabricante_id"]
             isOneToOne: false
             referencedRelation: "fabricantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
             referencedColumns: ["id"]
           },
           {
@@ -160,6 +170,48 @@ export type Database = {
           id?: string
           nome?: string
           pais_origem?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      fornecedores: {
+        Row: {
+          cnpj: string | null
+          contato_responsavel: string | null
+          created_at: string | null
+          email_contato: string | null
+          endereco: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          site: string | null
+          telefone_contato: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          contato_responsavel?: string | null
+          created_at?: string | null
+          email_contato?: string | null
+          endereco?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          site?: string | null
+          telefone_contato?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          contato_responsavel?: string | null
+          created_at?: string | null
+          email_contato?: string | null
+          endereco?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          site?: string | null
+          telefone_contato?: string | null
           updated_at?: string | null
         }
         Relationships: []

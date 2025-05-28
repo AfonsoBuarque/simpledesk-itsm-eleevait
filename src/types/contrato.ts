@@ -5,6 +5,7 @@ export interface Contrato {
   nome_contrato?: string;
   client_id?: string;
   fabricante_id?: string;
+  fornecedor_id?: string;
   localizacao_id?: string;
   usuario_responsavel_id?: string;
   provedor_servico?: string;
@@ -26,6 +27,10 @@ export interface Contrato {
     id: string;
     nome: string;
   };
+  fornecedor?: {
+    id: string;
+    nome: string;
+  };
   localizacao?: {
     id: string;
     nome: string;
@@ -41,6 +46,7 @@ export interface ContratoFormData {
   nome_contrato?: string;
   client_id?: string;
   fabricante_id?: string;
+  fornecedor_id?: string;
   localizacao_id?: string;
   usuario_responsavel_id?: string;
   provedor_servico?: string;
@@ -60,6 +66,7 @@ export interface ContratoFromDB {
   nome_contrato: string | null;
   client_id: string | null;
   fabricante_id: string | null;
+  fornecedor_id: string | null;
   localizacao_id: string | null;
   usuario_responsavel_id: string | null;
   provedor_servico: string | null;
@@ -78,6 +85,10 @@ export interface ContratoFromDB {
     name: string;
   };
   fabricantes?: {
+    id: string;
+    nome: string;
+  };
+  fornecedores?: {
     id: string;
     nome: string;
   };

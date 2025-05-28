@@ -11,6 +11,7 @@ const convertToContrato = (contratoFromDB: ContratoFromDB): Contrato => {
     nome_contrato: contratoFromDB.nome_contrato || undefined,
     client_id: contratoFromDB.client_id || undefined,
     fabricante_id: contratoFromDB.fabricante_id || undefined,
+    fornecedor_id: contratoFromDB.fornecedor_id || undefined,
     localizacao_id: contratoFromDB.localizacao_id || undefined,
     usuario_responsavel_id: contratoFromDB.usuario_responsavel_id || undefined,
     provedor_servico: contratoFromDB.provedor_servico || undefined,
@@ -31,6 +32,10 @@ const convertToContrato = (contratoFromDB: ContratoFromDB): Contrato => {
     fabricante: contratoFromDB.fabricantes ? {
       id: contratoFromDB.fabricantes.id,
       nome: contratoFromDB.fabricantes.nome
+    } : undefined,
+    fornecedor: contratoFromDB.fornecedores ? {
+      id: contratoFromDB.fornecedores.id,
+      nome: contratoFromDB.fornecedores.nome
     } : undefined,
     localizacao: contratoFromDB.localizacoes ? {
       id: contratoFromDB.localizacoes.id,
@@ -60,6 +65,7 @@ export const useContratos = () => {
           *,
           clients:client_id (id, name),
           fabricantes:fabricante_id (id, nome),
+          fornecedores:fornecedor_id (id, nome),
           localizacoes:localizacao_id (id, nome),
           users:usuario_responsavel_id (id, name)
         `)
