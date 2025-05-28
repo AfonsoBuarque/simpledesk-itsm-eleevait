@@ -23,7 +23,7 @@ export const useCategorias = () => {
           cliente:clients(name),
           grupo:groups(name),
           sla:slas(nome),
-          usuario_responsavel:users(name)
+          usuario_responsavel:users!usuario_responsavel_id(name)
         `)
         .order('ordem_exibicao', { ascending: true });
 
@@ -33,7 +33,18 @@ export const useCategorias = () => {
       }
 
       console.log('Categorias fetched:', data);
-      return (data || []) as Categoria[];
+      
+      // Transform the data to ensure proper typing and handle any join errors
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        categoria_pai: item.categoria_pai || null,
+        cliente: item.cliente || null,
+        grupo: item.grupo || null,
+        sla: item.sla || null,
+        usuario_responsavel: item.usuario_responsavel || null,
+      }));
+
+      return transformedData as Categoria[];
     },
   });
 

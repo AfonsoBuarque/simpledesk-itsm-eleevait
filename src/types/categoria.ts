@@ -16,7 +16,7 @@ export interface Categoria {
   atualizado_em?: string;
   atualizado_por?: string;
   
-  // Relacionamentos para exibição (podem estar ausentes)
+  // Relacionamentos para exibição (podem estar ausentes ou ser null)
   categoria_pai?: {
     nome: string;
   } | null;
