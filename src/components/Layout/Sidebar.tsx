@@ -40,7 +40,7 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, o
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         isCollapsed ? "w-16" : "w-64"
       )}>
-        <div className={cn("p-4 h-full flex flex-col", isCollapsed && "px-2")}>
+        <div className={cn("p-4 h-full flex flex-col overflow-hidden", isCollapsed && "px-2")}>
           <SidebarHeader isCollapsed={isCollapsed} />
           <SidebarNavigation
             activeModule={activeModule}
