@@ -40,7 +40,7 @@ export const UserRoleFields = ({ control }: UserRoleFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Função *</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a função" />
@@ -64,7 +64,7 @@ export const UserRoleFields = ({ control }: UserRoleFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Status *</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o status" />

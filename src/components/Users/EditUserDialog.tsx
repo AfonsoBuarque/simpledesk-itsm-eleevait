@@ -72,7 +72,8 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
         try {
           const userGroups = await getUserGroups(user.id);
           
-          form.reset({
+          // Reset do form com valores corretos
+          const formData = {
             name: user.name || '',
             email: user.email || '',
             phone: user.phone || '',
@@ -81,11 +82,17 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
             client_id: user.client_id || '',
             status: user.status || 'active',
             groups: userGroups.map(g => g.id),
-          });
+          };
+          
+          // Usar setTimeout para garantir que o form está pronto
+          setTimeout(() => {
+            form.reset(formData);
+          }, 100);
+          
         } catch (error) {
           console.error('Error loading user groups:', error);
-          // Reset form even if groups fail to load
-          form.reset({
+          // Reset form mesmo se grupos falharem
+          const formData = {
             name: user.name || '',
             email: user.email || '',
             phone: user.phone || '',
@@ -94,13 +101,17 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
             client_id: user.client_id || '',
             status: user.status || 'active',
             groups: [],
-          });
+          };
+          
+          setTimeout(() => {
+            form.reset(formData);
+          }, 100);
         }
       };
 
       loadUserGroups();
     }
-  }, [user.id, open, getUserGroups]); // Removido 'form' das dependências para evitar loop
+  }, [user.id, open, getUserGroups, form]);
 
   const onSubmit = async (data: UserFormData) => {
     const formData = {

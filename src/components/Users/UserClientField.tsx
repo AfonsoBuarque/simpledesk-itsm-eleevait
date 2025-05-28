@@ -49,7 +49,7 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
             onValueChange={(value) => {
               field.onChange(value === 'no-client' ? '' : value);
             }} 
-            value={field.value || 'no-client'}
+            value={field.value ? field.value : 'no-client'}
           >
             <FormControl>
               <SelectTrigger>
