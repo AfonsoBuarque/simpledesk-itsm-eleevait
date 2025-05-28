@@ -40,7 +40,7 @@ export const useSolicitacoes = () => {
       console.log('Creating solicitação:', formData);
       const { data, error } = await supabase
         .from('solicitacoes')
-        .insert([formData])
+        .insert(formData)
         .select()
         .single();
 
