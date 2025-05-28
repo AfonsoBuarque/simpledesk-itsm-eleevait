@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from '@/components/Layout/Sidebar';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
@@ -16,6 +15,7 @@ import ClientManagement from '@/components/Clients/ClientManagement';
 import SLAManagement from '@/components/SLAs/SLAManagement';
 import CategoriaManagement from '@/components/Categorias/CategoriaManagement';
 import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
+import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>('dashboard');
@@ -59,6 +59,8 @@ const Index: React.FC = () => {
         return <CategoriaManagement />;
       case 'solicitacoes':
         return <SolicitacaoManagement />;
+      case 'requests':
+        return <RequisicoesManagement />;
       default:
         return <DashboardOverview />;
     }
