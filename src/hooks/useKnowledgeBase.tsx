@@ -83,8 +83,9 @@ export const useKnowledgeBase = () => {
             views: viewsResult.data?.length || 0,
             likes: feedbackResult.data?.length || 0,
             categoria: article.categoria,
-            autor: article.autor?.name || 'Desconhecido'
-          };
+            autor: article.autor?.name || 'Desconhecido',
+            tags: Array.isArray(article.tags) ? article.tags : []
+          } as KBArticle;
         })
       );
 
@@ -120,7 +121,7 @@ export const useKnowledgeBase = () => {
           return {
             ...category,
             article_count: articleCount?.length || 0
-          };
+          } as KBCategory;
         })
       );
 
@@ -137,12 +138,21 @@ export const useKnowledgeBase = () => {
 
   const createArticle = async (articleData: Partial<KBArticle>) => {
     try {
+      const insertData = {
+        titulo: articleData.titulo!,
+        conteudo: articleData.conteudo!,
+        categoria_id: articleData.categoria_id,
+        tags: articleData.tags || [],
+        status: articleData.status || 'rascunho',
+        visibilidade: articleData.visibilidade || 'interno',
+        artigo_relacionado_ids: articleData.artigo_relacionado_ids,
+        anexos: articleData.anexos,
+        criado_por: profile?.id
+      };
+
       const { data, error } = await supabase
         .from('kb_artigos')
-        .insert({
-          ...articleData,
-          criado_por: profile?.id
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -168,9 +178,20 @@ export const useKnowledgeBase = () => {
 
   const updateArticle = async (id: string, articleData: Partial<KBArticle>) => {
     try {
+      const updateData = {
+        ...(articleData.titulo && { titulo: articleData.titulo }),
+        ...(articleData.conteudo && { conteudo: articleData.conteudo }),
+        ...(articleData.categoria_id !== undefined && { categoria_id: articleData.categoria_id }),
+        ...(articleData.tags && { tags: articleData.tags }),
+        ...(articleData.status && { status: articleData.status }),
+        ...(articleData.visibilidade && { visibilidade: articleData.visibilidade }),
+        ...(articleData.artigo_relacionado_ids && { artigo_relacionado_ids: articleData.artigo_relacionado_ids }),
+        ...(articleData.anexos && { anexos: articleData.anexos })
+      };
+
       const { error } = await supabase
         .from('kb_artigos')
-        .update(articleData)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
@@ -216,11 +237,18 @@ export const useKnowledgeBase = () => {
     }
   };
 
-  const createCategory = async (categoryData: Partial<KBCategory>) => {
+  const createCategory = async (categoryData: { nome: string; descricao?: string; parent_id?: string; ordem?: number }) => {
     try {
+      const insertData = {
+        nome: categoryData.nome,
+        descricao: categoryData.descricao,
+        parent_id: categoryData.parent_id,
+        ordem: categoryData.ordem || 0
+      };
+
       const { data, error } = await supabase
         .from('kb_categorias')
-        .insert(categoryData)
+        .insert(insertData)
         .select()
         .single();
 
