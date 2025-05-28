@@ -16,8 +16,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Client {
+  id: string;
+  name: string;
+}
+
+interface Group {
   id: string;
   name: string;
 }
@@ -30,14 +36,16 @@ interface UserFormData {
   role?: string;
   client_id?: string;
   status?: 'active' | 'inactive';
+  groups?: string[];
 }
 
 interface UserFormFieldsProps {
   control: Control<UserFormData>;
   clients: Client[];
+  groups?: Group[];
 }
 
-export const UserFormFields = ({ control, clients }: UserFormFieldsProps) => {
+export const UserFormFields = ({ control, clients, groups = [] }: UserFormFieldsProps) => {
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
@@ -173,6 +181,43 @@ export const UserFormFields = ({ control, clients }: UserFormFieldsProps) => {
           </FormItem>
         )}
       />
+
+      {groups.length > 0 && (
+        <FormField
+          control={control}
+          name="groups"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grupos</FormLabel>
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
+                {groups.map((group) => (
+                  <div key={group.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`group-${group.id}`}
+                      checked={field.value?.includes(group.id) || false}
+                      onCheckedChange={(checked) => {
+                        const currentGroups = field.value || [];
+                        if (checked) {
+                          field.onChange([...currentGroups, group.id]);
+                        } else {
+                          field.onChange(currentGroups.filter(id => id !== group.id));
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={`group-${group.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {group.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </>
   );
 };

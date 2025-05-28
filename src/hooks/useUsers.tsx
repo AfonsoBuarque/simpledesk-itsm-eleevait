@@ -28,6 +28,7 @@ interface UserFormData {
   role: string;
   client_id?: string;
   status: 'active' | 'inactive';
+  groups?: string[];
 }
 
 interface UserFromDB {
@@ -45,6 +46,11 @@ interface UserFromDB {
     id: string;
     name: string;
   };
+}
+
+interface Group {
+  id: string;
+  name: string;
 }
 
 const convertToUser = (dbUser: UserFromDB): User => ({
@@ -101,11 +107,74 @@ export const useUsers = () => {
     }
   };
 
-  const addUser = async (userData: UserFormData) => {
+  const getUserGroups = async (userId: string): Promise<Group[]> => {
     try {
       const { data, error } = await supabase
+        .from('user_groups')
+        .select(`
+          groups (
+            id,
+            name
+          )
+        `)
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error fetching user groups:', error);
+        return [];
+      }
+
+      return (data as any[]).map(item => item.groups).filter(Boolean);
+    } catch (error) {
+      console.error('Error fetching user groups:', error);
+      return [];
+    }
+  };
+
+  const updateUserGroups = async (userId: string, groupIds: string[]) => {
+    try {
+      // Primeiro, remover todas as associações existentes
+      const { error: deleteError } = await supabase
+        .from('user_groups')
+        .delete()
+        .eq('user_id', userId);
+
+      if (deleteError) {
+        console.error('Error removing user groups:', deleteError);
+        return false;
+      }
+
+      // Depois, adicionar as novas associações
+      if (groupIds.length > 0) {
+        const userGroupsData = groupIds.map(groupId => ({
+          user_id: userId,
+          group_id: groupId
+        }));
+
+        const { error: insertError } = await supabase
+          .from('user_groups')
+          .insert(userGroupsData);
+
+        if (insertError) {
+          console.error('Error adding user groups:', insertError);
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating user groups:', error);
+      return false;
+    }
+  };
+
+  const addUser = async (userData: UserFormData) => {
+    try {
+      const { groups, ...userDataWithoutGroups } = userData;
+
+      const { data, error } = await supabase
         .from('users')
-        .insert([userData])
+        .insert([userDataWithoutGroups])
         .select(`
           *,
           clients:client_id (
@@ -123,6 +192,18 @@ export const useUsers = () => {
           variant: "destructive",
         });
         return false;
+      }
+
+      // Adicionar grupos se especificados
+      if (groups && groups.length > 0) {
+        const groupsSuccess = await updateUserGroups(data.id, groups);
+        if (!groupsSuccess) {
+          toast({
+            title: "Aviso",
+            description: "Usuário cadastrado, mas houve erro ao associar grupos.",
+            variant: "destructive",
+          });
+        }
       }
 
       const convertedUser = convertToUser(data as UserFromDB);
@@ -145,9 +226,11 @@ export const useUsers = () => {
 
   const updateUser = async (id: string, userData: Partial<UserFormData>) => {
     try {
+      const { groups, ...userDataWithoutGroups } = userData;
+
       const { data, error } = await supabase
         .from('users')
-        .update(userData)
+        .update(userDataWithoutGroups)
         .eq('id', id)
         .select(`
           *,
@@ -166,6 +249,18 @@ export const useUsers = () => {
           variant: "destructive",
         });
         return false;
+      }
+
+      // Atualizar grupos se especificados
+      if (groups !== undefined) {
+        const groupsSuccess = await updateUserGroups(id, groups);
+        if (!groupsSuccess) {
+          toast({
+            title: "Aviso",
+            description: "Usuário atualizado, mas houve erro ao atualizar grupos.",
+            variant: "destructive",
+          });
+        }
       }
 
       const convertedUser = convertToUser(data as UserFromDB);
@@ -232,6 +327,7 @@ export const useUsers = () => {
     addUser,
     updateUser,
     deleteUser,
+    getUserGroups,
     refreshUsers: fetchUsers
   };
 };

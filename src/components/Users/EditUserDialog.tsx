@@ -12,6 +12,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { useUsers } from '@/hooks/useUsers';
 import { useClients } from '@/hooks/useClients';
+import { useGroups } from '@/hooks/useGroups';
 import { UserFormFields } from './UserFormFields';
 import { EditUserFormActions } from './EditUserFormActions';
 
@@ -23,6 +24,7 @@ const userSchema = z.object({
   role: z.string().min(1, 'Função é obrigatória'),
   client_id: z.string().optional(),
   status: z.enum(['active', 'inactive']),
+  groups: z.array(z.string()).optional(),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -45,8 +47,9 @@ interface EditUserDialogProps {
 }
 
 export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps) => {
-  const { updateUser } = useUsers();
+  const { updateUser, getUserGroups } = useUsers();
   const { clients } = useClients();
+  const { groups } = useGroups();
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -58,29 +61,42 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
       role: 'user',
       client_id: 'none',
       status: 'active',
+      groups: [],
     },
   });
 
   useEffect(() => {
     if (user && open) {
-      form.reset({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        department: user.department || '',
-        role: user.role || 'user',
-        client_id: user.client_id || 'none',
-        status: user.status || 'active',
-      });
+      // Carregar os grupos do usuário
+      const loadUserGroups = async () => {
+        const userGroups = await getUserGroups(user.id);
+        
+        form.reset({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          department: user.department || '',
+          role: user.role || 'user',
+          client_id: user.client_id || 'none',
+          status: user.status || 'active',
+          groups: userGroups.map(g => g.id),
+        });
+      };
+
+      loadUserGroups();
     }
-  }, [user, open, form]);
+  }, [user, open, form, getUserGroups]);
 
   const onSubmit = async (data: UserFormData) => {
     const formData = {
-      ...data,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      status: data.status,
       phone: data.phone || undefined,
       department: data.department || undefined,
       client_id: data.client_id === 'none' ? undefined : data.client_id,
+      groups: data.groups || [],
     };
 
     const success = await updateUser(user.id, formData);
@@ -95,14 +111,18 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Usuário</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <UserFormFields control={form.control} clients={clients} />
+            <UserFormFields 
+              control={form.control} 
+              clients={clients} 
+              groups={groups}
+            />
             <EditUserFormActions 
               onCancel={handleCancel}
               isSubmitting={form.formState.isSubmitting}

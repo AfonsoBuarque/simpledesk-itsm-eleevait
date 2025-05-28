@@ -12,6 +12,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { useUsers } from '@/hooks/useUsers';
 import { useClients } from '@/hooks/useClients';
+import { useGroups } from '@/hooks/useGroups';
 import { UserFormFields } from './UserFormFields';
 import { UserFormActions } from './UserFormActions';
 
@@ -23,6 +24,7 @@ const userSchema = z.object({
   role: z.string().min(1, 'Função é obrigatória'),
   client_id: z.string().optional(),
   status: z.enum(['active', 'inactive']),
+  groups: z.array(z.string()).optional(),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -35,6 +37,7 @@ interface NewUserDialogProps {
 export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
   const { addUser } = useUsers();
   const { clients } = useClients();
+  const { groups } = useGroups();
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -46,6 +49,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
       role: 'user',
       client_id: 'none',
       status: 'active',
+      groups: [],
     },
   });
 
@@ -58,6 +62,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
       phone: data.phone || undefined,
       department: data.department || undefined,
       client_id: data.client_id === 'none' ? undefined : data.client_id,
+      groups: data.groups || [],
     };
 
     const success = await addUser(formData);
@@ -74,14 +79,18 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo Usuário</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <UserFormFields control={form.control} clients={clients} />
+            <UserFormFields 
+              control={form.control} 
+              clients={clients} 
+              groups={groups}
+            />
             <UserFormActions 
               onCancel={handleCancel}
               isSubmitting={form.formState.isSubmitting}
