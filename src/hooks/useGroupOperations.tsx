@@ -17,7 +17,7 @@ export const useGroupOperations = () => {
           client_id: groupData.client_id === 'none' ? null : groupData.client_id,
           responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
           status: groupData.status,
-          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null,
+          dias_semana: groupData.dias_semana || null,
           inicio_turno: groupData.inicio_turno || undefined,
           fim_turno: groupData.fim_turno || undefined,
         }])
@@ -65,7 +65,7 @@ export const useGroupOperations = () => {
           client_id: groupData.client_id === 'none' ? null : groupData.client_id,
           responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
           status: groupData.status,
-          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null,
+          dias_semana: groupData.dias_semana || null,
           inicio_turno: groupData.inicio_turno || undefined,
           fim_turno: groupData.fim_turno || undefined,
         })

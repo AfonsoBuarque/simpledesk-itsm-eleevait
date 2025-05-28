@@ -9,7 +9,7 @@ export const convertToGroup = (dbGroup: GroupFromDB & { user_count?: number }): 
   client: dbGroup.clients,
   responsible_user: dbGroup.responsible_user,
   user_count: dbGroup.user_count || 0,
-  dias_semana: dbGroup.dia_semana ? [dbGroup.dia_semana] : [],
+  dias_semana: dbGroup.dias_semana || [],
   inicio_turno: dbGroup.inicio_turno,
   fim_turno: dbGroup.fim_turno
 });

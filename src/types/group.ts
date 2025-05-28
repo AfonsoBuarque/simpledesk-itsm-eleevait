@@ -50,7 +50,7 @@ export interface GroupFromDB {
     id: string;
     name: string;
   };
-  dia_semana?: number;
+  dias_semana?: number[];
   inicio_turno?: string;
   fim_turno?: string;
 }
