@@ -45,6 +45,98 @@ export type Database = {
         }
         Relationships: []
       }
+      contratos: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          fabricante_id: string | null
+          id: string
+          localizacao_id: string | null
+          nome_contrato: string | null
+          nota_fiscal_arquivo: string | null
+          nota_fiscal_data: string | null
+          nota_fiscal_numero: string | null
+          nota_fiscal_valor: number | null
+          numero_contrato: string
+          provedor_servico: string | null
+          renovacao_automatica: boolean | null
+          termos_contratuais: string | null
+          updated_at: string | null
+          usuario_responsavel_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          fabricante_id?: string | null
+          id?: string
+          localizacao_id?: string | null
+          nome_contrato?: string | null
+          nota_fiscal_arquivo?: string | null
+          nota_fiscal_data?: string | null
+          nota_fiscal_numero?: string | null
+          nota_fiscal_valor?: number | null
+          numero_contrato: string
+          provedor_servico?: string | null
+          renovacao_automatica?: boolean | null
+          termos_contratuais?: string | null
+          updated_at?: string | null
+          usuario_responsavel_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          fabricante_id?: string | null
+          id?: string
+          localizacao_id?: string | null
+          nome_contrato?: string | null
+          nota_fiscal_arquivo?: string | null
+          nota_fiscal_data?: string | null
+          nota_fiscal_numero?: string | null
+          nota_fiscal_valor?: number | null
+          numero_contrato?: string
+          provedor_servico?: string | null
+          renovacao_automatica?: boolean | null
+          termos_contratuais?: string | null
+          updated_at?: string | null
+          usuario_responsavel_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_fabricante_id_fkey"
+            columns: ["fabricante_id"]
+            isOneToOne: false
+            referencedRelation: "fabricantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_localizacao_id_fkey"
+            columns: ["localizacao_id"]
+            isOneToOne: false
+            referencedRelation: "localizacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_usuario_responsavel_id_fkey"
+            columns: ["usuario_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fabricantes: {
         Row: {
           contato_suporte: string | null

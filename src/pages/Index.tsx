@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -12,6 +11,7 @@ import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
 import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
+import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -52,14 +52,7 @@ const Index = () => {
       case 'cmdb':
         return <CMDBDashboard />;
       case 'contratos':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Contratos</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-600">Gestão de contratos em desenvolvimento...</p>
-            </div>
-          </div>
-        );
+        return <ContratoManagement />;
       case 'fornecedores':
         return (
           <div className="space-y-6">
