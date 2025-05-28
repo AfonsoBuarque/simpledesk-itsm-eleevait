@@ -82,7 +82,7 @@ const UserPortal = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2 bg-white/50 backdrop-blur-sm border shadow-sm">
+          <TabsList className="grid w-full max-w-md grid-cols-1 bg-white/50 backdrop-blur-sm border shadow-sm">
             <TabsTrigger 
               value="dashboard" 
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -90,54 +90,10 @@ const UserPortal = () => {
               <BarChart3 className="h-4 w-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger 
-              value="nova-requisicao"
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <Plus className="h-4 w-4" />
-              Formulário Manual
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
             <UserPortalDashboard />
-          </TabsContent>
-
-          <TabsContent value="nova-requisicao" className="space-y-6">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Formulário Manual de Requisição
-              </h3>
-              <p className="text-gray-600">
-                Use este formulário se preferir preencher diretamente na página
-              </p>
-            </div>
-
-            <UserPortalForm />
-
-            {/* Footer Info */}
-            <div className="mt-8">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 max-w-2xl mx-auto">
-                <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  Informações Importantes
-                </h4>
-                <ul className="text-sm text-blue-800 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-medium">•</span>
-                    Suas requisições serão analisadas pela equipe responsável
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-medium">•</span>
-                    Você receberá atualizações sobre o status da sua solicitação
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-medium">•</span>
-                    Para urgências críticas, entre em contato diretamente com o suporte
-                  </li>
-                </ul>
-              </div>
-            </div>
           </TabsContent>
         </Tabs>
       </main>
