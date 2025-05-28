@@ -92,6 +92,12 @@ const DashboardOverview = () => {
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{ticket.titulo}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs text-gray-500">Cliente:</span>
+                          <span className="text-xs font-medium text-gray-700">
+                            {ticket.cliente?.name || 'Não informado'}
+                          </span>
+                        </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className={getStatusColor(ticket.status)}>
                             {ticket.status.replace('_', ' ')}
