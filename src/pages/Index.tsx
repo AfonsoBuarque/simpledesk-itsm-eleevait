@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
-import { Layout } from '@/components/Layout/Sidebar';
+import Sidebar from '@/components/Layout/Sidebar';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
 import SLADashboard from '@/components/SLA/SLADashboard';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
 import AtivoManagement from '@/components/Ativos/AtivoManagement';
-import ContratoManagement from '@/components/Contratos/ContratoManagement';
+import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
 import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
-import FornecedorManagement from '@/components/Fornecedores/FornecedorManagement';
-import LocalizacaoManagement from '@/components/Localizacoes/LocalizacaoManagement';
+import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManagement';
+import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
 import ClientManagement from '@/components/Clients/ClientManagement';
@@ -17,9 +18,12 @@ import CategoriaManagement from '@/components/Categorias/CategoriaManagement';
 
 const Index: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
 
   const handleMenuItemClick = (item: string) => {
     setActiveItem(item);
+    setIsSidebarOpen(false); // Close mobile sidebar after selection
   };
 
   const renderContent = () => {
@@ -58,9 +62,22 @@ const Index: React.FC = () => {
   };
 
   return (
-    <Layout onMenuItemClick={handleMenuItemClick}>
-      {renderContent()}
-    </Layout>
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        activeModule={activeItem}
+        onModuleChange={handleMenuItemClick}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+      
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-6">
+          {renderContent()}
+        </main>
+      </div>
+    </div>
   );
 };
 

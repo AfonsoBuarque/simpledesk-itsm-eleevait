@@ -54,13 +54,13 @@ export const NewCategoriaDialog = ({ isOpen, onClose }: NewCategoriaDialogProps)
 
   const onSubmit = async (data: CategoriaFormData) => {
     try {
-      // Remove empty string values
-      const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
-        if (value !== '') {
-          acc[key as keyof CategoriaFormData] = value;
+      // Remove empty string values and convert them to undefined
+      const cleanData: Partial<CategoriaFormData> = {};
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== '' && value !== null) {
+          (cleanData as any)[key] = value;
         }
-        return acc;
-      }, {} as Partial<CategoriaFormData>);
+      });
 
       await createCategoria.mutateAsync(cleanData as CategoriaFormData);
       form.reset();

@@ -34,7 +34,7 @@ export const useCategorias = () => {
       }
 
       console.log('Categorias fetched:', data);
-      return data as Categoria[];
+      return (data || []) as Categoria[];
     },
   });
 

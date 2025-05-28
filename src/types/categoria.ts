@@ -16,22 +16,22 @@ export interface Categoria {
   atualizado_em?: string;
   atualizado_por?: string;
   
-  // Relacionamentos para exibição
+  // Relacionamentos para exibição (podem estar ausentes)
   categoria_pai?: {
     nome: string;
-  };
+  } | null;
   cliente?: {
     name: string;
-  };
+  } | null;
   grupo?: {
     name: string;
-  };
+  } | null;
   sla?: {
     nome: string;
-  };
+  } | null;
   usuario_responsavel?: {
     name: string;
-  };
+  } | null;
 }
 
 export interface CategoriaFormData {
