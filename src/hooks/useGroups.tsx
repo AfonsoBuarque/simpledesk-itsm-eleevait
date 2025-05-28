@@ -28,7 +28,7 @@ interface GroupFormData {
   client_id?: string;
   responsible_user_id?: string;
   status: 'active' | 'inactive';
-  dia_semana?: number;
+  dias_semana?: number[];
   inicio_turno?: string;
   fim_turno?: string;
 }
@@ -117,7 +117,8 @@ export const useGroups = () => {
         .insert([{
           ...groupData,
           client_id: groupData.client_id === 'none' ? null : groupData.client_id,
-          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id
+          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
+          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null
         }])
         .select(`
           *,
@@ -161,7 +162,8 @@ export const useGroups = () => {
         .update({
           ...groupData,
           client_id: groupData.client_id === 'none' ? null : groupData.client_id,
-          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id
+          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
+          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null
         })
         .eq('id', id)
         .select(`

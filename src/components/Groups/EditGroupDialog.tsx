@@ -22,7 +22,7 @@ const groupSchema = z.object({
   client_id: z.string().optional(),
   responsible_user_id: z.string().optional(),
   status: z.enum(['active', 'inactive']),
-  dia_semana: z.number().min(0).max(6).optional(),
+  dias_semana: z.array(z.number().min(0).max(6)).optional(),
   inicio_turno: z.string().optional(),
   fim_turno: z.string().optional(),
 });
@@ -36,7 +36,7 @@ interface Group {
   client_id?: string;
   responsible_user_id?: string;
   status: 'active' | 'inactive';
-  dia_semana?: number;
+  dias_semana?: number[];
   inicio_turno?: string;
   fim_turno?: string;
 }
@@ -60,7 +60,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
       client_id: 'none',
       responsible_user_id: 'none',
       status: 'active',
-      dia_semana: undefined,
+      dias_semana: [],
       inicio_turno: '',
       fim_turno: '',
     },
@@ -74,7 +74,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
         client_id: group.client_id || 'none',
         responsible_user_id: group.responsible_user_id || 'none',
         status: group.status || 'active',
-        dia_semana: group.dia_semana,
+        dias_semana: group.dias_semana || [],
         inicio_turno: group.inicio_turno || '',
         fim_turno: group.fim_turno || '',
       });
@@ -87,6 +87,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
       description: data.description || undefined,
       client_id: data.client_id === 'none' ? undefined : data.client_id,
       responsible_user_id: data.responsible_user_id === 'none' ? undefined : data.responsible_user_id,
+      dias_semana: data.dias_semana && data.dias_semana.length > 0 ? data.dias_semana : undefined,
       inicio_turno: data.inicio_turno || undefined,
       fim_turno: data.fim_turno || undefined,
     };

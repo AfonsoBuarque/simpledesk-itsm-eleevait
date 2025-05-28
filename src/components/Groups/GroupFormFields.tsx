@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Client {
   id: string;
@@ -34,7 +35,7 @@ interface GroupFormData {
   client_id?: string;
   responsible_user_id?: string;
   status?: 'active' | 'inactive';
-  dia_semana?: number;
+  dias_semana?: number[];
   inicio_turno?: string;
   fim_turno?: string;
 }
@@ -149,28 +150,34 @@ export const GroupFormFields = ({ control, clients, users }: GroupFormFieldsProp
         
         <FormField
           control={control}
-          name="dia_semana"
+          name="dias_semana"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dia da Semana</FormLabel>
-              <Select 
-                onValueChange={(value) => field.onChange(value === 'none' ? undefined : Number(value))} 
-                defaultValue={field.value !== undefined ? String(field.value) : 'none'}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o dia da semana" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">Não especificado</SelectItem>
-                  {diasSemana.map((dia) => (
-                    <SelectItem key={dia.value} value={String(dia.value)}>
+              <FormLabel>Dias da Semana</FormLabel>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                {diasSemana.map((dia) => (
+                  <div key={dia.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`dia-${dia.value}`}
+                      checked={field.value?.includes(dia.value) || false}
+                      onCheckedChange={(checked) => {
+                        const currentValues = field.value || [];
+                        if (checked) {
+                          field.onChange([...currentValues, dia.value]);
+                        } else {
+                          field.onChange(currentValues.filter((val) => val !== dia.value));
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={`dia-${dia.value}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
                       {dia.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </label>
+                  </div>
+                ))}
+              </div>
               <FormMessage />
             </FormItem>
           )}
