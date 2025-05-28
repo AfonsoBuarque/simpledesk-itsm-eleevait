@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -53,17 +52,9 @@ const Index = () => {
         return <UserManagement />;
       case 'groups':
         return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold">Grupos</h1>
-              <p className="text-gray-600 mt-2">
-                Gerencie os grupos de usuários do sistema ITSM
-              </p>
-            </div>
-            <div className="text-center py-8 text-gray-500">
-              Módulo de grupos em desenvolvimento
-            </div>
-          </div>
+          <>
+            {React.lazy(() => import('@/components/Groups/GroupManagement'))}
+          </>
         );
       case 'clients':
         return <ClientManagement />;
