@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -206,8 +205,14 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                 </FormItem>
               )}
             />
+            
+            {/* Campos editáveis usando SolicitacaoFormFields, excluindo os read-only e as datas limite */}
+            <SolicitacaoFormFields 
+              form={form} 
+              excludeFields={['titulo', 'descricao', 'solicitante_id', 'data_limite_resposta', 'data_limite_resolucao']}
+            />
 
-            {/* Data Limite Resposta - Read-only */}
+            {/* Data Limite Resposta - Read-only - movido para depois de Notas Internas */}
             <FormField
               control={form.control}
               name="data_limite_resposta"
@@ -227,7 +232,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
               )}
             />
 
-            {/* Data Limite Resolução - Read-only */}
+            {/* Data Limite Resolução - Read-only - movido para depois de Notas Internas */}
             <FormField
               control={form.control}
               name="data_limite_resolucao"
@@ -245,12 +250,6 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                   <FormMessage />
                 </FormItem>
               )}
-            />
-            
-            {/* Campos editáveis usando SolicitacaoFormFields, excluindo os read-only */}
-            <SolicitacaoFormFields 
-              form={form} 
-              excludeFields={['titulo', 'descricao', 'solicitante_id', 'data_limite_resposta', 'data_limite_resolucao']}
             />
             
             <FileUpload
