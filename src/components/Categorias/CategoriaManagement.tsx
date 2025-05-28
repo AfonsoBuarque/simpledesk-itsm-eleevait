@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Tags } from 'lucide-react';
 import { useCategorias } from '@/hooks/useCategorias';
 import { Categoria } from '@/types/categoria';
@@ -52,65 +53,86 @@ const CategoriaManagement = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {categorias.map((categoria) => (
-          <Card key={categoria.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{categoria.nome}</CardTitle>
-                  <Badge className={getTipoColor(categoria.tipo)}>
-                    {categoria.tipo}
-                  </Badge>
-                </div>
-                <div className="flex space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingCategoria(categoria)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(categoria.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {categoria.descricao && (
-                <p className="text-sm text-gray-600">{categoria.descricao}</p>
-              )}
-              
-              <div className="space-y-1 text-xs text-gray-500">
-                {categoria.categoria_pai && (
-                  <div>Categoria Pai: {categoria.categoria_pai.nome}</div>
-                )}
-                {categoria.cliente && (
-                  <div>Cliente: {categoria.cliente.name}</div>
-                )}
-                {categoria.grupo && (
-                  <div>Grupo: {categoria.grupo.name}</div>
-                )}
-                {categoria.sla && (
-                  <div>SLA: {categoria.sla.nome}</div>
-                )}
-                {categoria.usuario_responsavel && (
-                  <div>Responsável: {categoria.usuario_responsavel.name}</div>
-                )}
-                <div>Ordem: {categoria.ordem_exibicao}</div>
-                <div>Status: {categoria.ativo ? 'Ativo' : 'Inativo'}</div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {categorias.length === 0 && (
+      {categorias.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Lista de Categorias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Categoria Pai</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Grupo</TableHead>
+                  <TableHead>SLA</TableHead>
+                  <TableHead>Responsável</TableHead>
+                  <TableHead>Ordem</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categorias.map((categoria) => (
+                  <TableRow key={categoria.id}>
+                    <TableCell className="font-medium">{categoria.nome}</TableCell>
+                    <TableCell>
+                      <Badge className={getTipoColor(categoria.tipo)}>
+                        {categoria.tipo}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {categoria.descricao || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {categoria.categoria_pai?.nome || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {categoria.cliente?.name || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {categoria.grupo?.name || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {categoria.sla?.nome || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {categoria.usuario_responsavel?.name || '-'}
+                    </TableCell>
+                    <TableCell>{categoria.ordem_exibicao}</TableCell>
+                    <TableCell>
+                      <Badge variant={categoria.ativo ? 'default' : 'secondary'}>
+                        {categoria.ativo ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingCategoria(categoria)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(categoria.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Tags className="h-12 w-12 text-gray-400 mb-4" />
