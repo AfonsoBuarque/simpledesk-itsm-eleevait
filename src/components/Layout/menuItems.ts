@@ -7,14 +7,11 @@ import {
   Settings, 
   Database,
   BookOpen,
-  BarChart3,
   Users,
-  Calendar,
   Truck,
   MapPin,
   Package,
   Factory,
-  Clock,
   User,
   AlertCircle,
   HelpCircle,
@@ -37,7 +34,6 @@ export const menuItems = [
       { id: 'changes', label: 'Mudanças', icon: ArrowUpDown }
     ]
   },
-  { id: 'sla', label: 'SLA & Métricas', icon: BarChart3 },
   { id: 'knowledge', label: 'Base de Conhecimento', icon: BookOpen },
   { 
     id: 'cmdb', 
@@ -51,7 +47,6 @@ export const menuItems = [
       { id: 'localizacao', label: 'Localização', icon: MapPin }
     ]
   },
-  { id: 'calendar', label: 'Calendário', icon: Calendar },
   { 
     id: 'contacts', 
     label: 'Contatos', 
@@ -67,7 +62,6 @@ export const menuItems = [
     icon: Settings,
     children: [
       { id: 'clients', label: 'Clientes', icon: Users },
-      { id: 'sla-config', label: 'SLA', icon: Clock },
       { id: 'categoria', label: 'Categoria', icon: Tags },
       { id: 'solicitacoes', label: 'Solicitações', icon: FileText }
     ]

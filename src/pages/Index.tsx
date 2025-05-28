@@ -4,7 +4,6 @@ import Sidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
-import SLADashboard from '@/components/SLA/SLADashboard';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
 import AtivoManagement from '@/components/Ativos/AtivoManagement';
 import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
@@ -14,7 +13,6 @@ import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoMana
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
 import ClientManagement from '@/components/Clients/ClientManagement';
-import SLAManagement from '@/components/SLAs/SLAManagement';
 import CategoriaManagement from '@/components/Categorias/CategoriaManagement';
 import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
@@ -33,8 +31,6 @@ const Index: React.FC = () => {
     switch (activeItem) {
       case 'dashboard':
         return <DashboardOverview />;
-      case 'sla':
-        return <SLADashboard />;
       case 'knowledge':
         return <KnowledgeBase />;
       case 'cmdb':
@@ -55,8 +51,6 @@ const Index: React.FC = () => {
         return <GroupManagement />;
       case 'clients':
         return <ClientManagement />;
-      case 'sla-config':
-        return <SLAManagement />;
       case 'categoria':
         return <CategoriaManagement />;
       case 'solicitacoes':
