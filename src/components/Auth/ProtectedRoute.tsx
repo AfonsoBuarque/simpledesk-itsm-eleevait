@@ -11,7 +11,10 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, profile, loading } = useAuth();
 
+  console.log('ProtectedRoute - Estado atual:', { user: user?.id, profile, loading });
+
   if (loading) {
+    console.log('ProtectedRoute - Ainda carregando...');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -23,14 +26,17 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!user) {
+    console.log('ProtectedRoute - Usuário não autenticado, redirecionando para /auth');
     return <Navigate to="/auth" replace />;
   }
 
   // Redirecionar usuários com função "user" para o portal
   if (profile?.role === 'user') {
+    console.log('ProtectedRoute - Usuário com role "user", redirecionando para /portal');
     return <Navigate to="/portal" replace />;
   }
 
+  console.log('ProtectedRoute - Usuário autorizado, permitindo acesso');
   // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
   return <>{children}</>;
 };

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,24 +19,31 @@ export const useAuth = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Buscando perfil para usuário:', userId);
+      
       // Primeiro tentar buscar na tabela profiles
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
       
+      console.log('Resultado da busca na tabela profiles:', { profileData, profileError });
+      
       if (profileData) {
+        console.log('Perfil encontrado na tabela profiles:', profileData);
         setProfile(profileData);
         return;
       }
 
       // Se não encontrar na profiles, buscar na tabela users
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
         .single();
+      
+      console.log('Resultado da busca na tabela users:', { userData, userError });
       
       if (userData) {
         // Converter dados da tabela users para o formato Profile
@@ -49,7 +55,10 @@ export const useAuth = () => {
           department: userData.department,
           phone: userData.phone,
         };
+        console.log('Perfil convertido da tabela users:', userProfile);
         setProfile(userProfile);
+      } else {
+        console.log('Usuário não encontrado em nenhuma das tabelas');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -61,6 +70,7 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
+        console.log('User ID:', session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -79,6 +89,8 @@ export const useAuth = () => {
 
     // Verificar sessão existente
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Sessão existente:', session?.user?.email);
+      console.log('User ID da sessão:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
