@@ -11,7 +11,7 @@ import ClientManagement from '@/components/Clients/ClientManagement';
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
 import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
-import LocalizacaoManagement from '@/components/Localizacoes/LocalizacaoManagement';
+import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
