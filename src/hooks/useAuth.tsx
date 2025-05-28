@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,7 +28,15 @@ export const useAuth = () => {
         .single();
       
       if (profileData) {
-        setProfile(profileData);
+        setProfile({
+          id: profileData.id,
+          full_name: profileData.full_name,
+          email: profileData.email,
+          role: profileData.role,
+          department: profileData.department,
+          phone: profileData.phone,
+          client_id: profileData.client_id || null,
+        });
         return;
       }
 
@@ -49,6 +56,7 @@ export const useAuth = () => {
           role: userData.role,
           department: userData.department,
           phone: userData.phone,
+          client_id: userData.client_id || null,
         };
         setProfile(userProfile);
       }
