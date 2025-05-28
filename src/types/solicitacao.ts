@@ -80,4 +80,5 @@ export interface SolicitacaoFormData {
   ativos_envolvidos?: any[];
   notas_internas?: string;
   tags?: string[];
+  anexos?: Array<{ url: string; type: string; }>;
 }

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,6 +14,7 @@ import { Form } from '@/components/ui/form';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
+import { FileUpload } from '@/components/ui/file-upload';
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -45,6 +46,7 @@ interface NewRequisicaoDialogProps {
 
 export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProps) => {
   const { createRequisicao } = useRequisicoes();
+  const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
     resolver: zodResolver(requisicaoSchema),
@@ -61,16 +63,29 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
-      await createRequisicao.mutateAsync(data);
+      // Adicionar anexos aos dados do formulário
+      const dataWithAnexos = {
+        ...data,
+        anexos: anexos.length > 0 ? anexos.map(url => ({ url, type: 'file' })) : undefined,
+      };
+
+      await createRequisicao.mutateAsync(dataWithAnexos);
       form.reset();
+      setAnexos([]);
       onClose();
     } catch (error) {
       console.error('Error creating requisição:', error);
     }
   };
 
+  const handleClose = () => {
+    form.reset();
+    setAnexos([]);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Requisição</DialogTitle>
@@ -80,11 +95,18 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <SolicitacaoFormFields form={form} />
             
+            <FileUpload
+              onFilesChange={setAnexos}
+              maxFiles={5}
+              acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
+              maxFileSize={10}
+            />
+            
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handleClose}
                 disabled={createRequisicao.isPending}
               >
                 Cancelar
