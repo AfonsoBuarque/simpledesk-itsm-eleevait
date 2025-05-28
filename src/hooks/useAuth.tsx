@@ -35,7 +35,7 @@ export const useAuth = () => {
           role: profileData.role,
           department: profileData.department,
           phone: profileData.phone,
-          client_id: profileData.client_id || null,
+          client_id: null, // profiles table doesn't have client_id
         });
         return;
       }
