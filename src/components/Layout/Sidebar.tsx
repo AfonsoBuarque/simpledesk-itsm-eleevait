@@ -12,7 +12,8 @@ import {
   Users,
   Calendar,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,7 +46,15 @@ const menuItems = [
   { id: 'knowledge', label: 'Base de Conhecimento', icon: BookOpen },
   { id: 'cmdb', label: 'CMDB', icon: Database },
   { id: 'calendar', label: 'Calendário', icon: Calendar },
-  { id: 'users', label: 'Usuários', icon: Users },
+  { 
+    id: 'contacts', 
+    label: 'Contatos', 
+    icon: Users,
+    children: [
+      { id: 'users', label: 'Usuários' },
+      { id: 'groups', label: 'Grupos' }
+    ]
+  },
   { 
     id: 'settings', 
     label: 'Configurações', 

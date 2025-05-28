@@ -47,6 +47,35 @@ const Index = () => {
         return <KnowledgeBase />;
       case 'cmdb':
         return <CMDBDashboard />;
+      case 'contacts':
+      case 'users':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold">Usuários</h1>
+              <p className="text-gray-600 mt-2">
+                Gerencie os usuários do sistema ITSM
+              </p>
+            </div>
+            <div className="text-center py-8 text-gray-500">
+              Módulo de usuários em desenvolvimento
+            </div>
+          </div>
+        );
+      case 'groups':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold">Grupos</h1>
+              <p className="text-gray-600 mt-2">
+                Gerencie os grupos de usuários do sistema ITSM
+              </p>
+            </div>
+            <div className="text-center py-8 text-gray-500">
+              Módulo de grupos em desenvolvimento
+            </div>
+          </div>
+        );
       case 'clients':
         return <ClientManagement />;
       default:
