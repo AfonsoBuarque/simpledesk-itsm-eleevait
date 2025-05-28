@@ -1,12 +1,13 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Solicitacao, SolicitacaoFormData } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
+import { useSLACalculation } from './useSLACalculation';
 
 export const useSolicitacoes = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { calculateAndSetSLADeadlines } = useSLACalculation();
 
   const { data: solicitacoes = [], isLoading, error } = useQuery({
     queryKey: ['solicitacoes'],
@@ -39,7 +40,14 @@ export const useSolicitacoes = () => {
     mutationFn: async (formData: SolicitacaoFormData) => {
       console.log('Creating solicitação:', formData);
       
-      // Preparar dados para inserção, omitindo campos gerados automaticamente
+      // Calcular automaticamente as datas limite de SLA
+      const slaDeadlines = await calculateAndSetSLADeadlines(
+        formData.categoria_id,
+        formData.grupo_responsavel_id,
+        new Date().toISOString()
+      );
+      
+      // Preparar dados para inserção, incluindo as datas limite calculadas
       const insertData = {
         titulo: formData.titulo,
         descricao: formData.descricao,
@@ -55,8 +63,8 @@ export const useSolicitacoes = () => {
         grupo_responsavel_id: formData.grupo_responsavel_id || null,
         atendente_id: formData.atendente_id || null,
         canal_origem: formData.canal_origem,
-        data_limite_resposta: formData.data_limite_resposta || null,
-        data_limite_resolucao: formData.data_limite_resolucao || null,
+        data_limite_resposta: slaDeadlines.data_limite_resposta || formData.data_limite_resposta || null,
+        data_limite_resolucao: slaDeadlines.data_limite_resolucao || formData.data_limite_resolucao || null,
         origem_id: formData.origem_id || null,
         ativos_envolvidos: formData.ativos_envolvidos || null,
         notas_internas: formData.notas_internas || null,
@@ -80,7 +88,7 @@ export const useSolicitacoes = () => {
       queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
       toast({
         title: "Sucesso",
-        description: "Solicitação criada com sucesso!",
+        description: "Solicitação criada com sucesso! Prazos de SLA calculados automaticamente.",
       });
     },
     onError: (error) => {
@@ -96,6 +104,26 @@ export const useSolicitacoes = () => {
   const updateSolicitacao = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Updating solicitação:', id, data);
+      
+      // Se categoria ou grupo responsável mudaram, recalcular SLA
+      let slaDeadlines = {
+        data_limite_resposta: data.data_limite_resposta,
+        data_limite_resolucao: data.data_limite_resolucao,
+      };
+
+      if (data.categoria_id || data.grupo_responsavel_id) {
+        const calculatedDeadlines = await calculateAndSetSLADeadlines(
+          data.categoria_id,
+          data.grupo_responsavel_id
+        );
+        
+        if (calculatedDeadlines.data_limite_resposta) {
+          slaDeadlines.data_limite_resposta = calculatedDeadlines.data_limite_resposta;
+        }
+        if (calculatedDeadlines.data_limite_resolucao) {
+          slaDeadlines.data_limite_resolucao = calculatedDeadlines.data_limite_resolucao;
+        }
+      }
       
       // Preparar dados para atualização
       const updateData = {
@@ -113,8 +141,8 @@ export const useSolicitacoes = () => {
         grupo_responsavel_id: data.grupo_responsavel_id || null,
         atendente_id: data.atendente_id || null,
         canal_origem: data.canal_origem,
-        data_limite_resposta: data.data_limite_resposta || null,
-        data_limite_resolucao: data.data_limite_resolucao || null,
+        data_limite_resposta: slaDeadlines.data_limite_resposta || null,
+        data_limite_resolucao: slaDeadlines.data_limite_resolucao || null,
         origem_id: data.origem_id || null,
         ativos_envolvidos: data.ativos_envolvidos || null,
         notas_internas: data.notas_internas || null,
