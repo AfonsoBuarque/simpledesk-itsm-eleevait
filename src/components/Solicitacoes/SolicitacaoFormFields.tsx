@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 
@@ -45,6 +46,62 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
                 onChange={field.onChange}
                 placeholder="Digite a descrição da solicitação..."
               />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="solicitante_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Solicitante</FormLabel>
+            <FormControl>
+              <Input placeholder="ID do solicitante" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="cliente_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cliente</FormLabel>
+            <FormControl>
+              <Input placeholder="ID do cliente" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="categoria_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Categoria</FormLabel>
+            <FormControl>
+              <Input placeholder="ID da categoria" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="sla_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>SLA</FormLabel>
+            <FormControl>
+              <Input placeholder="ID do SLA" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -142,6 +199,80 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
                 <SelectItem value="presencial">Presencial</SelectItem>
               </SelectContent>
             </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="grupo_responsavel_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Grupo Responsável</FormLabel>
+            <FormControl>
+              <Input placeholder="ID do grupo responsável" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="atendente_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Atendente</FormLabel>
+            <FormControl>
+              <Input placeholder="ID do atendente" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="data_limite_resposta"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Data Limite Resposta</FormLabel>
+            <FormControl>
+              <Input type="datetime-local" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="data_limite_resolucao"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Data Limite Resolução</FormLabel>
+            <FormControl>
+              <Input type="datetime-local" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="notas_internas"
+        render={({ field }) => (
+          <FormItem className="md:col-span-2">
+            <FormLabel>Notas Internas</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Digite as notas internas..."
+                className="min-h-[80px]"
+                {...field}
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
