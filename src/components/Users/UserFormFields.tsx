@@ -23,13 +23,13 @@ interface Client {
 }
 
 interface UserFormData {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   phone?: string;
   department?: string;
-  role: string;
+  role?: string;
   client_id?: string;
-  status: 'active' | 'inactive';
+  status?: 'active' | 'inactive';
 }
 
 interface UserFormFieldsProps {
