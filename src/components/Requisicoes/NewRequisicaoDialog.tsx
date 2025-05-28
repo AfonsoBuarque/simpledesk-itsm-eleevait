@@ -14,6 +14,7 @@ import { Form } from '@/components/ui/form';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
 import { useCategorias } from '@/hooks/useCategorias';
+import { useAuth } from '@/hooks/useAuth';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -48,6 +49,7 @@ interface NewRequisicaoDialogProps {
 export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProps) => {
   const { createRequisicao } = useRequisicoes();
   const { categorias } = useCategorias();
+  const { user } = useAuth();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -60,8 +62,16 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
       prioridade: 'media',
       status: 'aberta',
       canal_origem: 'portal',
+      solicitante_id: user?.id || '',
     },
   });
+
+  // Preencher solicitante_id quando o usuário estiver disponível
+  useEffect(() => {
+    if (user?.id) {
+      form.setValue('solicitante_id', user.id);
+    }
+  }, [user?.id, form]);
 
   // Observar mudanças no campo categoria_id
   const categoriaId = form.watch('categoria_id');
