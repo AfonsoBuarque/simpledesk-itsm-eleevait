@@ -34,6 +34,9 @@ interface GroupFormData {
   client_id?: string;
   responsible_user_id?: string;
   status?: 'active' | 'inactive';
+  dia_semana?: number;
+  inicio_turno?: string;
+  fim_turno?: string;
 }
 
 interface GroupFormFieldsProps {
@@ -41,6 +44,16 @@ interface GroupFormFieldsProps {
   clients: Client[];
   users: User[];
 }
+
+const diasSemana = [
+  { value: 0, label: 'Domingo' },
+  { value: 1, label: 'Segunda-feira' },
+  { value: 2, label: 'Terça-feira' },
+  { value: 3, label: 'Quarta-feira' },
+  { value: 4, label: 'Quinta-feira' },
+  { value: 5, label: 'Sexta-feira' },
+  { value: 6, label: 'Sábado' },
+];
 
 export const GroupFormFields = ({ control, clients, users }: GroupFormFieldsProps) => {
   return (
@@ -128,6 +141,78 @@ export const GroupFormFields = ({ control, clients, users }: GroupFormFieldsProp
             </FormItem>
           )}
         />
+      </div>
+
+      {/* Seção de Configuração de Turno */}
+      <div className="border-t pt-4">
+        <h3 className="text-lg font-medium mb-4">Configuração de Turno</h3>
+        
+        <FormField
+          control={control}
+          name="dia_semana"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dia da Semana</FormLabel>
+              <Select 
+                onValueChange={(value) => field.onChange(value === 'none' ? undefined : Number(value))} 
+                defaultValue={field.value !== undefined ? String(field.value) : 'none'}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o dia da semana" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Não especificado</SelectItem>
+                  {diasSemana.map((dia) => (
+                    <SelectItem key={dia.value} value={String(dia.value)}>
+                      {dia.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <FormField
+            control={control}
+            name="inicio_turno"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Início do Turno</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="time" 
+                    placeholder="08:00"
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="fim_turno"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fim do Turno</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="time" 
+                    placeholder="18:00"
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
       <FormField

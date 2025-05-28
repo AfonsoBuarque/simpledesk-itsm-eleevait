@@ -22,6 +22,9 @@ const groupSchema = z.object({
   client_id: z.string().optional(),
   responsible_user_id: z.string().optional(),
   status: z.enum(['active', 'inactive']),
+  dia_semana: z.number().min(0).max(6).optional(),
+  inicio_turno: z.string().optional(),
+  fim_turno: z.string().optional(),
 });
 
 type GroupFormData = z.infer<typeof groupSchema>;
@@ -33,6 +36,9 @@ interface Group {
   client_id?: string;
   responsible_user_id?: string;
   status: 'active' | 'inactive';
+  dia_semana?: number;
+  inicio_turno?: string;
+  fim_turno?: string;
 }
 
 interface EditGroupDialogProps {
@@ -54,6 +60,9 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
       client_id: 'none',
       responsible_user_id: 'none',
       status: 'active',
+      dia_semana: undefined,
+      inicio_turno: '',
+      fim_turno: '',
     },
   });
 
@@ -65,6 +74,9 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
         client_id: group.client_id || 'none',
         responsible_user_id: group.responsible_user_id || 'none',
         status: group.status || 'active',
+        dia_semana: group.dia_semana,
+        inicio_turno: group.inicio_turno || '',
+        fim_turno: group.fim_turno || '',
       });
     }
   }, [group, open, form]);
@@ -75,6 +87,8 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
       description: data.description || undefined,
       client_id: data.client_id === 'none' ? undefined : data.client_id,
       responsible_user_id: data.responsible_user_id === 'none' ? undefined : data.responsible_user_id,
+      inicio_turno: data.inicio_turno || undefined,
+      fim_turno: data.fim_turno || undefined,
     };
 
     const success = await updateGroup(group.id, formData);
@@ -89,7 +103,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Grupo</DialogTitle>
         </DialogHeader>

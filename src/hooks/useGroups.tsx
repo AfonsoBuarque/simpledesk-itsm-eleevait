@@ -28,6 +28,9 @@ interface GroupFormData {
   client_id?: string;
   responsible_user_id?: string;
   status: 'active' | 'inactive';
+  dia_semana?: number;
+  inicio_turno?: string;
+  fim_turno?: string;
 }
 
 interface GroupFromDB {

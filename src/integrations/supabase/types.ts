@@ -597,7 +597,10 @@ export type Database = {
           client_id: string | null
           created_at: string
           description: string | null
+          dia_semana: number | null
+          fim_turno: string | null
           id: string
+          inicio_turno: string | null
           name: string
           responsible_user_id: string | null
           status: string
@@ -607,7 +610,10 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           description?: string | null
+          dia_semana?: number | null
+          fim_turno?: string | null
           id?: string
+          inicio_turno?: string | null
           name: string
           responsible_user_id?: string | null
           status?: string
@@ -617,7 +623,10 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           description?: string | null
+          dia_semana?: number | null
+          fim_turno?: string | null
           id?: string
+          inicio_turno?: string | null
           name?: string
           responsible_user_id?: string | null
           status?: string
