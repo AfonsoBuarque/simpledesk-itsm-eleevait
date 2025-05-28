@@ -13,7 +13,8 @@ import {
   Truck,
   MapPin,
   Package,
-  Factory
+  Factory,
+  Clock
 } from 'lucide-react';
 
 export const menuItems = [
@@ -59,7 +60,8 @@ export const menuItems = [
     label: 'Configurações', 
     icon: Settings,
     children: [
-      { id: 'clients', label: 'Clientes' }
+      { id: 'clients', label: 'Clientes' },
+      { id: 'sla-config', label: 'SLA', icon: Clock }
     ]
   }
 ];
