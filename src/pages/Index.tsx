@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -8,6 +9,7 @@ import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
 import ClientManagement from '@/components/Clients/ClientManagement';
 import UserManagement from '@/components/Users/UserManagement';
+import GroupManagement from '@/components/Groups/GroupManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -51,11 +53,7 @@ const Index = () => {
       case 'users':
         return <UserManagement />;
       case 'groups':
-        return (
-          <>
-            {React.lazy(() => import('@/components/Groups/GroupManagement'))}
-          </>
-        );
+        return <GroupManagement />;
       case 'clients':
         return <ClientManagement />;
       default:
