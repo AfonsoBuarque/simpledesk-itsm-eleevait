@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,7 +35,15 @@ export const UserPortalForm = () => {
 
   const onSubmit = async (data: UserPortalFormData) => {
     try {
-      await createRequisicao.mutateAsync(data);
+      // Garantir que todos os campos obrigatórios estejam presentes
+      const requisicaoData = {
+        titulo: data.titulo,
+        descricao: data.descricao,
+        categoria_id: data.categoria_id,
+        urgencia: data.urgencia,
+      };
+      
+      await createRequisicao.mutateAsync(requisicaoData);
       form.reset();
     } catch (error) {
       console.error('Error submitting form:', error);
