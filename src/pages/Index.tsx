@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -10,6 +11,7 @@ import ClientManagement from '@/components/Clients/ClientManagement';
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
 import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
+import LocalizacaoManagement from '@/components/Localizacoes/LocalizacaoManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -70,14 +72,7 @@ const Index = () => {
       case 'fabricantes':
         return <FabricanteManagement />;
       case 'localizacao':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Localização</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-600">Gestão de localizações em desenvolvimento...</p>
-            </div>
-          </div>
-        );
+        return <LocalizacaoManagement />;
       case 'ativos':
         return (
           <div className="space-y-6">

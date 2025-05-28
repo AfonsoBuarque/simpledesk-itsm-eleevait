@@ -120,6 +120,64 @@ export type Database = {
           },
         ]
       }
+      localizacoes: {
+        Row: {
+          client_id: string | null
+          coordenadas: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          parent_id: string | null
+          tipo: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          coordenadas?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          parent_id?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          coordenadas?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          parent_id?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "localizacoes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "localizacoes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "localizacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "localizacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
