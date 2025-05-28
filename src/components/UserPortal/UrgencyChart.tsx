@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface UrgencyChartProps {
   data: Array<{
@@ -43,11 +43,10 @@ const UrgencyChart = ({ data }: UrgencyChartProps) => {
             <Tooltip formatter={(value) => [value, 'Tickets']} />
             <Bar 
               dataKey="value" 
-              fill="#8884d8"
               radius={[4, 4, 0, 0]}
             >
               {data.map((entry, index) => (
-                <Bar key={`bar-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
