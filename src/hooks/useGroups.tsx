@@ -1,80 +1,18 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface Group {
-  id: string;
-  name: string;
-  description?: string;
-  client_id?: string;
-  responsible_user_id?: string;
-  status: 'active' | 'inactive';
-  created_at: string;
-  updated_at: string;
-  client?: {
-    id: string;
-    name: string;
-  };
-  responsible_user?: {
-    id: string;
-    name: string;
-  };
-  user_count?: number;
-  dias_semana?: number[];
-  inicio_turno?: string;
-  fim_turno?: string;
-}
-
-interface GroupFormData {
-  name: string;
-  description?: string;
-  client_id?: string;
-  responsible_user_id?: string;
-  status: 'active' | 'inactive';
-  dias_semana?: number[];
-  inicio_turno?: string;
-  fim_turno?: string;
-}
-
-interface GroupFromDB {
-  id: string;
-  name: string;
-  description?: string;
-  client_id?: string;
-  responsible_user_id?: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  clients?: {
-    id: string;
-    name: string;
-  };
-  responsible_user?: {
-    id: string;
-    name: string;
-  };
-  dia_semana?: number;
-  inicio_turno?: string;
-  fim_turno?: string;
-}
-
-const convertToGroup = (dbGroup: GroupFromDB & { user_count?: number }): Group => ({
-  ...dbGroup,
-  status: (dbGroup.status === 'active' || dbGroup.status === 'inactive') 
-    ? dbGroup.status as 'active' | 'inactive' 
-    : 'active',
-  client: dbGroup.clients,
-  responsible_user: dbGroup.responsible_user,
-  user_count: dbGroup.user_count || 0,
-  dias_semana: dbGroup.dia_semana ? [dbGroup.dia_semana] : [],
-  inicio_turno: dbGroup.inicio_turno,
-  fim_turno: dbGroup.fim_turno
-});
+import { Group } from '@/types/group';
+import { convertToGroup } from '@/utils/groupUtils';
+import { useGroupOperations } from './useGroupOperations';
+import { useGroupUserOperations } from './useGroupUserOperations';
 
 export const useGroups = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { addGroup: addGroupOperation, updateGroup: updateGroupOperation, deleteGroup: deleteGroupOperation } = useGroupOperations();
+  const { addUserToGroup: addUserToGroupOperation, removeUserFromGroup: removeUserFromGroupOperation } = useGroupUserOperations();
 
   const fetchGroups = async () => {
     try {
@@ -119,197 +57,46 @@ export const useGroups = () => {
     }
   };
 
-  const addGroup = async (groupData: GroupFormData) => {
-    try {
-      const { data, error } = await supabase
-        .from('groups')
-        .insert([{
-          name: groupData.name,
-          description: groupData.description || undefined,
-          client_id: groupData.client_id === 'none' ? null : groupData.client_id,
-          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
-          status: groupData.status,
-          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null,
-          inicio_turno: groupData.inicio_turno || undefined,
-          fim_turno: groupData.fim_turno || undefined,
-        }])
-        .select(`
-          *,
-          clients:client_id (id, name),
-          responsible_user:responsible_user_id (id, name)
-        `)
-        .single();
-
-      if (error) {
-        console.error('Erro ao cadastrar grupo:', error);
-        toast({
-          title: "Erro ao cadastrar grupo",
-          description: "Não foi possível cadastrar o grupo.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      const convertedGroup = convertToGroup(data as any);
-      setGroups(prev => [convertedGroup, ...prev]);
-      toast({
-        title: "Grupo cadastrado",
-        description: `Grupo ${groupData.name} foi cadastrado com sucesso.`,
-      });
-      return true;
-    } catch (error) {
-      console.error('Erro ao cadastrar grupo:', error);
-      toast({
-        title: "Erro ao cadastrar grupo",
-        description: "Erro inesperado ao cadastrar grupo.",
-        variant: "destructive",
-      });
-      return false;
+  const addGroup = async (groupData: any) => {
+    const result = await addGroupOperation(groupData);
+    if (result.success && result.data) {
+      setGroups(prev => [result.data!, ...prev]);
     }
+    return result.success;
   };
 
-  const updateGroup = async (id: string, groupData: Partial<GroupFormData>) => {
-    try {
-      const { data, error } = await supabase
-        .from('groups')
-        .update({
-          name: groupData.name,
-          description: groupData.description || undefined,
-          client_id: groupData.client_id === 'none' ? null : groupData.client_id,
-          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
-          status: groupData.status,
-          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null,
-          inicio_turno: groupData.inicio_turno || undefined,
-          fim_turno: groupData.fim_turno || undefined,
-        })
-        .eq('id', id)
-        .select(`
-          *,
-          clients:client_id (id, name),
-          responsible_user:responsible_user_id (id, name)
-        `)
-        .single();
-
-      if (error) {
-        console.error('Erro ao atualizar grupo:', error);
-        toast({
-          title: "Erro ao atualizar grupo",
-          description: "Não foi possível atualizar o grupo.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      const convertedGroup = convertToGroup(data as any);
+  const updateGroup = async (id: string, groupData: any) => {
+    const result = await updateGroupOperation(id, groupData);
+    if (result.success && result.data) {
       setGroups(prev => prev.map(group => 
-        group.id === id ? convertedGroup : group
+        group.id === id ? result.data! : group
       ));
-      toast({
-        title: "Grupo atualizado",
-        description: "Grupo foi atualizado com sucesso.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Erro ao atualizar grupo:', error);
-      toast({
-        title: "Erro ao atualizar grupo",
-        description: "Erro inesperado ao atualizar grupo.",
-        variant: "destructive",
-      });
-      return false;
     }
+    return result.success;
   };
 
   const deleteGroup = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('groups')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Erro ao excluir grupo:', error);
-        toast({
-          title: "Erro ao excluir grupo",
-          description: "Não foi possível excluir o grupo.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
+    const success = await deleteGroupOperation(id);
+    if (success) {
       setGroups(prev => prev.filter(group => group.id !== id));
-      toast({
-        title: "Grupo excluído",
-        description: "Grupo foi excluído com sucesso.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Erro ao excluir grupo:', error);
-      toast({
-        title: "Erro ao excluir grupo",
-        description: "Erro inesperado ao excluir grupo.",
-        variant: "destructive",
-      });
-      return false;
     }
+    return success;
   };
 
   const addUserToGroup = async (groupId: string, userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('user_groups')
-        .insert([{ group_id: groupId, user_id: userId }]);
-
-      if (error) {
-        console.error('Erro ao adicionar usuário ao grupo:', error);
-        toast({
-          title: "Erro ao adicionar usuário",
-          description: "Não foi possível adicionar o usuário ao grupo.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
+    const success = await addUserToGroupOperation(groupId, userId);
+    if (success) {
       await fetchGroups();
-      toast({
-        title: "Usuário adicionado",
-        description: "Usuário foi adicionado ao grupo com sucesso.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Erro ao adicionar usuário ao grupo:', error);
-      return false;
     }
+    return success;
   };
 
   const removeUserFromGroup = async (groupId: string, userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('user_groups')
-        .delete()
-        .eq('group_id', groupId)
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error('Erro ao remover usuário do grupo:', error);
-        toast({
-          title: "Erro ao remover usuário",
-          description: "Não foi possível remover o usuário do grupo.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
+    const success = await removeUserFromGroupOperation(groupId, userId);
+    if (success) {
       await fetchGroups();
-      toast({
-        title: "Usuário removido",
-        description: "Usuário foi removido do grupo com sucesso.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Erro ao remover usuário do grupo:', error);
-      return false;
     }
+    return success;
   };
 
   useEffect(() => {
