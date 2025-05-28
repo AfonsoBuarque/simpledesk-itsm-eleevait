@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -15,16 +14,16 @@ interface NovaRequisicaoFormFieldsProps {
 
 export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps) => {
   const { categorias } = useCategorias();
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
   // Filter categories to only show those where the category's client matches the user's client
   const filteredCategorias = categorias.filter(categoria => {
     // If user doesn't have a client_id, show all categories with no client_id
-    if (!user?.client_id) {
+    if (!profile?.client_id) {
       return !categoria.cliente_id;
     }
     // Show categories that match the user's client or have no client assigned
-    return categoria.cliente_id === user.client_id || !categoria.cliente_id;
+    return categoria.cliente_id === profile.client_id || !categoria.cliente_id;
   });
 
   return (
