@@ -188,8 +188,20 @@ export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogPr
 
   const onSubmit = async (data: AtivoFormData) => {
     console.log('EditAtivoDialog - Submitting data:', data);
+    
+    // Limpar campos vazios para evitar problemas no banco
+    const cleanedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => {
+        if (value === '' || value === null) return false;
+        if (typeof value === 'number' && isNaN(value)) return false;
+        return true;
+      })
+    ) as Partial<AtivoFormData>;
+
+    console.log('EditAtivoDialog - Cleaned data:', cleanedData);
+
     try {
-      await updateAtivoMutation.mutateAsync({ id: ativo.id, ...data });
+      await updateAtivoMutation.mutateAsync({ id: ativo.id, ...cleanedData });
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating ativo:', error);
