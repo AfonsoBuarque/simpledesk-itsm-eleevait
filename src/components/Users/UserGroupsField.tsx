@@ -34,8 +34,6 @@ export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
       name="groups"
       render={({ field }) => {
         const currentGroups = field.value || [];
-        console.log('UserGroupsField - groups received:', groups);
-        console.log('UserGroupsField - current field value:', currentGroups);
         
         return (
           <FormItem>
@@ -52,14 +50,12 @@ export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
                       id={`group-${group.id}`}
                       checked={currentGroups.includes(group.id)}
                       onCheckedChange={(checked) => {
-                        console.log('UserGroupsField - checkbox changed:', group.name, checked);
                         let newGroups;
                         if (checked) {
                           newGroups = [...currentGroups, group.id];
                         } else {
                           newGroups = currentGroups.filter(id => id !== group.id);
                         }
-                        console.log('UserGroupsField - new groups:', newGroups);
                         field.onChange(newGroups);
                       }}
                     />
