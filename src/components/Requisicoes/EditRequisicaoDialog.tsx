@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,13 +10,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Form } from '@/components/ui/form';
 import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
-import { useCategorias } from '@/hooks/useCategorias';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
+import { EditRequisicaoReadOnlyFields } from './EditRequisicaoReadOnlyFields';
+import { EditRequisicaoDateFields } from './EditRequisicaoDateFields';
+import { useEditRequisicaoFormLogic } from './EditRequisicaoFormLogic';
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -47,23 +48,8 @@ interface EditRequisicaoDialogProps {
   onClose: () => void;
 }
 
-// Função para converter data ISO para formato datetime-local
-const formatDateForInput = (isoDate?: string) => {
-  if (!isoDate) return '';
-  
-  try {
-    // Remove timezone info e converte para formato datetime-local
-    const date = new Date(isoDate);
-    return date.toISOString().slice(0, 16);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return '';
-  }
-};
-
 export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequisicaoDialogProps) => {
   const { updateRequisicao } = useRequisicoes();
-  const { categorias } = useCategorias();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -79,82 +65,16 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     },
   });
 
-  // Observar mudanças no campo categoria_id
-  const categoriaId = form.watch('categoria_id');
+  // Use the form logic hook
+  useEditRequisicaoFormLogic({ form, requisicao });
 
-  useEffect(() => {
-    if (categoriaId && categorias.length > 0) {
-      console.log('Categoria selecionada:', categoriaId);
-      
-      // Encontrar a categoria selecionada
-      const categoriaSelecionada = categorias.find(cat => cat.id === categoriaId);
-      
-      if (categoriaSelecionada) {
-        console.log('Dados da categoria:', categoriaSelecionada);
-        
-        // Preencher automaticamente os campos baseados na categoria
-        if (categoriaSelecionada.cliente_id) {
-          console.log('Preenchendo cliente_id:', categoriaSelecionada.cliente_id);
-          form.setValue('cliente_id', categoriaSelecionada.cliente_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
-        }
-        
-        if (categoriaSelecionada.sla_id) {
-          console.log('Preenchendo sla_id:', categoriaSelecionada.sla_id);
-          form.setValue('sla_id', categoriaSelecionada.sla_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
-        }
-        
-        if (categoriaSelecionada.grupo_id) {
-          console.log('Preenchendo grupo_responsavel_id:', categoriaSelecionada.grupo_id);
-          form.setValue('grupo_responsavel_id', categoriaSelecionada.grupo_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
-        }
-
-        // Forçar re-render do formulário
-        form.trigger(['cliente_id', 'sla_id', 'grupo_responsavel_id']);
-      }
+  // Set anexos if they exist
+  React.useEffect(() => {
+    if (requisicao.anexos && Array.isArray(requisicao.anexos)) {
+      const anexosUrls = requisicao.anexos.map(anexo => anexo.url || anexo).filter(Boolean);
+      setAnexos(anexosUrls);
     }
-  }, [categoriaId, categorias, form]);
-
-  useEffect(() => {
-    if (requisicao) {
-      form.reset({
-        titulo: requisicao.titulo,
-        descricao: requisicao.descricao || '',
-        tipo: 'requisicao',
-        categoria_id: requisicao.categoria_id || '',
-        sla_id: requisicao.sla_id || '',
-        urgencia: requisicao.urgencia,
-        impacto: requisicao.impacto,
-        prioridade: requisicao.prioridade,
-        status: requisicao.status,
-        solicitante_id: requisicao.solicitante_id || '',
-        cliente_id: requisicao.cliente_id || '',
-        grupo_responsavel_id: requisicao.grupo_responsavel_id || '',
-        atendente_id: requisicao.atendente_id || '',
-        canal_origem: requisicao.canal_origem,
-        data_limite_resposta: formatDateForInput(requisicao.data_limite_resposta),
-        data_limite_resolucao: formatDateForInput(requisicao.data_limite_resolucao),
-        notas_internas: requisicao.notas_internas || '',
-      });
-      
-      // Set anexos if they exist
-      if (requisicao.anexos && Array.isArray(requisicao.anexos)) {
-        const anexosUrls = requisicao.anexos.map(anexo => anexo.url || anexo).filter(Boolean);
-        setAnexos(anexosUrls);
-      }
-    }
-  }, [requisicao, form]);
+  }, [requisicao]);
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
@@ -191,35 +111,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Título - Read-only */}
-            <FormField
-              control={form.control}
-              name="titulo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título *</FormLabel>
-                  <FormControl>
-                    <Input {...field} readOnly className="bg-gray-50" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Descrição - Read-only */}
-            <FormField
-              control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Input {...field} readOnly className="bg-gray-50" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <EditRequisicaoReadOnlyFields form={form} />
             
             {/* Campos editáveis usando SolicitacaoFormFields, excluindo os read-only e as datas limite */}
             <SolicitacaoFormFields 
@@ -227,46 +119,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
               excludeFields={['titulo', 'descricao', 'solicitante_id', 'data_limite_resposta', 'data_limite_resolucao']}
             />
 
-            {/* Data Limite Resposta e Data Limite Resolução - Read-only - lado a lado */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="data_limite_resposta"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data Limite Resposta</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        type="datetime-local" 
-                        readOnly 
-                        className="bg-gray-50" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="data_limite_resolucao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data Limite Resolução</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        type="datetime-local" 
-                        readOnly 
-                        className="bg-gray-50" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <EditRequisicaoDateFields form={form} />
             
             <FileUpload
               onFilesChange={setAnexos}
