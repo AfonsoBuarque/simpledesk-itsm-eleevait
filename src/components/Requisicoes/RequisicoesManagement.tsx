@@ -4,16 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, HelpCircle, Clock, User } from 'lucide-react';
+import { Plus, HelpCircle, Clock, User, Pencil } from 'lucide-react';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
 import { Solicitacao } from '@/types/solicitacao';
 import { NewRequisicaoDialog } from './NewRequisicaoDialog';
+import { EditRequisicaoDialog } from './EditRequisicaoDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const RequisicoesManagement = () => {
   const { requisicoes, isLoading } = useRequisicoes();
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
+  const [editingRequisicao, setEditingRequisicao] = useState<Solicitacao | null>(null);
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -124,6 +126,7 @@ const RequisicoesManagement = () => {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Grupo</TableHead>
                   <TableHead>Data Abertura</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -157,6 +160,15 @@ const RequisicoesManagement = () => {
                         locale: ptBR,
                       })}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingRequisicao(requisicao)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -185,6 +197,14 @@ const RequisicoesManagement = () => {
         isOpen={isNewDialogOpen}
         onClose={() => setIsNewDialogOpen(false)}
       />
+
+      {editingRequisicao && (
+        <EditRequisicaoDialog
+          requisicao={editingRequisicao}
+          isOpen={!!editingRequisicao}
+          onClose={() => setEditingRequisicao(null)}
+        />
+      )}
     </div>
   );
 };
