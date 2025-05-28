@@ -60,7 +60,7 @@ export const menuItems = [
     label: 'Configurações', 
     icon: Settings,
     children: [
-      { id: 'clients', label: 'Clientes' },
+      { id: 'clients', label: 'Clientes', icon: Users },
       { id: 'sla-config', label: 'SLA', icon: Clock }
     ]
   }
