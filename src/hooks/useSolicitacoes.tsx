@@ -38,9 +38,34 @@ export const useSolicitacoes = () => {
   const createSolicitacao = useMutation({
     mutationFn: async (formData: SolicitacaoFormData) => {
       console.log('Creating solicitação:', formData);
+      
+      // Preparar dados para inserção, omitindo campos gerados automaticamente
+      const insertData = {
+        titulo: formData.titulo,
+        descricao: formData.descricao,
+        tipo: formData.tipo,
+        categoria_id: formData.categoria_id || null,
+        sla_id: formData.sla_id || null,
+        urgencia: formData.urgencia,
+        impacto: formData.impacto,
+        prioridade: formData.prioridade,
+        status: formData.status,
+        solicitante_id: formData.solicitante_id || null,
+        cliente_id: formData.cliente_id || null,
+        grupo_responsavel_id: formData.grupo_responsavel_id || null,
+        atendente_id: formData.atendente_id || null,
+        canal_origem: formData.canal_origem,
+        data_limite_resposta: formData.data_limite_resposta || null,
+        data_limite_resolucao: formData.data_limite_resolucao || null,
+        origem_id: formData.origem_id || null,
+        ativos_envolvidos: formData.ativos_envolvidos || null,
+        notas_internas: formData.notas_internas || null,
+        tags: formData.tags || null,
+      };
+
       const { data, error } = await supabase
         .from('solicitacoes')
-        .insert(formData)
+        .insert(insertData)
         .select()
         .single();
 
@@ -71,9 +96,34 @@ export const useSolicitacoes = () => {
   const updateSolicitacao = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Updating solicitação:', id, data);
+      
+      // Preparar dados para atualização
+      const updateData = {
+        titulo: data.titulo,
+        descricao: data.descricao,
+        tipo: data.tipo,
+        categoria_id: data.categoria_id || null,
+        sla_id: data.sla_id || null,
+        urgencia: data.urgencia,
+        impacto: data.impacto,
+        prioridade: data.prioridade,
+        status: data.status,
+        solicitante_id: data.solicitante_id || null,
+        cliente_id: data.cliente_id || null,
+        grupo_responsavel_id: data.grupo_responsavel_id || null,
+        atendente_id: data.atendente_id || null,
+        canal_origem: data.canal_origem,
+        data_limite_resposta: data.data_limite_resposta || null,
+        data_limite_resolucao: data.data_limite_resolucao || null,
+        origem_id: data.origem_id || null,
+        ativos_envolvidos: data.ativos_envolvidos || null,
+        notas_internas: data.notas_internas || null,
+        tags: data.tags || null,
+      };
+
       const { data: updatedData, error } = await supabase
         .from('solicitacoes')
-        .update(data)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
