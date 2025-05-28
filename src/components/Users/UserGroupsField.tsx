@@ -28,15 +28,11 @@ interface UserGroupsFieldProps {
 }
 
 export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
-  console.log('UserGroupsField - groups received:', groups);
-  
   return (
     <FormField
       control={control}
       name="groups"
       render={({ field }) => {
-        console.log('UserGroupsField - current field value:', field.value);
-        
         return (
           <FormItem>
             <FormLabel>Grupos</FormLabel>
@@ -52,15 +48,12 @@ export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
                       id={`group-${group.id}`}
                       checked={field.value?.includes(group.id) || false}
                       onCheckedChange={(checked) => {
-                        console.log('Checkbox changed for group:', group.id, 'checked:', checked);
                         const currentGroups = field.value || [];
                         if (checked) {
                           const newGroups = [...currentGroups, group.id];
-                          console.log('Adding group, new groups:', newGroups);
                           field.onChange(newGroups);
                         } else {
                           const newGroups = currentGroups.filter(id => id !== group.id);
-                          console.log('Removing group, new groups:', newGroups);
                           field.onChange(newGroups);
                         }
                       }}

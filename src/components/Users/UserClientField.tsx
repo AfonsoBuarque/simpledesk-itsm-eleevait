@@ -47,7 +47,6 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
           <FormLabel>Cliente (Multi-Cliente)</FormLabel>
           <Select 
             onValueChange={(value) => {
-              console.log('Client field value changed:', value);
               field.onChange(value === 'no-client' ? '' : value);
             }} 
             value={field.value || 'no-client'}

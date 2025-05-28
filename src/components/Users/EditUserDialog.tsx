@@ -67,13 +67,10 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
 
   useEffect(() => {
     if (user && open) {
-      console.log('Loading user data:', user);
-      
       // Carregar os grupos do usuário
       const loadUserGroups = async () => {
         try {
           const userGroups = await getUserGroups(user.id);
-          console.log('User groups loaded:', userGroups);
           
           form.reset({
             name: user.name || '',
@@ -103,11 +100,9 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
 
       loadUserGroups();
     }
-  }, [user, open, form, getUserGroups]);
+  }, [user.id, open, getUserGroups]); // Removido 'form' das dependências para evitar loop
 
   const onSubmit = async (data: UserFormData) => {
-    console.log('Submitting user data:', data);
-    
     const formData = {
       name: data.name,
       email: data.email,
@@ -118,8 +113,6 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
       client_id: data.client_id || undefined,
       groups: data.groups || [],
     };
-
-    console.log('Final form data to update:', formData);
 
     const success = await updateUser(user.id, formData);
     if (success) {
