@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Categoria, CategoriaFormData } from '@/types/categoria';
@@ -23,7 +22,8 @@ export const useCategorias = () => {
           categoria_pai:categorias_servico!categoria_pai_id(nome),
           cliente:clients(name),
           grupo:groups(name),
-          sla:slas(nome)
+          sla:slas(nome),
+          usuario_responsavel:users(name)
         `)
         .order('ordem_exibicao', { ascending: true });
 
@@ -33,14 +33,7 @@ export const useCategorias = () => {
       }
 
       console.log('Categorias fetched:', data);
-      
-      // Transform the data to match our Categoria interface
-      const transformedData = (data || []).map(item => ({
-        ...item,
-        usuario_responsavel: null // We'll handle this separately if needed
-      })) as Categoria[];
-
-      return transformedData;
+      return (data || []) as Categoria[];
     },
   });
 

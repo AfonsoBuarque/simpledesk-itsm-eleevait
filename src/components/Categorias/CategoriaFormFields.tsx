@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -10,6 +9,7 @@ import { CategoriaFormData } from '@/types/categoria';
 import { useClients } from '@/hooks/useClients';
 import { useGroups } from '@/hooks/useGroups';
 import { useSLAs } from '@/hooks/useSLAs';
+import { useUsers } from '@/hooks/useUsers';
 import { useCategorias } from '@/hooks/useCategorias';
 
 interface CategoriaFormFieldsProps {
@@ -20,6 +20,7 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
   const { clients } = useClients();
   const { groups } = useGroups();
   const { slas } = useSLAs();
+  const { users } = useUsers();
   const { categorias } = useCategorias();
 
   const tiposCategoria = [
@@ -206,6 +207,32 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
                 {slas.map((sla) => (
                   <SelectItem key={sla.id} value={sla.id}>
                     {sla.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="usuario_responsavel_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Usuário Responsável</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o responsável" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="">Nenhum</SelectItem>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name}
                   </SelectItem>
                 ))}
               </SelectContent>
