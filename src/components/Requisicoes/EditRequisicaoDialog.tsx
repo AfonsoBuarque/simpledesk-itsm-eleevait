@@ -183,7 +183,6 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
               maxFiles={5}
               acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
               maxFileSize={10}
-              initialFiles={anexos}
             />
             
             <div className="flex justify-end space-x-2 pt-4">
