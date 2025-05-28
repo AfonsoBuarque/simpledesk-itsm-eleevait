@@ -67,12 +67,10 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
 
   useEffect(() => {
     if (user && open) {
-      // Carregar os grupos do usuário
-      const loadUserGroups = async () => {
+      const loadUserData = async () => {
         try {
           const userGroups = await getUserGroups(user.id);
           
-          // Reset do form com valores corretos
           const formData = {
             name: user.name || '',
             email: user.email || '',
@@ -80,18 +78,16 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
             department: user.department || '',
             role: user.role || 'user',
             client_id: user.client_id || '',
-            status: user.status || 'active',
+            status: user.status || 'active' as const,
             groups: userGroups.map(g => g.id),
           };
           
-          // Usar setTimeout para garantir que o form está pronto
-          setTimeout(() => {
-            form.reset(formData);
-          }, 100);
+          // Reset form with all data
+          form.reset(formData);
           
         } catch (error) {
-          console.error('Error loading user groups:', error);
-          // Reset form mesmo se grupos falharem
+          console.error('Error loading user data:', error);
+          
           const formData = {
             name: user.name || '',
             email: user.email || '',
@@ -99,19 +95,17 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
             department: user.department || '',
             role: user.role || 'user',
             client_id: user.client_id || '',
-            status: user.status || 'active',
+            status: user.status || 'active' as const,
             groups: [],
           };
           
-          setTimeout(() => {
-            form.reset(formData);
-          }, 100);
+          form.reset(formData);
         }
       };
 
-      loadUserGroups();
+      loadUserData();
     }
-  }, [user.id, open, getUserGroups, form]);
+  }, [user, open, getUserGroups, form]);
 
   const onSubmit = async (data: UserFormData) => {
     const formData = {

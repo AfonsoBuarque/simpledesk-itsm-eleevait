@@ -33,6 +33,8 @@ export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
       control={control}
       name="groups"
       render={({ field }) => {
+        const currentGroups = field.value || [];
+        
         return (
           <FormItem>
             <FormLabel>Grupos</FormLabel>
@@ -46,16 +48,15 @@ export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
                   <div key={group.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`group-${group.id}`}
-                      checked={field.value?.includes(group.id) || false}
+                      checked={currentGroups.includes(group.id)}
                       onCheckedChange={(checked) => {
-                        const currentGroups = field.value || [];
+                        let newGroups;
                         if (checked) {
-                          const newGroups = [...currentGroups, group.id];
-                          field.onChange(newGroups);
+                          newGroups = [...currentGroups, group.id];
                         } else {
-                          const newGroups = currentGroups.filter(id => id !== group.id);
-                          field.onChange(newGroups);
+                          newGroups = currentGroups.filter(id => id !== group.id);
                         }
+                        field.onChange(newGroups);
                       }}
                     />
                     <label

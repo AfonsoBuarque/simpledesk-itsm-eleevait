@@ -47,9 +47,10 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
           <FormLabel>Cliente (Multi-Cliente)</FormLabel>
           <Select 
             onValueChange={(value) => {
-              field.onChange(value === 'no-client' ? '' : value);
+              const newValue = value === 'no-client' ? '' : value;
+              field.onChange(newValue);
             }} 
-            value={field.value ? field.value : 'no-client'}
+            value={field.value || 'no-client'}
           >
             <FormControl>
               <SelectTrigger>
