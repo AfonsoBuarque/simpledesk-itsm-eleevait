@@ -59,7 +59,7 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
       phone: '',
       department: '',
       role: 'user',
-      client_id: 'none',
+      client_id: '',
       status: 'active',
       groups: [],
     },
@@ -67,20 +67,38 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
 
   useEffect(() => {
     if (user && open) {
+      console.log('Loading user data:', user);
+      
       // Carregar os grupos do usuário
       const loadUserGroups = async () => {
-        const userGroups = await getUserGroups(user.id);
-        
-        form.reset({
-          name: user.name || '',
-          email: user.email || '',
-          phone: user.phone || '',
-          department: user.department || '',
-          role: user.role || 'user',
-          client_id: user.client_id || 'none',
-          status: user.status || 'active',
-          groups: userGroups.map(g => g.id),
-        });
+        try {
+          const userGroups = await getUserGroups(user.id);
+          console.log('User groups loaded:', userGroups);
+          
+          form.reset({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            department: user.department || '',
+            role: user.role || 'user',
+            client_id: user.client_id || '',
+            status: user.status || 'active',
+            groups: userGroups.map(g => g.id),
+          });
+        } catch (error) {
+          console.error('Error loading user groups:', error);
+          // Reset form even if groups fail to load
+          form.reset({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            department: user.department || '',
+            role: user.role || 'user',
+            client_id: user.client_id || '',
+            status: user.status || 'active',
+            groups: [],
+          });
+        }
       };
 
       loadUserGroups();
@@ -88,6 +106,8 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
   }, [user, open, form, getUserGroups]);
 
   const onSubmit = async (data: UserFormData) => {
+    console.log('Submitting user data:', data);
+    
     const formData = {
       name: data.name,
       email: data.email,
@@ -95,9 +115,11 @@ export const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps
       status: data.status,
       phone: data.phone || undefined,
       department: data.department || undefined,
-      client_id: data.client_id === 'none' ? undefined : data.client_id,
+      client_id: data.client_id || undefined,
       groups: data.groups || [],
     };
+
+    console.log('Final form data to update:', formData);
 
     const success = await updateUser(user.id, formData);
     if (success) {

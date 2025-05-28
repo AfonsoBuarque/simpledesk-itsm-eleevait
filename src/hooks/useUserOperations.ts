@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { User, UserFormData, UserFromDB } from '@/types/user';
@@ -15,9 +14,17 @@ export const useUserOperations = (
     try {
       const { groups, ...userDataWithoutGroups } = userData;
 
+      // Prepare data for insertion
+      const dataToInsert = {
+        ...userDataWithoutGroups,
+        client_id: userDataWithoutGroups.client_id || null
+      };
+
+      console.log('Adding user with data:', dataToInsert);
+
       const { data, error } = await supabase
         .from('users')
-        .insert([userDataWithoutGroups])
+        .insert([dataToInsert])
         .select(`
           *,
           clients:client_id (
@@ -71,9 +78,17 @@ export const useUserOperations = (
     try {
       const { groups, ...userDataWithoutGroups } = userData;
 
+      // Prepare data for update
+      const dataToUpdate = {
+        ...userDataWithoutGroups,
+        client_id: userDataWithoutGroups.client_id || null
+      };
+
+      console.log('Updating user with data:', dataToUpdate);
+
       const { data, error } = await supabase
         .from('users')
-        .update(userDataWithoutGroups)
+        .update(dataToUpdate)
         .eq('id', id)
         .select(`
           *,

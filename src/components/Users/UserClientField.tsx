@@ -45,14 +45,20 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Cliente (Multi-Cliente)</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select 
+            onValueChange={(value) => {
+              console.log('Client field value changed:', value);
+              field.onChange(value === 'none' ? '' : value);
+            }} 
+            value={field.value || ''}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um cliente (opcional)" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="none">Sem cliente específico</SelectItem>
+              <SelectItem value="">Sem cliente específico</SelectItem>
               {clients.map((client) => (
                 <SelectItem key={client.id} value={client.id}>
                   {client.name}

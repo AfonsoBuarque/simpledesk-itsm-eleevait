@@ -28,46 +28,57 @@ interface UserGroupsFieldProps {
 }
 
 export const UserGroupsField = ({ control, groups }: UserGroupsFieldProps) => {
+  console.log('UserGroupsField - groups received:', groups);
+  
   return (
     <FormField
       control={control}
       name="groups"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Grupos</FormLabel>
-          <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
-            {groups.length === 0 ? (
-              <div className="col-span-2 text-sm text-gray-500 text-center py-2">
-                Nenhum grupo disponível
-              </div>
-            ) : (
-              groups.map((group) => (
-                <div key={group.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`group-${group.id}`}
-                    checked={field.value?.includes(group.id) || false}
-                    onCheckedChange={(checked) => {
-                      const currentGroups = field.value || [];
-                      if (checked) {
-                        field.onChange([...currentGroups, group.id]);
-                      } else {
-                        field.onChange(currentGroups.filter(id => id !== group.id));
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={`group-${group.id}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {group.name}
-                  </label>
+      render={({ field }) => {
+        console.log('UserGroupsField - current field value:', field.value);
+        
+        return (
+          <FormItem>
+            <FormLabel>Grupos</FormLabel>
+            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3 bg-background">
+              {groups.length === 0 ? (
+                <div className="col-span-2 text-sm text-gray-500 text-center py-2">
+                  Nenhum grupo disponível
                 </div>
-              ))
-            )}
-          </div>
-          <FormMessage />
-        </FormItem>
-      )}
+              ) : (
+                groups.map((group) => (
+                  <div key={group.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`group-${group.id}`}
+                      checked={field.value?.includes(group.id) || false}
+                      onCheckedChange={(checked) => {
+                        console.log('Checkbox changed for group:', group.id, 'checked:', checked);
+                        const currentGroups = field.value || [];
+                        if (checked) {
+                          const newGroups = [...currentGroups, group.id];
+                          console.log('Adding group, new groups:', newGroups);
+                          field.onChange(newGroups);
+                        } else {
+                          const newGroups = currentGroups.filter(id => id !== group.id);
+                          console.log('Removing group, new groups:', newGroups);
+                          field.onChange(newGroups);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={`group-${group.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {group.name}
+                    </label>
+                  </div>
+                ))
+              )}
+            </div>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 };
