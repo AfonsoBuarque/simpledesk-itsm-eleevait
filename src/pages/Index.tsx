@@ -56,14 +56,7 @@ const Index = () => {
       case 'contratos':
         return <ContratoManagement />;
       case 'fornecedores':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Fornecedores</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-600">Gestão de fornecedores em desenvolvimento...</p>
-            </div>
-          </div>
-        );
+        return <FornecedorManagement />;
       case 'fabricantes':
         return <FabricanteManagement />;
       case 'localizacao':
