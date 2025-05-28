@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import Sidebar from '@/components/Layout/Sidebar';
+import Header from '@/components/Layout/Header';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
 import SLADashboard from '@/components/SLA/SLADashboard';
@@ -78,6 +80,13 @@ const Index: React.FC = () => {
       />
       
       <div className="flex-1 flex flex-col">
+        <Header
+          onMenuClick={() => setIsSidebarOpen(true)}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          isSidebarOpen={isSidebarOpen}
+          onCloseSidebar={() => setIsSidebarOpen(false)}
+        />
         <main className="flex-1 overflow-y-auto p-6">
           {renderContent()}
         </main>

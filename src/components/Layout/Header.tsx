@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut } from 'lucide-react';
+import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +20,18 @@ interface HeaderProps {
   currentClient?: string;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  isSidebarOpen?: boolean;
+  onCloseSidebar?: () => void;
 }
 
-const Header = ({ onMenuClick, currentClient = "TechCorp", isCollapsed, onToggleCollapse }: HeaderProps) => {
+const Header = ({ 
+  onMenuClick, 
+  currentClient = "TechCorp", 
+  isCollapsed, 
+  onToggleCollapse,
+  isSidebarOpen = false,
+  onCloseSidebar 
+}: HeaderProps) => {
   const { profile, signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -44,9 +53,17 @@ const Header = ({ onMenuClick, currentClient = "TechCorp", isCollapsed, onToggle
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden">
-          <Menu className="h-5 w-5" />
+        {/* Mobile menu toggle - shows X when sidebar is open, Menu when closed */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={isSidebarOpen && onCloseSidebar ? onCloseSidebar : onMenuClick} 
+          className="lg:hidden"
+        >
+          {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
+        
+        {/* Desktop collapse toggle */}
         <Button 
           variant="ghost" 
           size="sm" 
@@ -55,6 +72,7 @@ const Header = ({ onMenuClick, currentClient = "TechCorp", isCollapsed, onToggle
         >
           {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
         </Button>
+        
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-blue-600">ServiceMaster</h1>
           <Badge variant="secondary" className="text-xs">
