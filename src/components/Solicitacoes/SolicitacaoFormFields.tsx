@@ -13,12 +13,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { useUsers } from '@/hooks/useUsers';
+import { useClients } from '@/hooks/useClients';
+import { useCategorias } from '@/hooks/useCategorias';
+import { useSLAs } from '@/hooks/useSLAs';
+import { useGroups } from '@/hooks/useGroups';
 
 interface SolicitacaoFormFieldsProps {
   form: UseFormReturn<SolicitacaoFormData>;
 }
 
 const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
+  const { users } = useUsers();
+  const { clients } = useClients();
+  const { categorias } = useCategorias();
+  const { slas } = useSLAs();
+  const { groups } = useGroups();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <FormField
@@ -58,9 +69,20 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Solicitante</FormLabel>
-            <FormControl>
-              <Input placeholder="ID do solicitante" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o solicitante" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -72,9 +94,20 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Cliente</FormLabel>
-            <FormControl>
-              <Input placeholder="ID do cliente" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o cliente" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -86,9 +119,20 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Categoria</FormLabel>
-            <FormControl>
-              <Input placeholder="ID da categoria" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {categorias.map((categoria) => (
+                  <SelectItem key={categoria.id} value={categoria.id}>
+                    {categoria.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -100,9 +144,20 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>SLA</FormLabel>
-            <FormControl>
-              <Input placeholder="ID do SLA" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o SLA" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {slas.map((sla) => (
+                  <SelectItem key={sla.id} value={sla.id}>
+                    {sla.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -210,9 +265,20 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Grupo Responsável</FormLabel>
-            <FormControl>
-              <Input placeholder="ID do grupo responsável" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o grupo responsável" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {groups.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -224,9 +290,20 @@ const SolicitacaoFormFields = ({ form }: SolicitacaoFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Atendente</FormLabel>
-            <FormControl>
-              <Input placeholder="ID do atendente" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o atendente" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
