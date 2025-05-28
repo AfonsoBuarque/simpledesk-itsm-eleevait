@@ -20,15 +20,6 @@ const SidebarNavigation = ({
 }: SidebarNavigationProps) => {
   return (
     <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-hide">
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
       {menuItems.map((item) => (
         <SidebarMenuItem
           key={item.id}
