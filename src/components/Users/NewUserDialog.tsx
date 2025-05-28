@@ -65,7 +65,10 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
 
   const onSubmit = async (data: UserFormData) => {
     const formData = {
-      ...data,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      status: data.status,
       phone: data.phone || undefined,
       department: data.department || undefined,
       client_id: data.client_id || undefined,
