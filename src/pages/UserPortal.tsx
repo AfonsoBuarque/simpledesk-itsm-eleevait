@@ -6,13 +6,19 @@ import { AlertTriangle, LogOut, BarChart3, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPortalForm } from '@/components/UserPortal/UserPortalForm';
 import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
+import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal';
 
 const UserPortal = () => {
   const { signOut, profile } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleNovaRequisicaoClick = () => {
+    setIsNovaRequisicaoModalOpen(true);
   };
 
   return (
@@ -56,13 +62,23 @@ const UserPortal = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Bem-vindo ao seu Portal
-          </h2>
-          <p className="text-lg text-gray-600">
-            Gerencie suas requisições e acompanhe o status dos seus chamados
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Bem-vindo ao seu Portal
+            </h2>
+            <p className="text-lg text-gray-600">
+              Gerencie suas requisições e acompanhe o status dos seus chamados
+            </p>
+          </div>
+          
+          <Button
+            onClick={handleNovaRequisicaoClick}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 px-6 py-3"
+          >
+            <Plus className="h-5 w-5" />
+            Nova Requisição
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -79,7 +95,7 @@ const UserPortal = () => {
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
             >
               <Plus className="h-4 w-4" />
-              Nova Requisição
+              Formulário Manual
             </TabsTrigger>
           </TabsList>
 
@@ -90,10 +106,10 @@ const UserPortal = () => {
           <TabsContent value="nova-requisicao" className="space-y-6">
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Abrir Nova Requisição
+                Formulário Manual de Requisição
               </h3>
               <p className="text-gray-600">
-                Preencha o formulário abaixo para solicitar um novo atendimento
+                Use este formulário se preferir preencher diretamente na página
               </p>
             </div>
 
@@ -125,6 +141,12 @@ const UserPortal = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Modal de Nova Requisição */}
+      <NovaRequisicaoModal 
+        isOpen={isNovaRequisicaoModalOpen}
+        onClose={() => setIsNovaRequisicaoModalOpen(false)}
+      />
     </div>
   );
 };
