@@ -1,49 +1,15 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Building, Mail, Phone, MapPin } from 'lucide-react';
+import { Plus, Search, Building, Mail, Phone, MapPin, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import NewClientDialog from './NewClientDialog';
-
-interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  status: 'active' | 'inactive';
-  ticketsCount: number;
-  createdAt: string;
-}
-
-// Mock data - será substituído pela integração com Supabase
-const mockClients: Client[] = [
-  {
-    id: '1',
-    name: 'TechCorp Ltda',
-    email: 'contato@techcorp.com',
-    phone: '(11) 99999-9999',
-    address: 'Av. Paulista, 1000 - São Paulo, SP',
-    status: 'active',
-    ticketsCount: 15,
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Inovação Digital',
-    email: 'admin@inovacaodigital.com',
-    phone: '(11) 88888-8888',
-    address: 'Rua da Inovação, 500 - São Paulo, SP',
-    status: 'active',
-    ticketsCount: 8,
-    createdAt: '2024-02-20'
-  }
-];
+import { useClients } from '@/hooks/useClients';
 
 const ClientManagement = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const { clients, loading, addClient } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
 
@@ -52,16 +18,43 @@ const ClientManagement = () => {
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddClient = (clientData: any) => {
-    const newClient: Client = {
-      id: Date.now().toString(),
-      ...clientData,
-      status: 'active',
-      ticketsCount: 0,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    setClients([...clients, newClient]);
+  const handleAddClient = async (clientData: any) => {
+    const success = await addClient(clientData);
+    if (success) {
+      setIsNewClientDialogOpen(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Gerenciamento de Clientes</h1>
+            <p className="text-gray-600 mt-2">
+              Cadastre e gerencie os clientes do sistema ITSM
+            </p>
+          </div>
+          <Button disabled>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Cliente
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Lista de Clientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Carregando clientes...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -124,14 +117,17 @@ const ClientManagement = () => {
                         <span>{client.address}</span>
                       </div>
                     </div>
+                    
+                    {client.description && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        <p>{client.description}</p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-sm text-gray-500 mb-1">
-                      Tickets: {client.ticketsCount}
-                    </div>
                     <div className="text-xs text-gray-400">
-                      Cadastrado em: {new Date(client.createdAt).toLocaleDateString('pt-BR')}
+                      Cadastrado em: {new Date(client.created_at).toLocaleDateString('pt-BR')}
                     </div>
                   </div>
                 </div>
