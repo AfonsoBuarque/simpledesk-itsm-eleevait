@@ -48,9 +48,9 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
           <Select 
             onValueChange={(value) => {
               console.log('Client field value changed:', value);
-              field.onChange(value === 'none' ? '' : value);
+              field.onChange(value === 'no-client' ? '' : value);
             }} 
-            value={field.value || ''}
+            value={field.value || 'no-client'}
           >
             <FormControl>
               <SelectTrigger>
@@ -58,7 +58,7 @@ export const UserClientField = ({ control, clients }: UserClientFieldProps) => {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Sem cliente específico</SelectItem>
+              <SelectItem value="no-client">Sem cliente específico</SelectItem>
               {clients.map((client) => (
                 <SelectItem key={client.id} value={client.id}>
                   {client.name}
