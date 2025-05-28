@@ -255,29 +255,29 @@ export interface AtivoFromDB {
   politica_retirada: string | null;
   versao: number | null;
 
-  // Relacionamentos
+  // Relacionamentos - usando tipos flexíveis para resolver problemas de compatibilidade
   clients?: {
     id: string;
     name: string;
-  };
+  } | null;
   fabricantes?: {
     id: string;
     nome: string;
-  };
+  } | null;
   contratos?: {
     id: string;
     numero_contrato: string;
-  };
+  } | null;
   localizacoes?: {
     id: string;
     nome: string;
-  };
+  } | null;
   users?: {
     id: string;
     name: string;
-  };
+  } | null;
   groups?: {
     id: string;
     name: string;
-  };
+  } | null;
 }

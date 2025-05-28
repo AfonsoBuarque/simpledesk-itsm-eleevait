@@ -1,10 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Ativo, AtivoFromDB, AtivoFormData } from '@/types/ativo';
+import { Ativo, AtivoFormData } from '@/types/ativo';
 import { useToast } from '@/hooks/use-toast';
 
-const transformAtivoFromDB = (ativo: AtivoFromDB): Ativo => {
+const transformAtivoFromDB = (ativo: any): Ativo => {
   return {
     ...ativo,
     client: ativo.clients ? {

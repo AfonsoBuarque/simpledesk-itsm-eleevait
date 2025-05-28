@@ -33,12 +33,12 @@ interface AtivoFormFieldsProps {
 }
 
 export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
-  const { data: clients } = useClients();
-  const { data: fabricantes } = useFabricantes();
-  const { data: contratos } = useContratos();
-  const { data: localizacoes } = useLocalizacoes();
-  const { data: users } = useUsers();
-  const { data: groups } = useGroups();
+  const { clients } = useClients();
+  const { fabricantes } = useFabricantes();
+  const { contratos } = useContratos();
+  const { localizacoes } = useLocalizacoes();
+  const { users } = useUsers();
+  const { groups } = useGroups();
 
   return (
     <Tabs defaultValue="basico" className="w-full">
