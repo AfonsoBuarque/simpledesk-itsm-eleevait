@@ -4,11 +4,11 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
-interface ProtectedRouteProps {
+interface UserOnlyRouteProps {
   children: React.ReactNode;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
@@ -26,12 +26,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Redirecionar usuários com função "user" para o portal
-  if (profile?.role === 'user') {
-    return <Navigate to="/portal" replace />;
+  if (profile?.role !== 'user') {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default UserOnlyRoute;
