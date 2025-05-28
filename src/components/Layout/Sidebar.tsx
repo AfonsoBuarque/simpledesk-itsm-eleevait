@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Home, 
@@ -15,7 +16,8 @@ import {
   UserPlus,
   Truck,
   MapPin,
-  Package
+  Package,
+  Factory
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +55,7 @@ const menuItems = [
     children: [
       { id: 'contratos', label: 'Contratos', icon: FileText },
       { id: 'fornecedores', label: 'Fornecedores', icon: Truck },
+      { id: 'fabricantes', label: 'Fabricantes', icon: Factory },
       { id: 'localizacao', label: 'Localização', icon: MapPin },
       { id: 'ativos', label: 'Ativos', icon: Package }
     ]
