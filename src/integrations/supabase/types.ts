@@ -45,6 +45,278 @@ export type Database = {
         }
         Relationships: []
       }
+      cmdb_ativos: {
+        Row: {
+          ambiente: string | null
+          atributos_customizados: Json | null
+          atualizado_em: string | null
+          atualizado_por: string | null
+          auditoria_status: string | null
+          business_criticality: string | null
+          capacidade: Json | null
+          centro_de_custo: string | null
+          certificados: Json | null
+          ciclo_vida_esperado: number | null
+          classificacao_dados: string | null
+          cliente_id: string | null
+          compliance: Json | null
+          componentes: Json | null
+          contrato_id: string | null
+          criado_em: string | null
+          criado_por: string | null
+          data_aquisicao: string | null
+          data_garantia_fim: string | null
+          data_garantia_inicio: string | null
+          data_instalacao: string | null
+          data_retirada: string | null
+          departamento_id: string | null
+          dependencias: Json | null
+          descricao: string | null
+          dono_negocio_id: string | null
+          fabricante_id: string | null
+          grupo_responsavel_id: string | null
+          host_parent_id: string | null
+          id: string
+          ips: Json | null
+          localizacao_id: string | null
+          mac_addresses: Json | null
+          modelo: string | null
+          nivel_acesso: string | null
+          nome: string
+          numero_serie: string | null
+          observacoes_negocio: string | null
+          parent_id: string | null
+          patrimonio: string | null
+          politica_retirada: string | null
+          prazo_renovacao: string | null
+          proxima_auditoria: string | null
+          relacionado_a_chamados: boolean | null
+          requer_criptografia: boolean | null
+          servicos_dependentes: Json | null
+          sistema_operacional: string | null
+          situacao_legal: string | null
+          sla_esperado: string | null
+          software_instalado: Json | null
+          status_operacional: string | null
+          tags: Json | null
+          taxa_depreciacao: number | null
+          tickets_ativos: Json | null
+          tipo_aquisicao: string | null
+          tipo_id: string | null
+          ultima_auditoria: string | null
+          valor_aquisicao: number | null
+          valor_atual: number | null
+          valor_residual: number | null
+          versao: number | null
+          versao_firmware: string | null
+          virtualizacao_tipo: string | null
+          vulnerabilidades_conhecidas: string | null
+        }
+        Insert: {
+          ambiente?: string | null
+          atributos_customizados?: Json | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          auditoria_status?: string | null
+          business_criticality?: string | null
+          capacidade?: Json | null
+          centro_de_custo?: string | null
+          certificados?: Json | null
+          ciclo_vida_esperado?: number | null
+          classificacao_dados?: string | null
+          cliente_id?: string | null
+          compliance?: Json | null
+          componentes?: Json | null
+          contrato_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          data_aquisicao?: string | null
+          data_garantia_fim?: string | null
+          data_garantia_inicio?: string | null
+          data_instalacao?: string | null
+          data_retirada?: string | null
+          departamento_id?: string | null
+          dependencias?: Json | null
+          descricao?: string | null
+          dono_negocio_id?: string | null
+          fabricante_id?: string | null
+          grupo_responsavel_id?: string | null
+          host_parent_id?: string | null
+          id?: string
+          ips?: Json | null
+          localizacao_id?: string | null
+          mac_addresses?: Json | null
+          modelo?: string | null
+          nivel_acesso?: string | null
+          nome: string
+          numero_serie?: string | null
+          observacoes_negocio?: string | null
+          parent_id?: string | null
+          patrimonio?: string | null
+          politica_retirada?: string | null
+          prazo_renovacao?: string | null
+          proxima_auditoria?: string | null
+          relacionado_a_chamados?: boolean | null
+          requer_criptografia?: boolean | null
+          servicos_dependentes?: Json | null
+          sistema_operacional?: string | null
+          situacao_legal?: string | null
+          sla_esperado?: string | null
+          software_instalado?: Json | null
+          status_operacional?: string | null
+          tags?: Json | null
+          taxa_depreciacao?: number | null
+          tickets_ativos?: Json | null
+          tipo_aquisicao?: string | null
+          tipo_id?: string | null
+          ultima_auditoria?: string | null
+          valor_aquisicao?: number | null
+          valor_atual?: number | null
+          valor_residual?: number | null
+          versao?: number | null
+          versao_firmware?: string | null
+          virtualizacao_tipo?: string | null
+          vulnerabilidades_conhecidas?: string | null
+        }
+        Update: {
+          ambiente?: string | null
+          atributos_customizados?: Json | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          auditoria_status?: string | null
+          business_criticality?: string | null
+          capacidade?: Json | null
+          centro_de_custo?: string | null
+          certificados?: Json | null
+          ciclo_vida_esperado?: number | null
+          classificacao_dados?: string | null
+          cliente_id?: string | null
+          compliance?: Json | null
+          componentes?: Json | null
+          contrato_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          data_aquisicao?: string | null
+          data_garantia_fim?: string | null
+          data_garantia_inicio?: string | null
+          data_instalacao?: string | null
+          data_retirada?: string | null
+          departamento_id?: string | null
+          dependencias?: Json | null
+          descricao?: string | null
+          dono_negocio_id?: string | null
+          fabricante_id?: string | null
+          grupo_responsavel_id?: string | null
+          host_parent_id?: string | null
+          id?: string
+          ips?: Json | null
+          localizacao_id?: string | null
+          mac_addresses?: Json | null
+          modelo?: string | null
+          nivel_acesso?: string | null
+          nome?: string
+          numero_serie?: string | null
+          observacoes_negocio?: string | null
+          parent_id?: string | null
+          patrimonio?: string | null
+          politica_retirada?: string | null
+          prazo_renovacao?: string | null
+          proxima_auditoria?: string | null
+          relacionado_a_chamados?: boolean | null
+          requer_criptografia?: boolean | null
+          servicos_dependentes?: Json | null
+          sistema_operacional?: string | null
+          situacao_legal?: string | null
+          sla_esperado?: string | null
+          software_instalado?: Json | null
+          status_operacional?: string | null
+          tags?: Json | null
+          taxa_depreciacao?: number | null
+          tickets_ativos?: Json | null
+          tipo_aquisicao?: string | null
+          tipo_id?: string | null
+          ultima_auditoria?: string | null
+          valor_aquisicao?: number | null
+          valor_atual?: number | null
+          valor_residual?: number | null
+          versao?: number | null
+          versao_firmware?: string | null
+          virtualizacao_tipo?: string | null
+          vulnerabilidades_conhecidas?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cmdb_ativos_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_dono_negocio_id_fkey"
+            columns: ["dono_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_fabricante_id_fkey"
+            columns: ["fabricante_id"]
+            isOneToOne: false
+            referencedRelation: "fabricantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_grupo_responsavel_id_fkey"
+            columns: ["grupo_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_host_parent_id_fkey"
+            columns: ["host_parent_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_localizacao_id_fkey"
+            columns: ["localizacao_id"]
+            isOneToOne: false
+            referencedRelation: "localizacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ativos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contratos: {
         Row: {
           client_id: string | null

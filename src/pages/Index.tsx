@@ -14,6 +14,7 @@ import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement'
 import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManagement';
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
+import AtivoManagement from '@/components/Ativos/AtivoManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -62,14 +63,7 @@ const Index = () => {
       case 'localizacao':
         return <LocalizacaoManagement />;
       case 'ativos':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Ativos</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-600">Gestão de ativos em desenvolvimento...</p>
-            </div>
-          </div>
-        );
+        return <AtivoManagement />;
       case 'contacts':
       case 'users':
         return <UserManagement />;
