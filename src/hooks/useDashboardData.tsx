@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Solicitacao } from '@/types/solicitacao';
 
 export const useDashboardData = () => {
   const { data: tickets = [], isLoading: ticketsLoading } = useQuery({
@@ -20,7 +21,7 @@ export const useDashboardData = () => {
         .limit(10);
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Solicitacao[];
     },
   });
 
