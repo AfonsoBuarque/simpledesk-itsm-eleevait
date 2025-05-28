@@ -23,7 +23,8 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
+  Layers
 } from 'lucide-react';
 import { useAtivos } from '@/hooks/useAtivos';
 import { Ativo } from '@/types/ativo';
@@ -67,6 +68,17 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
   const ativosInativos = ativos.filter(ativo => ativo.status_operacional?.toLowerCase() === 'inativo').length;
   const ativosManutencao = ativos.filter(ativo => ativo.status_operacional?.toLowerCase() === 'manutencao').length;
 
+  // Estatísticas por tipo de ativo
+  const tipoStats = ativos.reduce((acc, ativo) => {
+    const tipo = ativo.tipo_id || 'Não especificado';
+    acc[tipo] = (acc[tipo] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const tiposComAtivos = Object.entries(tipoStats)
+    .filter(([_, quantidade]) => quantidade > 0)
+    .sort((a, b) => b[1] - a[1]);
+
   // Dados para gráfico de status
   const statusData = [
     { name: 'Ativo', value: ativosAtivos, color: '#22c55e' },
@@ -107,9 +119,33 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
     }
   };
 
+  const getTypeIcon = (tipo: string) => {
+    switch (tipo.toLowerCase()) {
+      case 'servidor':
+      case 'server':
+        return Server;
+      case 'computador':
+      case 'desktop':
+      case 'laptop':
+        return Monitor;
+      case 'celular':
+      case 'smartphone':
+      case 'mobile':
+        return Smartphone;
+      case 'storage':
+      case 'armazenamento':
+        return HardDrive;
+      case 'rede':
+      case 'network':
+        return Wifi;
+      default:
+        return Layers;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Cards de Estatísticas */}
+      {/* Cards de Estatísticas Gerais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card 
           className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -175,6 +211,36 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Cards por Tipo de Ativo */}
+      {tiposComAtivos.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Ativos por Tipo</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {tiposComAtivos.map(([tipo, quantidade]) => {
+              const IconComponent = getTypeIcon(tipo);
+              return (
+                <Card 
+                  key={tipo}
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleCardClick(ativo => (ativo.tipo_id || 'Não especificado') === tipo)}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{tipo}</CardTitle>
+                    <IconComponent className="h-4 w-4 text-blue-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">{quantidade}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {quantidade === 1 ? 'ativo' : 'ativos'}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
