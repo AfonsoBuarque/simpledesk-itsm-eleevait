@@ -13,7 +13,11 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  UserPlus
+  UserPlus,
+  FileContract,
+  Truck,
+  MapPin,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +48,17 @@ const menuItems = [
   },
   { id: 'sla', label: 'SLA & Métricas', icon: BarChart3 },
   { id: 'knowledge', label: 'Base de Conhecimento', icon: BookOpen },
-  { id: 'cmdb', label: 'CMDB', icon: Database },
+  { 
+    id: 'cmdb', 
+    label: 'CMDB', 
+    icon: Database,
+    children: [
+      { id: 'contratos', label: 'Contratos', icon: FileContract },
+      { id: 'fornecedores', label: 'Fornecedores', icon: Truck },
+      { id: 'localizacao', label: 'Localização', icon: MapPin },
+      { id: 'ativos', label: 'Ativos', icon: Package }
+    ]
+  },
   { id: 'calendar', label: 'Calendário', icon: Calendar },
   { 
     id: 'contacts', 
@@ -168,6 +182,7 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, o
                         )}
                         onClick={() => onModuleChange(child.id)}
                       >
+                        {child.icon && <child.icon className="h-4 w-4 mr-3" />}
                         <span className="flex-1">{child.label}</span>
                         {child.badge && (
                           <Badge variant="destructive" className="ml-2 text-xs">

@@ -49,6 +49,42 @@ const Index = () => {
         return <KnowledgeBase />;
       case 'cmdb':
         return <CMDBDashboard />;
+      case 'contratos':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-900">Contratos</h1>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-gray-600">Gestão de contratos em desenvolvimento...</p>
+            </div>
+          </div>
+        );
+      case 'fornecedores':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-900">Fornecedores</h1>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-gray-600">Gestão de fornecedores em desenvolvimento...</p>
+            </div>
+          </div>
+        );
+      case 'localizacao':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-900">Localização</h1>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-gray-600">Gestão de localizações em desenvolvimento...</p>
+            </div>
+          </div>
+        );
+      case 'ativos':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-900">Ativos</h1>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-gray-600">Gestão de ativos em desenvolvimento...</p>
+            </div>
+          </div>
+        );
       case 'contacts':
       case 'users':
         return <UserManagement />;
