@@ -189,14 +189,23 @@ export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogPr
   const onSubmit = async (data: AtivoFormData) => {
     console.log('EditAtivoDialog - Submitting data:', data);
     
-    // Limpar campos vazios para evitar problemas no banco
-    const cleanedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => {
-        if (value === '' || value === null) return false;
-        if (typeof value === 'number' && isNaN(value)) return false;
-        return true;
-      })
-    ) as Partial<AtivoFormData>;
+    // Limpar campos vazios para evitar problemas no banco, mas manter o nome sempre
+    const cleanedData: Partial<AtivoFormData> & { nome: string } = {
+      nome: data.nome, // Nome é obrigatório, sempre incluir
+    };
+
+    // Adicionar outros campos apenas se não estão vazios
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'nome') return; // Já incluído acima
+      
+      if (value !== '' && value !== null && value !== undefined) {
+        if (typeof value === 'number' && !isNaN(value)) {
+          (cleanedData as any)[key] = value;
+        } else if (typeof value !== 'number') {
+          (cleanedData as any)[key] = value;
+        }
+      }
+    });
 
     console.log('EditAtivoDialog - Cleaned data:', cleanedData);
 
