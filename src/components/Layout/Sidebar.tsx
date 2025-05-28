@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Home, 
@@ -14,7 +13,6 @@ import {
   ChevronDown,
   ChevronRight,
   UserPlus,
-  FileContract,
   Truck,
   MapPin,
   Package
@@ -53,7 +51,7 @@ const menuItems = [
     label: 'CMDB', 
     icon: Database,
     children: [
-      { id: 'contratos', label: 'Contratos', icon: FileContract },
+      { id: 'contratos', label: 'Contratos', icon: FileText },
       { id: 'fornecedores', label: 'Fornecedores', icon: Truck },
       { id: 'localizacao', label: 'Localização', icon: MapPin },
       { id: 'ativos', label: 'Ativos', icon: Package }
