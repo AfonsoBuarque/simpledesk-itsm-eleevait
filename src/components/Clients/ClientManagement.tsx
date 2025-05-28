@@ -1,0 +1,159 @@
+
+import React, { useState } from 'react';
+import { Plus, Search, Building, Mail, Phone, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import NewClientDialog from './NewClientDialog';
+
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  status: 'active' | 'inactive';
+  ticketsCount: number;
+  createdAt: string;
+}
+
+// Mock data - será substituído pela integração com Supabase
+const mockClients: Client[] = [
+  {
+    id: '1',
+    name: 'TechCorp Ltda',
+    email: 'contato@techcorp.com',
+    phone: '(11) 99999-9999',
+    address: 'Av. Paulista, 1000 - São Paulo, SP',
+    status: 'active',
+    ticketsCount: 15,
+    createdAt: '2024-01-15'
+  },
+  {
+    id: '2',
+    name: 'Inovação Digital',
+    email: 'admin@inovacaodigital.com',
+    phone: '(11) 88888-8888',
+    address: 'Rua da Inovação, 500 - São Paulo, SP',
+    status: 'active',
+    ticketsCount: 8,
+    createdAt: '2024-02-20'
+  }
+];
+
+const ClientManagement = () => {
+  const [clients, setClients] = useState<Client[]>(mockClients);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleAddClient = (clientData: any) => {
+    const newClient: Client = {
+      id: Date.now().toString(),
+      ...clientData,
+      status: 'active',
+      ticketsCount: 0,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    setClients([...clients, newClient]);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Gerenciamento de Clientes</h1>
+          <p className="text-gray-600 mt-2">
+            Cadastre e gerencie os clientes do sistema ITSM
+          </p>
+        </div>
+        <Button onClick={() => setIsNewClientDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Cliente
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Lista de Clientes</CardTitle>
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Buscar clientes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {filteredClients.map((client) => (
+              <div
+                key={client.id}
+                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Building className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold">{client.name}</h3>
+                      <Badge variant={client.status === 'active' ? 'default' : 'secondary'}>
+                        {client.status === 'active' ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        <span>{client.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <span>{client.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>{client.address}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500 mb-1">
+                      Tickets: {client.ticketsCount}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      Cadastrado em: {new Date(client.createdAt).toLocaleDateString('pt-BR')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {filteredClients.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                {searchTerm ? 'Nenhum cliente encontrado.' : 'Nenhum cliente cadastrado.'}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <NewClientDialog
+        open={isNewClientDialogOpen}
+        onOpenChange={setIsNewClientDialogOpen}
+        onSubmit={handleAddClient}
+      />
+    </div>
+  );
+};
+
+export default ClientManagement;

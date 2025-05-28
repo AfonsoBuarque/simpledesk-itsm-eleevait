@@ -7,6 +7,7 @@ import TicketList from '@/components/Tickets/TicketList';
 import SLADashboard from '@/components/SLA/SLADashboard';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
+import ClientManagement from '@/components/Clients/ClientManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -46,6 +47,8 @@ const Index = () => {
         return <KnowledgeBase />;
       case 'cmdb':
         return <CMDBDashboard />;
+      case 'clients':
+        return <ClientManagement />;
       default:
         return <DashboardOverview />;
     }

@@ -46,7 +46,14 @@ const menuItems = [
   { id: 'cmdb', label: 'CMDB', icon: Database },
   { id: 'calendar', label: 'Calendário', icon: Calendar },
   { id: 'users', label: 'Usuários', icon: Users },
-  { id: 'settings', label: 'Configurações', icon: Settings }
+  { 
+    id: 'settings', 
+    label: 'Configurações', 
+    icon: Settings,
+    children: [
+      { id: 'clients', label: 'Clientes' }
+    ]
+  }
 ];
 
 const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, onToggleCollapse }: SidebarProps) => {
