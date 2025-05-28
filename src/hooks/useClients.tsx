@@ -23,6 +23,27 @@ interface ClientFormData {
   description?: string;
 }
 
+// Type for data coming from Supabase
+interface ClientFromDB {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  description?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Helper function to convert DB data to Client type
+const convertToClient = (dbClient: ClientFromDB): Client => ({
+  ...dbClient,
+  status: (dbClient.status === 'active' || dbClient.status === 'inactive') 
+    ? dbClient.status as 'active' | 'inactive' 
+    : 'active'
+});
+
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +67,8 @@ export const useClients = () => {
         return;
       }
 
-      setClients(data || []);
+      const convertedClients = (data as ClientFromDB[]).map(convertToClient);
+      setClients(convertedClients);
     } catch (error) {
       console.error('Error fetching clients:', error);
       toast({
@@ -77,7 +99,8 @@ export const useClients = () => {
         return false;
       }
 
-      setClients(prev => [data, ...prev]);
+      const convertedClient = convertToClient(data as ClientFromDB);
+      setClients(prev => [convertedClient, ...prev]);
       toast({
         title: "Cliente cadastrado",
         description: `Cliente ${clientData.name} foi cadastrado com sucesso.`,
@@ -113,8 +136,9 @@ export const useClients = () => {
         return false;
       }
 
+      const convertedClient = convertToClient(data as ClientFromDB);
       setClients(prev => prev.map(client => 
-        client.id === id ? data : client
+        client.id === id ? convertedClient : client
       ));
       toast({
         title: "Cliente atualizado",
