@@ -77,29 +77,35 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
         console.log('Dados da categoria:', categoriaSelecionada);
         
         // Preencher automaticamente os campos baseados na categoria
-        const updates: Partial<SolicitacaoFormData> = {};
-        
         if (categoriaSelecionada.cliente_id) {
-          updates.cliente_id = categoriaSelecionada.cliente_id;
           console.log('Preenchendo cliente_id:', categoriaSelecionada.cliente_id);
+          form.setValue('cliente_id', categoriaSelecionada.cliente_id, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
         }
         
         if (categoriaSelecionada.sla_id) {
-          updates.sla_id = categoriaSelecionada.sla_id;
           console.log('Preenchendo sla_id:', categoriaSelecionada.sla_id);
+          form.setValue('sla_id', categoriaSelecionada.sla_id, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
         }
         
         if (categoriaSelecionada.grupo_id) {
-          updates.grupo_responsavel_id = categoriaSelecionada.grupo_id;
           console.log('Preenchendo grupo_responsavel_id:', categoriaSelecionada.grupo_id);
-        }
-        
-        // Aplicar as atualizações ao formulário
-        if (Object.keys(updates).length > 0) {
-          Object.entries(updates).forEach(([key, value]) => {
-            form.setValue(key as keyof SolicitacaoFormData, value);
+          form.setValue('grupo_responsavel_id', categoriaSelecionada.grupo_id, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
           });
         }
+
+        // Forçar re-render do formulário
+        form.trigger(['cliente_id', 'sla_id', 'grupo_responsavel_id']);
       }
     }
   }, [categoriaId, categorias, form]);
