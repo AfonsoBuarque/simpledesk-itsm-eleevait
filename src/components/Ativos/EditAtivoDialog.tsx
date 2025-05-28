@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -151,7 +152,7 @@ export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogPr
         data_garantia_inicio: ativo.data_garantia_inicio || '',
         data_garantia_fim: ativo.data_garantia_fim || '',
         prazo_renovacao: ativo.prazo_renovacao || '',
-        ciclo_vida_esperado: ativo.ciclo_vida_esperado,
+        ciclo_vida_esperado: ativo.ciclo_vida_esperado ?? undefined,
         data_retirada: ativo.data_retirada || '',
         ultima_auditoria: ativo.ultima_auditoria || '',
         proxima_auditoria: ativo.proxima_auditoria || '',
@@ -160,10 +161,10 @@ export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogPr
         grupo_responsavel_id: ativo.grupo_responsavel_id || '',
         departamento_id: ativo.departamento_id || '',
         centro_de_custo: ativo.centro_de_custo || '',
-        valor_aquisicao: ativo.valor_aquisicao,
-        valor_atual: ativo.valor_atual,
-        taxa_depreciacao: ativo.taxa_depreciacao,
-        valor_residual: ativo.valor_residual,
+        valor_aquisicao: ativo.valor_aquisicao ?? undefined,
+        valor_atual: ativo.valor_atual ?? undefined,
+        taxa_depreciacao: ativo.taxa_depreciacao ?? undefined,
+        valor_residual: ativo.valor_residual ?? undefined,
         tipo_aquisicao: ativo.tipo_aquisicao || '',
         business_criticality: ativo.business_criticality || '',
         sla_esperado: ativo.sla_esperado || '',
