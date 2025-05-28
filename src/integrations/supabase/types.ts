@@ -9,6 +9,110 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categorias_servico: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string | null
+          atualizado_por: string | null
+          categoria_pai_id: string | null
+          cliente_id: string | null
+          criado_em: string | null
+          criado_por: string | null
+          descricao: string | null
+          grupo_id: string | null
+          id: string
+          nome: string
+          ordem_exibicao: number | null
+          sla_id: string | null
+          tipo: string
+          usuario_responsavel_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          categoria_pai_id?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          descricao?: string | null
+          grupo_id?: string | null
+          id?: string
+          nome: string
+          ordem_exibicao?: number | null
+          sla_id?: string | null
+          tipo: string
+          usuario_responsavel_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          categoria_pai_id?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          descricao?: string | null
+          grupo_id?: string | null
+          id?: string
+          nome?: string
+          ordem_exibicao?: number | null
+          sla_id?: string | null
+          tipo?: string
+          usuario_responsavel_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categorias_servico_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_servico_categoria_pai_id_fkey"
+            columns: ["categoria_pai_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_servico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_servico_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_servico_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_servico_grupo_id_fkey"
+            columns: ["grupo_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_servico_sla_id_fkey"
+            columns: ["sla_id"]
+            isOneToOne: false
+            referencedRelation: "slas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_servico_usuario_responsavel_id_fkey"
+            columns: ["usuario_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string
