@@ -14,7 +14,8 @@ import {
   MapPin,
   Package,
   Factory,
-  Clock
+  Clock,
+  User
 } from 'lucide-react';
 
 export const menuItems = [
@@ -51,8 +52,8 @@ export const menuItems = [
     label: 'Contatos', 
     icon: Users,
     children: [
-      { id: 'users', label: 'Usuários' },
-      { id: 'groups', label: 'Grupos' }
+      { id: 'users', label: 'Usuários', icon: User },
+      { id: 'groups', label: 'Grupos', icon: Users }
     ]
   },
   { 
