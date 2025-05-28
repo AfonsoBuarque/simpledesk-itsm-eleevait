@@ -44,20 +44,20 @@ export const NewCategoriaDialog = ({ isOpen, onClose }: NewCategoriaDialogProps)
       tipo: 'incidente',
       ordem_exibicao: 0,
       ativo: true,
-      categoria_pai_id: '',
-      cliente_id: '',
-      grupo_id: '',
-      sla_id: '',
-      usuario_responsavel_id: '',
+      categoria_pai_id: 'none',
+      cliente_id: 'none',
+      grupo_id: 'none',
+      sla_id: 'none',
+      usuario_responsavel_id: 'none',
     },
   });
 
   const onSubmit = async (data: CategoriaFormData) => {
     try {
-      // Remove empty string values and convert them to undefined
+      // Convert "none" values to undefined for the API
       const cleanData: Partial<CategoriaFormData> = {};
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== '' && value !== null) {
+        if (value !== 'none' && value !== '' && value !== null) {
           (cleanData as any)[key] = value;
         }
       });

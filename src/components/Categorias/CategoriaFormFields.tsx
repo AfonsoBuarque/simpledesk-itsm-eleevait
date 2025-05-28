@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -99,14 +100,14 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Categoria Pai</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select onValueChange={field.onChange} value={field.value || "none"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a categoria pai" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Nenhuma</SelectItem>
+                <SelectItem value="none">Nenhuma</SelectItem>
                 {availableParentCategories.map((categoria) => (
                   <SelectItem key={categoria.id} value={categoria.id}>
                     {categoria.nome}
@@ -144,14 +145,14 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Cliente</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select onValueChange={field.onChange} value={field.value || "none"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {clients.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
                     {client.name}
@@ -170,14 +171,14 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Grupo</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select onValueChange={field.onChange} value={field.value || "none"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o grupo" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {groups.map((group) => (
                   <SelectItem key={group.id} value={group.id}>
                     {group.name}
@@ -196,14 +197,14 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>SLA</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select onValueChange={field.onChange} value={field.value || "none"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o SLA" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {slas.map((sla) => (
                   <SelectItem key={sla.id} value={sla.id}>
                     {sla.nome}
@@ -222,14 +223,14 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Usuário Responsável</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select onValueChange={field.onChange} value={field.value || "none"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o responsável" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name}

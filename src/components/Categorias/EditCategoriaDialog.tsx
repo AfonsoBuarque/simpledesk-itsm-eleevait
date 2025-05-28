@@ -45,11 +45,11 @@ export const EditCategoriaDialog = ({ categoria, isOpen, onClose }: EditCategori
       tipo: 'incidente',
       ordem_exibicao: 0,
       ativo: true,
-      categoria_pai_id: '',
-      cliente_id: '',
-      grupo_id: '',
-      sla_id: '',
-      usuario_responsavel_id: '',
+      categoria_pai_id: 'none',
+      cliente_id: 'none',
+      grupo_id: 'none',
+      sla_id: 'none',
+      usuario_responsavel_id: 'none',
     },
   });
 
@@ -59,23 +59,23 @@ export const EditCategoriaDialog = ({ categoria, isOpen, onClose }: EditCategori
         nome: categoria.nome,
         descricao: categoria.descricao || '',
         tipo: categoria.tipo,
-        categoria_pai_id: categoria.categoria_pai_id || '',
+        categoria_pai_id: categoria.categoria_pai_id || 'none',
         ordem_exibicao: categoria.ordem_exibicao,
         ativo: categoria.ativo,
-        cliente_id: categoria.cliente_id || '',
-        grupo_id: categoria.grupo_id || '',
-        sla_id: categoria.sla_id || '',
-        usuario_responsavel_id: categoria.usuario_responsavel_id || '',
+        cliente_id: categoria.cliente_id || 'none',
+        grupo_id: categoria.grupo_id || 'none',
+        sla_id: categoria.sla_id || 'none',
+        usuario_responsavel_id: categoria.usuario_responsavel_id || 'none',
       });
     }
   }, [categoria, form]);
 
   const onSubmit = async (data: CategoriaFormData) => {
     try {
-      // Remove empty string values and convert them to undefined
+      // Convert "none" values to undefined for the API
       const cleanData: Partial<CategoriaFormData> = {};
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== '' && value !== null) {
+        if (value !== 'none' && value !== '' && value !== null) {
           (cleanData as any)[key] = value;
         }
       });
