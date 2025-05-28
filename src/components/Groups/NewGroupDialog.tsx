@@ -12,6 +12,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { useGroups } from '@/hooks/useGroups';
 import { useClients } from '@/hooks/useClients';
+import { useUsers } from '@/hooks/useUsers';
 import { GroupFormFields } from './GroupFormFields';
 import { GroupFormActions } from './GroupFormActions';
 
@@ -19,6 +20,7 @@ const groupSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().optional(),
   client_id: z.string().optional(),
+  responsible_user_id: z.string().optional(),
   status: z.enum(['active', 'inactive']),
 });
 
@@ -32,6 +34,7 @@ interface NewGroupDialogProps {
 export const NewGroupDialog = ({ open, onOpenChange }: NewGroupDialogProps) => {
   const { addGroup } = useGroups();
   const { clients } = useClients();
+  const { users } = useUsers();
 
   const form = useForm<GroupFormData>({
     resolver: zodResolver(groupSchema),
@@ -39,6 +42,7 @@ export const NewGroupDialog = ({ open, onOpenChange }: NewGroupDialogProps) => {
       name: '',
       description: '',
       client_id: 'none',
+      responsible_user_id: 'none',
       status: 'active',
     },
   });
@@ -49,6 +53,7 @@ export const NewGroupDialog = ({ open, onOpenChange }: NewGroupDialogProps) => {
       status: data.status,
       description: data.description || undefined,
       client_id: data.client_id === 'none' ? undefined : data.client_id,
+      responsible_user_id: data.responsible_user_id === 'none' ? undefined : data.responsible_user_id,
     };
 
     const success = await addGroup(formData);
@@ -72,7 +77,7 @@ export const NewGroupDialog = ({ open, onOpenChange }: NewGroupDialogProps) => {
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <GroupFormFields control={form.control} clients={clients} />
+            <GroupFormFields control={form.control} clients={clients} users={users} />
             <GroupFormActions 
               onCancel={handleCancel}
               isSubmitting={form.formState.isSubmitting}

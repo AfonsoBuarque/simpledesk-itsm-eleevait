@@ -26,7 +26,8 @@ const GroupManagement = () => {
   const filteredGroups = groups.filter(group =>
     group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (group.description && group.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (group.client?.name && group.client.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    (group.client?.name && group.client.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (group.responsible_user?.name && group.responsible_user.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleDeleteGroup = async (id: string) => {
@@ -89,6 +90,7 @@ const GroupManagement = () => {
                 <TableHead>Nome</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Cliente</TableHead>
+                <TableHead>Responsável</TableHead>
                 <TableHead>Usuários</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
@@ -104,6 +106,13 @@ const GroupManagement = () => {
                       <Badge variant="outline">{group.client.name}</Badge>
                     ) : (
                       <span className="text-gray-400">Sem cliente</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {group.responsible_user ? (
+                      <Badge variant="outline">{group.responsible_user.name}</Badge>
+                    ) : (
+                      <span className="text-gray-400">Sem responsável</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -140,7 +149,7 @@ const GroupManagement = () => {
               ))}
               {filteredGroups.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="text-gray-500">
                       {searchTerm ? 'Nenhum grupo encontrado com os critérios de busca.' : 'Nenhum grupo cadastrado.'}
                     </div>

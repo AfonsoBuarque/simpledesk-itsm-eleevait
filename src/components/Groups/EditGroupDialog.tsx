@@ -12,6 +12,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { useGroups } from '@/hooks/useGroups';
 import { useClients } from '@/hooks/useClients';
+import { useUsers } from '@/hooks/useUsers';
 import { GroupFormFields } from './GroupFormFields';
 import { EditGroupFormActions } from './EditGroupFormActions';
 
@@ -19,6 +20,7 @@ const groupSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().optional(),
   client_id: z.string().optional(),
+  responsible_user_id: z.string().optional(),
   status: z.enum(['active', 'inactive']),
 });
 
@@ -29,6 +31,7 @@ interface Group {
   name: string;
   description?: string;
   client_id?: string;
+  responsible_user_id?: string;
   status: 'active' | 'inactive';
 }
 
@@ -41,6 +44,7 @@ interface EditGroupDialogProps {
 export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogProps) => {
   const { updateGroup } = useGroups();
   const { clients } = useClients();
+  const { users } = useUsers();
 
   const form = useForm<GroupFormData>({
     resolver: zodResolver(groupSchema),
@@ -48,6 +52,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
       name: '',
       description: '',
       client_id: 'none',
+      responsible_user_id: 'none',
       status: 'active',
     },
   });
@@ -58,6 +63,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
         name: group.name || '',
         description: group.description || '',
         client_id: group.client_id || 'none',
+        responsible_user_id: group.responsible_user_id || 'none',
         status: group.status || 'active',
       });
     }
@@ -68,6 +74,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
       ...data,
       description: data.description || undefined,
       client_id: data.client_id === 'none' ? undefined : data.client_id,
+      responsible_user_id: data.responsible_user_id === 'none' ? undefined : data.responsible_user_id,
     };
 
     const success = await updateGroup(group.id, formData);
@@ -89,7 +96,7 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <GroupFormFields control={form.control} clients={clients} />
+            <GroupFormFields control={form.control} clients={clients} users={users} />
             <EditGroupFormActions 
               onCancel={handleCancel}
               isSubmitting={form.formState.isSubmitting}

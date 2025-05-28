@@ -23,19 +23,26 @@ interface Client {
   name: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 interface GroupFormData {
   name?: string;
   description?: string;
   client_id?: string;
+  responsible_user_id?: string;
   status?: 'active' | 'inactive';
 }
 
 interface GroupFormFieldsProps {
   control: Control<GroupFormData>;
   clients: Client[];
+  users: User[];
 }
 
-export const GroupFormFields = ({ control, clients }: GroupFormFieldsProps) => {
+export const GroupFormFields = ({ control, clients, users }: GroupFormFieldsProps) => {
   return (
     <>
       <FormField
@@ -98,19 +105,23 @@ export const GroupFormFields = ({ control, clients }: GroupFormFieldsProps) => {
 
         <FormField
           control={control}
-          name="status"
+          name="responsible_user_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status *</FormLabel>
+              <FormLabel>Responsável</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
+                    <SelectValue placeholder="Selecione um responsável" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="inactive">Inativo</SelectItem>
+                  <SelectItem value="none">Sem responsável específico</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -118,6 +129,28 @@ export const GroupFormFields = ({ control, clients }: GroupFormFieldsProps) => {
           )}
         />
       </div>
+
+      <FormField
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Status *</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="active">Ativo</SelectItem>
+                <SelectItem value="inactive">Inativo</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   );
 };

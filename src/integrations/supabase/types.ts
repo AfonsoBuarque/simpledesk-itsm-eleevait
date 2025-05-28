@@ -52,6 +52,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          responsible_user_id: string | null
           status: string
           updated_at: string
         }
@@ -61,6 +62,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          responsible_user_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -70,6 +72,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          responsible_user_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -79,6 +82,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_responsible_user_id_fkey"
+            columns: ["responsible_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -8,10 +7,15 @@ interface Group {
   name: string;
   description?: string;
   client_id?: string;
+  responsible_user_id?: string;
   status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
   client?: {
+    id: string;
+    name: string;
+  };
+  responsible_user?: {
     id: string;
     name: string;
   };
@@ -22,6 +26,7 @@ interface GroupFormData {
   name: string;
   description?: string;
   client_id?: string;
+  responsible_user_id?: string;
   status: 'active' | 'inactive';
 }
 
@@ -30,10 +35,15 @@ interface GroupFromDB {
   name: string;
   description?: string;
   client_id?: string;
+  responsible_user_id?: string;
   status: string;
   created_at: string;
   updated_at: string;
   clients?: {
+    id: string;
+    name: string;
+  };
+  responsible_user?: {
     id: string;
     name: string;
   };
@@ -45,6 +55,7 @@ const convertToGroup = (dbGroup: GroupFromDB & { user_count?: number }): Group =
     ? dbGroup.status as 'active' | 'inactive' 
     : 'active',
   client: dbGroup.clients,
+  responsible_user: dbGroup.responsible_user,
   user_count: dbGroup.user_count || 0
 });
 
@@ -61,6 +72,7 @@ export const useGroups = () => {
         .select(`
           *,
           clients:client_id (id, name),
+          responsible_user:responsible_user_id (id, name),
           user_groups (count)
         `)
         .order('created_at', { ascending: false });
@@ -78,7 +90,8 @@ export const useGroups = () => {
       const convertedGroups = (data as any[]).map((group) => ({
         ...group,
         user_count: group.user_groups?.length || 0,
-        client: group.clients
+        client: group.clients,
+        responsible_user: group.responsible_user
       })).map(convertToGroup);
       
       setGroups(convertedGroups);
@@ -100,11 +113,13 @@ export const useGroups = () => {
         .from('groups')
         .insert([{
           ...groupData,
-          client_id: groupData.client_id === 'none' ? null : groupData.client_id
+          client_id: groupData.client_id === 'none' ? null : groupData.client_id,
+          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id
         }])
         .select(`
           *,
-          clients:client_id (id, name)
+          clients:client_id (id, name),
+          responsible_user:responsible_user_id (id, name)
         `)
         .single();
 
@@ -142,12 +157,14 @@ export const useGroups = () => {
         .from('groups')
         .update({
           ...groupData,
-          client_id: groupData.client_id === 'none' ? null : groupData.client_id
+          client_id: groupData.client_id === 'none' ? null : groupData.client_id,
+          responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id
         })
         .eq('id', id)
         .select(`
           *,
-          clients:client_id (id, name)
+          clients:client_id (id, name),
+          responsible_user:responsible_user_id (id, name)
         `)
         .single();
 
