@@ -48,7 +48,15 @@ export const NovaRequisicaoModal = ({ isOpen, onClose }: NovaRequisicaoModalProp
 
   const onSubmit = async (data: NovaRequisicaoFormData) => {
     try {
-      await createRequisicao.mutateAsync(data);
+      // Ensure data matches the expected type by explicitly structuring it
+      const formData = {
+        titulo: data.titulo,
+        descricao: data.descricao || '',
+        categoria_id: data.categoria_id || undefined,
+        urgencia: data.urgencia,
+      };
+      
+      await createRequisicao.mutateAsync(formData);
       form.reset();
       onClose();
     } catch (error) {
