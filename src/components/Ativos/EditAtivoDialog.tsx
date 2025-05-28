@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { AtivoFormFields } from './AtivoFormFields';
+import { AtivoFieldsAlert } from './AtivoFieldsAlert';
 import { useUpdateAtivo } from '@/hooks/useAtivos';
 import { Ativo, AtivoFormData } from '@/types/ativo';
 
@@ -226,6 +226,8 @@ export const EditAtivoDialog = ({ ativo, open, onOpenChange }: EditAtivoDialogPr
             Edite as informações do ativo {ativo?.nome}.
           </DialogDescription>
         </DialogHeader>
+
+        <AtivoFieldsAlert />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
