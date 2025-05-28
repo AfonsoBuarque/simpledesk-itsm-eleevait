@@ -37,11 +37,11 @@ export const menuItems = [
     label: 'CMDB', 
     icon: Database,
     children: [
+      { id: 'ativos', label: 'Ativos', icon: Package },
       { id: 'contratos', label: 'Contratos', icon: FileText },
-      { id: 'fornecedores', label: 'Fornecedores', icon: Truck },
       { id: 'fabricantes', label: 'Fabricantes', icon: Factory },
-      { id: 'localizacao', label: 'Localização', icon: MapPin },
-      { id: 'ativos', label: 'Ativos', icon: Package }
+      { id: 'fornecedores', label: 'Fornecedores', icon: Truck },
+      { id: 'localizacao', label: 'Localização', icon: MapPin }
     ]
   },
   { id: 'calendar', label: 'Calendário', icon: Calendar },
