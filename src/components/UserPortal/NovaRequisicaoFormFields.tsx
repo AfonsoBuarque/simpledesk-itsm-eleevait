@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategorias } from '@/hooks/useCategorias';
+import { useAuth } from '@/hooks/useAuth';
 import { NovaRequisicaoFormData } from './schemas/novaRequisicaoSchema';
 
 interface NovaRequisicaoFormFieldsProps {
@@ -14,6 +15,17 @@ interface NovaRequisicaoFormFieldsProps {
 
 export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps) => {
   const { categorias } = useCategorias();
+  const { user } = useAuth();
+
+  // Filter categories to only show those where the category's client matches the user's client
+  const filteredCategorias = categorias.filter(categoria => {
+    // If user doesn't have a client_id, show all categories with no client_id
+    if (!user?.client_id) {
+      return !categoria.cliente_id;
+    }
+    // Show categories that match the user's client or have no client assigned
+    return categoria.cliente_id === user.client_id || !categoria.cliente_id;
+  });
 
   return (
     <>
@@ -72,7 +84,7 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {categorias.map((categoria) => (
+                {filteredCategorias.map((categoria) => (
                   <SelectItem key={categoria.id} value={categoria.id}>
                     {categoria.nome}
                   </SelectItem>
