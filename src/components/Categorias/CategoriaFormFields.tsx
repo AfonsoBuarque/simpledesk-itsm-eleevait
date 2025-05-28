@@ -10,7 +10,6 @@ import { CategoriaFormData } from '@/types/categoria';
 import { useClients } from '@/hooks/useClients';
 import { useGroups } from '@/hooks/useGroups';
 import { useSLAs } from '@/hooks/useSLAs';
-import { useUsers } from '@/hooks/useUsers';
 import { useCategorias } from '@/hooks/useCategorias';
 
 interface CategoriaFormFieldsProps {
@@ -21,7 +20,6 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
   const { clients } = useClients();
   const { groups } = useGroups();
   const { slas } = useSLAs();
-  const { users } = useUsers();
   const { categorias } = useCategorias();
 
   const tiposCategoria = [
@@ -219,35 +217,9 @@ const CategoriaFormFields = ({ form }: CategoriaFormFieldsProps) => {
 
       <FormField
         control={form.control}
-        name="usuario_responsavel_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Usuário Responsável</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o responsável" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
         name="ativo"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm md:col-span-2">
             <div className="space-y-0.5">
               <FormLabel>Categoria Ativa</FormLabel>
               <div className="text-sm text-muted-foreground">

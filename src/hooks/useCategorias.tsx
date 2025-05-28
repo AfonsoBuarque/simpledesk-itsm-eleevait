@@ -23,8 +23,7 @@ export const useCategorias = () => {
           categoria_pai:categorias_servico!categoria_pai_id(nome),
           cliente:clients(name),
           grupo:groups(name),
-          sla:slas(nome),
-          usuario_responsavel:users(name)
+          sla:slas(nome)
         `)
         .order('ordem_exibicao', { ascending: true });
 
@@ -34,7 +33,14 @@ export const useCategorias = () => {
       }
 
       console.log('Categorias fetched:', data);
-      return (data || []) as Categoria[];
+      
+      // Transform the data to match our Categoria interface
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        usuario_responsavel: null // We'll handle this separately if needed
+      })) as Categoria[];
+
+      return transformedData;
     },
   });
 
