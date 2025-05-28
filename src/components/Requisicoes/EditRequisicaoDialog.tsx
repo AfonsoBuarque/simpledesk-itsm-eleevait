@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
 import { useCategorias } from '@/hooks/useCategorias';
@@ -176,7 +177,81 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <SolicitacaoFormFields form={form} />
+            {/* Título - Read-only */}
+            <FormField
+              control={form.control}
+              name="titulo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título *</FormLabel>
+                  <FormControl>
+                    <Input {...field} readOnly className="bg-gray-50" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Descrição - Read-only */}
+            <FormField
+              control={form.control}
+              name="descricao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Input {...field} readOnly className="bg-gray-50" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Data Limite Resposta - Read-only */}
+            <FormField
+              control={form.control}
+              name="data_limite_resposta"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data Limite Resposta</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      type="datetime-local" 
+                      readOnly 
+                      className="bg-gray-50" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Data Limite Resolução - Read-only */}
+            <FormField
+              control={form.control}
+              name="data_limite_resolucao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data Limite Resolução</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      type="datetime-local" 
+                      readOnly 
+                      className="bg-gray-50" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Campos editáveis usando SolicitacaoFormFields, excluindo os read-only */}
+            <SolicitacaoFormFields 
+              form={form} 
+              excludeFields={['titulo', 'descricao', 'solicitante_id', 'data_limite_resposta', 'data_limite_resolucao']}
+            />
             
             <FileUpload
               onFilesChange={setAnexos}
