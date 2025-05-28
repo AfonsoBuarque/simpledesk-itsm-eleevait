@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -212,45 +213,46 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
               excludeFields={['titulo', 'descricao', 'solicitante_id', 'data_limite_resposta', 'data_limite_resolucao']}
             />
 
-            {/* Data Limite Resposta - Read-only - movido para depois de Notas Internas */}
-            <FormField
-              control={form.control}
-              name="data_limite_resposta"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data Limite Resposta</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field} 
-                      type="datetime-local" 
-                      readOnly 
-                      className="bg-gray-50" 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Data Limite Resposta e Data Limite Resolução - Read-only - lado a lado */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="data_limite_resposta"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data Limite Resposta</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="datetime-local" 
+                        readOnly 
+                        className="bg-gray-50" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Data Limite Resolução - Read-only - movido para depois de Notas Internas */}
-            <FormField
-              control={form.control}
-              name="data_limite_resolucao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data Limite Resolução</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field} 
-                      type="datetime-local" 
-                      readOnly 
-                      className="bg-gray-50" 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="data_limite_resolucao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data Limite Resolução</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="datetime-local" 
+                        readOnly 
+                        className="bg-gray-50" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <FileUpload
               onFilesChange={setAnexos}
