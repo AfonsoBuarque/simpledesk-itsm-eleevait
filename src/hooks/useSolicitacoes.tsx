@@ -65,7 +65,7 @@ export const useSolicitacoes = () => {
 
       const { data, error } = await supabase
         .from('solicitacoes')
-        .insert(insertData)
+        .insert(insertData as any)
         .select()
         .single();
 
@@ -123,7 +123,7 @@ export const useSolicitacoes = () => {
 
       const { data: updatedData, error } = await supabase
         .from('solicitacoes')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', id)
         .select()
         .single();
