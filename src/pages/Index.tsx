@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -10,6 +9,7 @@ import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
 import ClientManagement from '@/components/Clients/ClientManagement';
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
+import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -68,14 +68,7 @@ const Index = () => {
           </div>
         );
       case 'fabricantes':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Fabricantes</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-600">Gestão de fabricantes em desenvolvimento...</p>
-            </div>
-          </div>
-        );
+        return <FabricanteManagement />;
       case 'localizacao':
         return (
           <div className="space-y-6">

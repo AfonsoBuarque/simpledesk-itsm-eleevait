@@ -45,6 +45,33 @@ export type Database = {
         }
         Relationships: []
       }
+      fabricantes: {
+        Row: {
+          contato_suporte: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          pais_origem: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contato_suporte?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          pais_origem?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contato_suporte?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          pais_origem?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       groups: {
         Row: {
           client_id: string | null
