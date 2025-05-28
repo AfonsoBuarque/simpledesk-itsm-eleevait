@@ -37,12 +37,37 @@ const Header = ({
 }: HeaderProps) => {
   const { profile, signOut } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [userClient, setUserClient] = useState<string>('');
 
   useEffect(() => {
     if (profile?.id) {
       fetchNotifications();
+      fetchUserClient();
     }
   }, [profile?.id]);
+
+  const fetchUserClient = async () => {
+    try {
+      // Buscar dados do usuário na tabela users para obter o cliente
+      const { data: userData } = await supabase
+        .from('users')
+        .select(`
+          client_id,
+          clients:client_id(name)
+        `)
+        .eq('email', profile?.email)
+        .single();
+
+      if (userData?.clients?.name) {
+        setUserClient(userData.clients.name);
+      } else {
+        setUserClient('Sem cliente específico');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar cliente do usuário:', error);
+      setUserClient('Não informado');
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -113,7 +138,7 @@ const Header = ({
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-blue-600">SimpleDesk</h1>
           <Badge variant="secondary" className="text-xs">
-            {currentClient}
+            {userClient || 'Carregando...'}
           </Badge>
         </div>
       </div>
