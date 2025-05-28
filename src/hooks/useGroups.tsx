@@ -20,6 +20,9 @@ interface Group {
     name: string;
   };
   user_count?: number;
+  dias_semana?: number[];
+  inicio_turno?: string;
+  fim_turno?: string;
 }
 
 interface GroupFormData {
@@ -50,6 +53,9 @@ interface GroupFromDB {
     id: string;
     name: string;
   };
+  dia_semana?: number;
+  inicio_turno?: string;
+  fim_turno?: string;
 }
 
 const convertToGroup = (dbGroup: GroupFromDB & { user_count?: number }): Group => ({
@@ -59,7 +65,10 @@ const convertToGroup = (dbGroup: GroupFromDB & { user_count?: number }): Group =
     : 'active',
   client: dbGroup.clients,
   responsible_user: dbGroup.responsible_user,
-  user_count: dbGroup.user_count || 0
+  user_count: dbGroup.user_count || 0,
+  dias_semana: dbGroup.dia_semana ? [dbGroup.dia_semana] : [],
+  inicio_turno: dbGroup.inicio_turno,
+  fim_turno: dbGroup.fim_turno
 });
 
 export const useGroups = () => {
@@ -115,10 +124,14 @@ export const useGroups = () => {
       const { data, error } = await supabase
         .from('groups')
         .insert([{
-          ...groupData,
+          name: groupData.name,
+          description: groupData.description || undefined,
           client_id: groupData.client_id === 'none' ? null : groupData.client_id,
           responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
-          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null
+          status: groupData.status,
+          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null,
+          inicio_turno: groupData.inicio_turno || undefined,
+          fim_turno: groupData.fim_turno || undefined,
         }])
         .select(`
           *,
@@ -160,10 +173,14 @@ export const useGroups = () => {
       const { data, error } = await supabase
         .from('groups')
         .update({
-          ...groupData,
+          name: groupData.name,
+          description: groupData.description || undefined,
           client_id: groupData.client_id === 'none' ? null : groupData.client_id,
           responsible_user_id: groupData.responsible_user_id === 'none' ? null : groupData.responsible_user_id,
-          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null
+          status: groupData.status,
+          dia_semana: groupData.dias_semana && groupData.dias_semana.length > 0 ? groupData.dias_semana[0] : null,
+          inicio_turno: groupData.inicio_turno || undefined,
+          fim_turno: groupData.fim_turno || undefined,
         })
         .eq('id', id)
         .select(`
