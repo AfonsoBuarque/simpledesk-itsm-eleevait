@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -15,6 +14,7 @@ import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManage
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
 import AtivoManagement from '@/components/Ativos/AtivoManagement';
+import SLAManagement from '@/components/SLAs/SLAManagement';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -71,6 +71,8 @@ const Index = () => {
         return <GroupManagement />;
       case 'clients':
         return <ClientManagement />;
+      case 'sla-config':
+        return <SLAManagement />;
       default:
         return <DashboardOverview />;
     }

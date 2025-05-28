@@ -627,6 +627,89 @@ export type Database = {
         }
         Relationships: []
       }
+      slas: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string | null
+          atualizado_por: string | null
+          cliente_id: string | null
+          criado_em: string | null
+          criado_por: string | null
+          descricao: string | null
+          grupo_id: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          prioridade: string | null
+          tempo_resolucao_min: number
+          tempo_resposta_min: number
+          tipo_aplicacao: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          descricao?: string | null
+          grupo_id?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          prioridade?: string | null
+          tempo_resolucao_min: number
+          tempo_resposta_min: number
+          tipo_aplicacao: string
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          descricao?: string | null
+          grupo_id?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          prioridade?: string | null
+          tempo_resolucao_min?: number
+          tempo_resposta_min?: number
+          tipo_aplicacao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slas_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slas_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slas_grupo_id_fkey"
+            columns: ["grupo_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           assigned_to: string | null
