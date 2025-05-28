@@ -31,6 +31,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/portal" replace />;
   }
 
+  // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
   return <>{children}</>;
 };
 

@@ -18,6 +18,44 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async (userId: string) => {
+    try {
+      // Primeiro tentar buscar na tabela profiles
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (profileData) {
+        setProfile(profileData);
+        return;
+      }
+
+      // Se não encontrar na profiles, buscar na tabela users
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (userData) {
+        // Converter dados da tabela users para o formato Profile
+        const userProfile: Profile = {
+          id: userData.id,
+          full_name: userData.name,
+          email: userData.email,
+          role: userData.role,
+          department: userData.department,
+          phone: userData.phone,
+        };
+        setProfile(userProfile);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
   useEffect(() => {
     // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -27,17 +65,9 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Buscar perfil do usuário
-          setTimeout(async () => {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-            
-            if (profile) {
-              setProfile(profile);
-            }
+          // Buscar perfil do usuário de forma assíncrona
+          setTimeout(() => {
+            fetchProfile(session.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -53,16 +83,7 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data: profile }) => {
-            if (profile) {
-              setProfile(profile);
-            }
-          });
+        fetchProfile(session.user.id);
       }
       
       setLoading(false);
