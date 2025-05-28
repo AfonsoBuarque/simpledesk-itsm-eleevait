@@ -182,15 +182,19 @@ export const UserFormFields = ({ control, clients, groups = [] }: UserFormFields
         )}
       />
 
-      {groups.length > 0 && (
-        <FormField
-          control={control}
-          name="groups"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Grupos</FormLabel>
-              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
-                {groups.map((group) => (
+      <FormField
+        control={control}
+        name="groups"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Grupos</FormLabel>
+            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
+              {groups.length === 0 ? (
+                <div className="col-span-2 text-sm text-gray-500 text-center py-2">
+                  Nenhum grupo disponível
+                </div>
+              ) : (
+                groups.map((group) => (
                   <div key={group.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`group-${group.id}`}
@@ -211,13 +215,13 @@ export const UserFormFields = ({ control, clients, groups = [] }: UserFormFields
                       {group.name}
                     </label>
                   </div>
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+                ))
+              )}
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   );
 };
