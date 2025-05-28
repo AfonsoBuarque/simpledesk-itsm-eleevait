@@ -2,19 +2,16 @@
 import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface MenuItem {
   id: string;
   label: string;
   icon?: any;
-  badge?: string;
   children?: Array<{
     id: string;
     label: string;
     icon?: any;
-    badge?: string;
   }>;
 }
 
@@ -60,11 +57,6 @@ const SidebarMenuItem = ({
         {!isCollapsed && (
           <>
             <span className="flex-1">{item.label}</span>
-            {item.badge && (
-              <Badge variant="destructive" className="ml-2 text-xs">
-                {item.badge}
-              </Badge>
-            )}
             {item.children && (
               isExpanded 
                 ? <ChevronDown className="h-4 w-4" />
@@ -76,11 +68,6 @@ const SidebarMenuItem = ({
         {isCollapsed && (
           <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
             {item.label}
-            {item.badge && (
-              <Badge variant="destructive" className="ml-2 text-xs">
-                {item.badge}
-              </Badge>
-            )}
           </div>
         )}
       </Button>
@@ -101,11 +88,6 @@ const SidebarMenuItem = ({
             >
               {child.icon && <child.icon className="h-4 w-4 mr-3" />}
               <span className="flex-1">{child.label}</span>
-              {child.badge && (
-                <Badge variant="destructive" className="ml-2 text-xs">
-                  {child.badge}
-                </Badge>
-              )}
             </Button>
           ))}
         </div>
