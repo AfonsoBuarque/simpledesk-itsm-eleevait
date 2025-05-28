@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -59,7 +58,7 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
       phone: '',
       department: '',
       role: 'user',
-      client_id: '',
+      client_id: 'none',
       status: 'active',
     },
   });
@@ -72,7 +71,7 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
         phone: user.phone || '',
         department: user.department || '',
         role: user.role || 'user',
-        client_id: user.client_id || '',
+        client_id: user.client_id || 'none',
         status: user.status || 'active',
       });
     }
@@ -83,7 +82,7 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
       ...data,
       phone: data.phone || undefined,
       department: data.department || undefined,
-      client_id: data.client_id || undefined,
+      client_id: data.client_id === 'none' ? undefined : data.client_id,
     };
 
     const success = await updateUser(user.id, formData);
@@ -222,7 +221,7 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Sem cliente específico</SelectItem>
+                      <SelectItem value="none">Sem cliente específico</SelectItem>
                       {clients.map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.name}

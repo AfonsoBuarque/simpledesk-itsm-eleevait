@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,7 +57,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
       phone: '',
       department: '',
       role: 'user',
-      client_id: '',
+      client_id: 'none',
       status: 'active',
     },
   });
@@ -71,7 +70,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
       status: data.status,
       phone: data.phone || undefined,
       department: data.department || undefined,
-      client_id: data.client_id || undefined,
+      client_id: data.client_id === 'none' ? undefined : data.client_id,
     };
 
     const success = await addUser(formData);
@@ -211,7 +210,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Sem cliente específico</SelectItem>
+                      <SelectItem value="none">Sem cliente específico</SelectItem>
                       {clients.map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.name}
