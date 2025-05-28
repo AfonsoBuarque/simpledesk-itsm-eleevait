@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
 interface HeaderProps {
   onMenuClick: () => void;
   currentClient?: string;
@@ -14,6 +17,16 @@ interface HeaderProps {
   isSidebarOpen?: boolean;
   onCloseSidebar?: () => void;
 }
+
+interface Notification {
+  id: string;
+  titulo: string;
+  numero: string;
+  status: string;
+  prioridade: string;
+  criado_em: string;
+}
+
 const Header = ({
   onMenuClick,
   currentClient = "TechCorp",
@@ -22,14 +35,44 @@ const Header = ({
   isSidebarOpen = false,
   onCloseSidebar
 }: HeaderProps) => {
-  const {
-    profile,
-    signOut
-  } = useAuth();
+  const { profile, signOut } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    if (profile?.id) {
+      fetchNotifications();
+    }
+  }, [profile?.id]);
+
+  const fetchNotifications = async () => {
+    try {
+      // Buscar grupos do usuário
+      const { data: userGroups } = await supabase
+        .from('user_groups')
+        .select('group_id')
+        .eq('user_id', profile?.id);
+
+      const groupIds = userGroups?.map(ug => ug.group_id) || [];
+
+      // Buscar tickets onde o usuário é atendente OU faz parte do grupo responsável
+      const { data: tickets } = await supabase
+        .from('solicitacoes')
+        .select('id, titulo, numero, status, prioridade, criado_em')
+        .or(`atendente_id.eq.${profile?.id},grupo_responsavel_id.in.(${groupIds.join(',')})`)
+        .in('status', ['aberta', 'em_andamento', 'pendente'])
+        .order('criado_em', { ascending: false })
+        .limit(10);
+
+      if (tickets) {
+        setNotifications(tickets);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+    }
+  };
+
   const handleSignOut = async () => {
-    const {
-      error
-    } = await signOut();
+    const { error } = await signOut();
     if (error) {
       toast({
         title: "Erro",
@@ -43,7 +86,19 @@ const Header = ({
       });
     }
   };
-  return <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+
+  const getNotificationText = (notification: Notification) => {
+    if (notification.prioridade === 'critica') {
+      return `Ticket crítico: ${notification.numero}`;
+    }
+    if (notification.status === 'aberta') {
+      return `Novo ticket: ${notification.numero}`;
+    }
+    return `Ticket pendente: ${notification.numero}`;
+  };
+
+  return (
+    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
         {/* Mobile menu toggle - shows X when sidebar is open, Menu when closed */}
         <Button variant="ghost" size="sm" onClick={isSidebarOpen && onCloseSidebar ? onCloseSidebar : onMenuClick} className="lg:hidden">
@@ -75,26 +130,32 @@ const Header = ({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-red-500">
-                3
-              </Badge>
+              {notifications.length > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-red-500">
+                  {notifications.length}
+                </Badge>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel>Notificações</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">SLA em risco</p>
-                <p className="text-xs text-gray-600">Ticket #INC001234 - 2h restantes</p>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">Novo ticket atribuído</p>
-                <p className="text-xs text-gray-600">REQ001235 - Acesso ao sistema</p>
-              </div>
-            </DropdownMenuItem>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <DropdownMenuItem key={notification.id}>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">{getNotificationText(notification)}</p>
+                    <p className="text-xs text-gray-600">{notification.titulo}</p>
+                  </div>
+                </DropdownMenuItem>
+              ))
+            ) : (
+              <DropdownMenuItem>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-gray-600">Nenhuma notificação</p>
+                </div>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -125,6 +186,8 @@ const Header = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Header;
