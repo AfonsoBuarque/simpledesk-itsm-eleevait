@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
+import { useCategorias } from '@/hooks/useCategorias';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -46,6 +47,7 @@ interface NewRequisicaoDialogProps {
 
 export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProps) => {
   const { createRequisicao } = useRequisicoes();
+  const { categorias } = useCategorias();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -60,6 +62,47 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
       canal_origem: 'portal',
     },
   });
+
+  // Observar mudanças no campo categoria_id
+  const categoriaId = form.watch('categoria_id');
+
+  useEffect(() => {
+    if (categoriaId && categorias.length > 0) {
+      console.log('Categoria selecionada:', categoriaId);
+      
+      // Encontrar a categoria selecionada
+      const categoriaSelecionada = categorias.find(cat => cat.id === categoriaId);
+      
+      if (categoriaSelecionada) {
+        console.log('Dados da categoria:', categoriaSelecionada);
+        
+        // Preencher automaticamente os campos baseados na categoria
+        const updates: Partial<SolicitacaoFormData> = {};
+        
+        if (categoriaSelecionada.cliente_id) {
+          updates.cliente_id = categoriaSelecionada.cliente_id;
+          console.log('Preenchendo cliente_id:', categoriaSelecionada.cliente_id);
+        }
+        
+        if (categoriaSelecionada.sla_id) {
+          updates.sla_id = categoriaSelecionada.sla_id;
+          console.log('Preenchendo sla_id:', categoriaSelecionada.sla_id);
+        }
+        
+        if (categoriaSelecionada.grupo_id) {
+          updates.grupo_responsavel_id = categoriaSelecionada.grupo_id;
+          console.log('Preenchendo grupo_responsavel_id:', categoriaSelecionada.grupo_id);
+        }
+        
+        // Aplicar as atualizações ao formulário
+        if (Object.keys(updates).length > 0) {
+          Object.entries(updates).forEach(([key, value]) => {
+            form.setValue(key as keyof SolicitacaoFormData, value);
+          });
+        }
+      }
+    }
+  }, [categoriaId, categorias, form]);
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
