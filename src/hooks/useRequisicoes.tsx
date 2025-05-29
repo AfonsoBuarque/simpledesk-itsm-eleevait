@@ -49,14 +49,16 @@ export const useRequisicoes = () => {
     mutationFn: async (data: SolicitacaoFormData) => {
       console.log('Creating requisição:', data);
       
+      // Preparar dados removendo campos que serão gerados automaticamente
+      const { anexos, ativos_envolvidos, tags, ...restData } = data;
+      
       const requisicaoData = {
-        ...data,
+        ...restData,
         tipo: 'requisicao' as const,
-        // Não incluir numero - será gerado automaticamente pelo trigger
-        // Converter anexos para JSON se existir
-        anexos: data.anexos ? JSON.stringify(data.anexos) : null,
-        ativos_envolvidos: data.ativos_envolvidos ? JSON.stringify(data.ativos_envolvidos) : null,
-        tags: data.tags ? JSON.stringify(data.tags) : null,
+        // Converter arrays para JSON se existirem
+        ...(anexos && { anexos: JSON.stringify(anexos) }),
+        ...(ativos_envolvidos && { ativos_envolvidos: JSON.stringify(ativos_envolvidos) }),
+        ...(tags && { tags: JSON.stringify(tags) }),
       };
 
       const { data: result, error } = await supabase
@@ -96,11 +98,14 @@ export const useRequisicoes = () => {
       console.log('Updating requisição:', id, data);
       
       // Preparar dados para atualização, convertendo arrays para JSON
+      const { anexos, ativos_envolvidos, tags, ...restData } = data;
+      
       const updateData = {
-        ...data,
-        anexos: data.anexos ? JSON.stringify(data.anexos) : undefined,
-        ativos_envolvidos: data.ativos_envolvidos ? JSON.stringify(data.ativos_envolvidos) : undefined,
-        tags: data.tags ? JSON.stringify(data.tags) : undefined,
+        ...restData,
+        // Converter arrays para JSON apenas se estiverem presentes
+        ...(anexos !== undefined && { anexos: anexos ? JSON.stringify(anexos) : null }),
+        ...(ativos_envolvidos !== undefined && { ativos_envolvidos: ativos_envolvidos ? JSON.stringify(ativos_envolvidos) : null }),
+        ...(tags !== undefined && { tags: tags ? JSON.stringify(tags) : null }),
       };
 
       const { data: result, error } = await supabase
