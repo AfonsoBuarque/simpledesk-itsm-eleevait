@@ -53,7 +53,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Login realizado com sucesso!",
-          description: "Bem-vindo ao ServiceMaster ITSM.",
+          description: "Bem-vindo ao SimpleDesk ITSM.",
         });
         navigate('/');
       }
@@ -115,7 +115,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Cadastro realizado com sucesso!",
-          description: "Bem-vindo ao ServiceMaster ITSM.",
+          description: "Bem-vindo ao SimpleDesk ITSM.",
         });
         navigate('/');
       }
@@ -138,7 +138,7 @@ const Auth = () => {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <AlertTriangle className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-blue-600">ServiceMaster ITSM</h1>
+            <h1 className="text-2xl font-bold text-blue-600">SimpleDesk ITSM</h1>
           </div>
           <p className="text-gray-600">Plataforma de Gestão de Serviços de TI</p>
         </div>
