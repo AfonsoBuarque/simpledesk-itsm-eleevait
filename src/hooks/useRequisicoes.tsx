@@ -52,6 +52,11 @@ export const useRequisicoes = () => {
       const requisicaoData = {
         ...data,
         tipo: 'requisicao' as const,
+        // Não incluir numero - será gerado automaticamente pelo trigger
+        // Converter anexos para JSON se existir
+        anexos: data.anexos ? JSON.stringify(data.anexos) : null,
+        ativos_envolvidos: data.ativos_envolvidos ? JSON.stringify(data.ativos_envolvidos) : null,
+        tags: data.tags ? JSON.stringify(data.tags) : null,
       };
 
       const { data: result, error } = await supabase
@@ -90,9 +95,17 @@ export const useRequisicoes = () => {
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Updating requisição:', id, data);
       
+      // Preparar dados para atualização, convertendo arrays para JSON
+      const updateData = {
+        ...data,
+        anexos: data.anexos ? JSON.stringify(data.anexos) : undefined,
+        ativos_envolvidos: data.ativos_envolvidos ? JSON.stringify(data.ativos_envolvidos) : undefined,
+        tags: data.tags ? JSON.stringify(data.tags) : undefined,
+      };
+
       const { data: result, error } = await supabase
         .from('solicitacoes')
-        .update(data)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
