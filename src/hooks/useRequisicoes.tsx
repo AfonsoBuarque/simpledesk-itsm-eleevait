@@ -55,6 +55,7 @@ export const useRequisicoes = () => {
       const requisicaoData = {
         ...restData,
         tipo: 'requisicao' as const,
+        numero: '', // Valor temporário - será gerado pelo trigger
         // Converter arrays para JSON se existirem
         ...(anexos && { anexos: JSON.stringify(anexos) }),
         ...(ativos_envolvidos && { ativos_envolvidos: JSON.stringify(ativos_envolvidos) }),
