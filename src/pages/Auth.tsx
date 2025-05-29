@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -165,7 +166,7 @@ const Auth = () => {
         <div className="relative z-10 flex flex-col justify-center h-full px-16 text-white">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2">
+              <div className="w-12 h-12 flex items-center justify-center">
                 <img 
                   src="/lovable-uploads/4c57429c-8e5a-4e57-b3b8-da1a8b7b7909.png" 
                   alt="SimpleDesk Logo" 
