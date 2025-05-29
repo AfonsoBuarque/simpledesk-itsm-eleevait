@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -166,8 +165,12 @@ const Auth = () => {
         <div className="relative z-10 flex flex-col justify-center h-full px-16 text-white">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-blue-600 rounded-full"></div>
+              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2">
+                <img 
+                  src="/lovable-uploads/4c57429c-8e5a-4e57-b3b8-da1a8b7b7909.png" 
+                  alt="SimpleDesk Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="text-xl font-semibold">SimpleDesk</span>
             </div>
