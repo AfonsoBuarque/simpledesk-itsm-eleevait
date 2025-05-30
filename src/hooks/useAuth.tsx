@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,7 +46,7 @@ export const useAuth = () => {
         return;
       }
 
-      // Se não encontrar na profiles, buscar na tabela users
+      // Se não encontrar na profiles, buscar na tabela users (sem joins problemáticos)
       console.log('Trying to fetch from users table...');
       const { data: userData, error: userError } = await supabase
         .from('users')
