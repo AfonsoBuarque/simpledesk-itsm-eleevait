@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,24 +47,44 @@ const Header = ({
 
   const fetchUserClient = async () => {
     try {
-      // Buscar dados do usuário na tabela users para obter o cliente
-      const { data: userData } = await supabase
+      console.log('Fetching user client for profile:', profile?.email);
+      
+      // Primeiro buscar dados do usuário na tabela users
+      const { data: userData, error: userError } = await supabase
         .from('users')
-        .select(`
-          client_id,
-          clients:client_id(name)
-        `)
+        .select('client_id')
         .eq('email', profile?.email)
         .single();
 
-      if (userData?.clients?.name) {
-        setUserClient(userData.clients.name);
+      console.log('User data result:', { userData, userError });
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        setUserClient('Não informado');
+        return;
+      }
+
+      // Se tem client_id, buscar o nome do cliente
+      if (userData?.client_id) {
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('name')
+          .eq('id', userData.client_id)
+          .single();
+
+        console.log('Client data result:', { clientData, clientError });
+
+        if (clientData && !clientError) {
+          setUserClient(clientData.name);
+        } else {
+          setUserClient('Cliente não encontrado');
+        }
       } else {
         setUserClient('Sem cliente específico');
       }
     } catch (error) {
       console.error('Erro ao buscar cliente do usuário:', error);
-      setUserClient('Não informado');
+      setUserClient('Erro ao carregar');
     }
   };
 
