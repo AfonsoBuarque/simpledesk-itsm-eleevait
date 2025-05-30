@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,16 +30,12 @@ export const useAuth = () => {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Usando maybeSingle() ao invés de single()
 
       console.log('Resultado da busca de perfil:', { userData, userError });
 
-      if (userError) {
-        console.error('Erro ao buscar dados do usuário:', userError);
-        throw userError;
-      }
-
-      if (userData) {
+      // Se encontrou dados na tabela users e não houve erro, use esses dados
+      if (userData && !userError) {
         console.log('Perfil encontrado na tabela users:', userData);
         setProfile({
           id: userData.id,
@@ -54,20 +49,16 @@ export const useAuth = () => {
         return;
       }
 
-      // Fallback para a tabela profiles se não encontrar em users
+      // Se não encontrou na users, tenta na profiles
       console.log('Buscando na tabela profiles...');
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Usando maybeSingle() ao invés de single()
 
-      if (profileError) {
-        console.error('Erro ao buscar perfil:', profileError);
-        throw profileError;
-      }
-
-      if (profileData) {
+      // Se encontrou dados na tabela profiles e não houve erro, use esses dados
+      if (profileData && !profileError) {
         console.log('Perfil encontrado na tabela profiles:', profileData);
         setProfile({
           id: profileData.id,
