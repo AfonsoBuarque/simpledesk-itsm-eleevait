@@ -30,7 +30,7 @@ const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   
   if (profile && profile.role !== 'user') {
     console.log('Redirecionando para home - usuário não é comum');
-    return <Navigate to="/" replace />;
+    return <Navigate to="/\" replace />;
   }
 
   console.log('Permitindo acesso ao portal de usuário');

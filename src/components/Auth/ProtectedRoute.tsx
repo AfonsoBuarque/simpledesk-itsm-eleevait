@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     
     if (profile && profile.role === 'user') {
       console.log('Redirecionando para portal - usuário comum');
-      return <Navigate to="/portal" replace />;
+      return <Navigate to="/portal\" replace />;
     }
 
     // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
