@@ -21,7 +21,7 @@ export const useAuth = () => {
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
-      console.log('Fetching profile for user:', userId, 'with email:', userEmail);
+      console.log('Iniciando busca de perfil para usuário:', userId);
       
       // Buscar dados da tabela users (fonte principal)
       const { data: userData, error: userError } = await supabase
@@ -34,9 +34,9 @@ export const useAuth = () => {
           )
         `)
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
-      console.log('Users query result:', { userData, userError });
+      console.log('Resultado da consulta de usuário:', userData ? 'Dados encontrados' : 'Nenhum dado');
       
       if (userData && !userError) {
         console.log('Profile found in users table:', userData);
@@ -56,10 +56,10 @@ export const useAuth = () => {
       // Fallback para a tabela profiles se não encontrar em users
       console.log('Trying to fetch from profiles table...');
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
+        .from('users')
+        .select('id, name as full_name, email, role, department, phone, client_id')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       console.log('Profile query result:', { profileData, profileError });
       
@@ -68,19 +68,37 @@ export const useAuth = () => {
         setProfile({
           id: profileData.id,
           full_name: profileData.full_name,
-          email: profileData.email || userEmail,
-          role: profileData.role,
-          department: profileData.department,
-          phone: profileData.phone,
-          client_id: null,
+          email: profileData.email || userEmail || '',
+          role: profileData.role || 'user',
+          department: profileData.department || null,
+          phone: profileData.phone || null,
+          client_id: profileData.client_id || null,
         });
       } else {
-        console.log('No profile found for user:', userId);
-        setProfile(null);
+        console.log('Nenhum perfil encontrado, criando perfil padrão');
+        // Criar um perfil padrão para evitar loop infinito
+        setProfile({
+          id: userId,
+          full_name: null,
+          email: userEmail,
+          role: 'user',
+          department: null,
+          phone: null,
+          client_id: null,
+        });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      setProfile(null);
+      // Criar um perfil padrão para evitar loop infinito
+      setProfile({
+        id: userId,
+        full_name: null,
+        email: userEmail,
+        role: 'user',
+        department: null,
+        phone: null,
+        client_id: null,
+      });
     }
   }, []);
 

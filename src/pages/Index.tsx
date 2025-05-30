@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
+import { Loader2 } from 'lucide-react';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
@@ -15,9 +16,11 @@ import GroupManagement from '@/components/Groups/GroupManagement';
 import ClientManagement from '@/components/Clients/ClientManagement';
 import CategoriaManagement from '@/components/Categorias/CategoriaManagement';
 import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
+import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
+  const { loading } = useAuth();
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -61,6 +64,18 @@ const Index: React.FC = () => {
         return <DashboardOverview />;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-lg font-medium text-gray-900">Carregando...</p>
+          <p className="text-sm text-gray-500">Aguarde enquanto preparamos o sistema</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
