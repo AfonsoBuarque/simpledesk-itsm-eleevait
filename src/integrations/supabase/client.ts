@@ -2,11 +2,18 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Usando valores fixos para evitar problemas com variáveis de ambiente
-const SUPABASE_URL = "https://idctavngatyyileoitgz.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkY3Rhdm5nYXR5eWlsZW9pdGd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzOTUyMTYsImV4cCI6MjA2Mzk3MTIxNn0.RJVZcUzCn03Jp4K1eIuP2kjT5zV-1sFnDfoZNvB7UK0";
+// Obter valores do ambiente ou usar valores padrão
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://idctavngatyyileoitgz.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkY3Rhdm5nYXR5eWlsZW9pdGd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzOTUyMTYsImV4cCI6MjA2Mzk3MTIxNn0.RJVZcUzCn03Jp4K1eIuP2kjT5zV-1sFnDfoZNvB7UK0";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storageKey: 'supabase.auth.token'
+  }
+});

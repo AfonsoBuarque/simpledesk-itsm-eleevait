@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface Profile {
   id: string;
@@ -22,14 +22,23 @@ export const useAuth = () => {
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
       console.log('Fetching profile for user:', userId, 'with email:', userEmail);
+      let profileFound = false;
       
       // Primeiro, tentar buscar na tabela users
       try {
         const { data: userData, error: userError } = await supabase
           .from('users')
-          .select('*')
+          .select(`
+            *,
+            clients:client_id (
+              id,
+              name
+            )
+          `)
           .eq('id', userId)
           .maybeSingle();
+
+        console.log('Users query result:', { userData, userError });
 
         if (userData) {
           console.log('Profile found in users table:', userData);
@@ -43,13 +52,55 @@ export const useAuth = () => {
             client_id: userData.client_id || null,
           };
           setProfile(userProfile);
+          profileFound = true;
           return;
         }
       } catch (userQueryError) {
         console.error('Error querying users table:', userQueryError);
       }
 
-      // Se não encontrou na tabela users, tentar na tabela profiles
+      // Se não encontrou na tabela users, tentar inserir um novo registro
+      if (!profileFound) {
+        try {
+          console.log('Trying to insert new user record');
+          const { data: insertData, error: insertError } = await supabase.auth.getSession();
+          
+          if (insertData?.session) {
+            const { data: newUser, error: createError } = await supabase
+              .from('users')
+              .insert({
+                id: userId,
+                email: userEmail,
+                name: userEmail.split('@')[0],
+                role: 'user',
+                status: 'active'
+              })
+              .select()
+              .single();
+              
+            if (newUser && !createError) {
+              console.log('Created new user record:', newUser);
+              setProfile({
+                id: newUser.id,
+                full_name: newUser.name,
+                email: newUser.email,
+                role: newUser.role || 'user',
+                department: newUser.department,
+                phone: newUser.phone,
+                client_id: newUser.client_id || null,
+              });
+              profileFound = true;
+              return;
+            } else {
+              console.error('Error inserting user record:', createError);
+            }
+          }
+        } catch (insertError) {
+          console.error('Exception inserting user record:', insertError);
+        }
+      }
+      
+      // Como último recurso, tentar na tabela profiles
       try {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -68,17 +119,18 @@ export const useAuth = () => {
             phone: profileData.phone,
             client_id: null,
           });
+          profileFound = true;
           return;
         }
       } catch (profileQueryError) {
         console.error('Error querying profiles table:', profileQueryError);
       }
       
-      // Se não encontrou em nenhuma tabela, criar um perfil básico
-      console.log('No profile found, creating basic profile for:', userId);
+      // Se não encontrou em nenhuma tabela, definir um perfil básico em memória
+      console.log('No profile found in any table, using basic profile for:', userId);
       setProfile({
         id: userId,
-        full_name: null,
+        full_name: userEmail.split('@')[0],
         email: userEmail,
         role: 'user',
         department: null,
@@ -90,7 +142,7 @@ export const useAuth = () => {
       // Definir um perfil básico mesmo em caso de erro
       setProfile({
         id: userId,
-        full_name: null,
+        full_name: userEmail.split('@')[0],
         email: userEmail,
         role: 'user',
         department: null,
@@ -104,6 +156,7 @@ export const useAuth = () => {
     let mounted = true;
     let initialLoad = true;
     let loadingTimeout: NodeJS.Timeout;
+    let authCheckTimeout: NodeJS.Timeout;
 
     console.log('Setting up auth state listener');
 
@@ -113,6 +166,7 @@ export const useAuth = () => {
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (!mounted) return;
+        clearTimeout(authCheckTimeout);
 
         setSession(session);
         setUser(session?.user ?? null);
@@ -144,7 +198,7 @@ export const useAuth = () => {
           if (mounted && loading) {
             console.log('Loading timeout reached, forcing loading to false');
             setLoading(false);
-          }
+          } 
         }, 3000);
 
         console.log('Checking for existing session');
@@ -153,6 +207,7 @@ export const useAuth = () => {
         if (error) throw error;
         if (!mounted) return;
 
+        console.log('Initial session:', session?.user?.id);
         console.log('Initial user details:', session?.user);
         setSession(session);
         setUser(session?.user ?? null);
@@ -160,12 +215,22 @@ export const useAuth = () => {
         try {
           if (session?.user && mounted) {
             await fetchProfile(session.user.id, session.user.email || '');
+            clearTimeout(loadingTimeout); // Limpar timeout se o perfil foi carregado com sucesso
           } else {
             setProfile(null);
           }
         } catch (error) {
           console.error('Error fetching profile in getInitialSession:', error);
           setProfile(null);
+        }
+
+        // Definir um timeout para verificar novamente a sessão se o perfil não foi carregado
+        if (!profile && session?.user) {
+          authCheckTimeout = setTimeout(async () => {
+            if (mounted && session?.user && !profile) {
+              await fetchProfile(session.user.id, session.user.email || '');
+            }
+          }, 2000);
         }
         
         if (mounted) {
@@ -187,6 +252,7 @@ export const useAuth = () => {
       console.log('Cleaning up auth listener');
       mounted = false;
       clearTimeout(loadingTimeout);
+      clearTimeout(authCheckTimeout);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
@@ -197,6 +263,7 @@ export const useAuth = () => {
       
       // Validação de entrada
       if (!email) {
+        console.error('Email é obrigatório');
         toast({
           title: "Erro",
           description: "Email é obrigatório",
@@ -206,6 +273,7 @@ export const useAuth = () => {
       }
       
       if (!password) {
+        console.error('Senha é obrigatória');
         toast({
           title: "Erro",
           description: "Senha é obrigatória",
@@ -215,6 +283,7 @@ export const useAuth = () => {
       }
 
       if (!email.includes('@')) {
+        console.error('Email inválido');
         toast({
           title: "Erro",
           description: "Email inválido",
@@ -223,20 +292,20 @@ export const useAuth = () => {
         return { data: null, error: { message: 'Email inválido' } };
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const result = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
-      console.log('Sign in response:', { data, error });
+      console.log('Sign in response:', result);
 
-      if (error) {
-        console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
+      if (result.error) {
+        console.warn('Failed login attempt:', { email: email.trim(), error: result.error.message });
         toast({
           title: "Erro de Login",
-          description: error.message === "Invalid login credentials" 
+          description: result.error.message === "Invalid login credentials" 
             ? "Email ou senha incorretos" 
-            : error.message,
+            : result.error.message,
           variant: "destructive",
         });
       } else {
@@ -247,7 +316,7 @@ export const useAuth = () => {
         });
       }
 
-      return { data, error };
+      return result;
     } catch (error) {
       console.error('Unexpected signin error:', error);
       toast({
@@ -265,6 +334,7 @@ export const useAuth = () => {
       
       // Validação de entrada
       if (!email) {
+        console.error('Email é obrigatório');
         toast({
           title: "Erro",
           description: "Email é obrigatório",
@@ -274,6 +344,7 @@ export const useAuth = () => {
       }
       
       if (!password) {
+        console.error('Senha é obrigatória');
         toast({
           title: "Erro",
           description: "Senha é obrigatória",
@@ -283,6 +354,7 @@ export const useAuth = () => {
       }
       
       if (!fullName) {
+        console.error('Nome completo é obrigatório');
         toast({
           title: "Erro",
           description: "Nome completo é obrigatório",
@@ -292,6 +364,7 @@ export const useAuth = () => {
       }
 
       if (!email.includes('@')) {
+        console.error('Email inválido');
         toast({
           title: "Erro",
           description: "Email inválido",
@@ -301,6 +374,7 @@ export const useAuth = () => {
       }
 
       if (password.length < 8) {
+        console.error('Senha deve ter pelo menos 8 caracteres');
         toast({
           title: "Erro",
           description: "Senha deve ter pelo menos 8 caracteres",
@@ -315,6 +389,7 @@ export const useAuth = () => {
       const hasNumbers = /\d/.test(password);
       
       if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+        console.error('Senha deve conter pelo menos uma letra maiúscula, minúscula e um número');
         toast({
           title: "Erro",
           description: "Senha deve conter pelo menos uma letra maiúscula, minúscula e um número",
@@ -332,7 +407,7 @@ export const useAuth = () => {
 
       const redirectUrl = `${window.location.origin}/`;
 
-      const { data, error } = await supabase.auth.signUp({
+      const result = await supabase.auth.signUp({
         email: sanitizedEmail,
         password,
         options: {
@@ -343,7 +418,7 @@ export const useAuth = () => {
         },
       });
 
-      if (!error) {
+      if (!result.error) {
         console.log('Sign up successful');
         toast({
           title: "Cadastro realizado com sucesso",
@@ -352,12 +427,12 @@ export const useAuth = () => {
       } else {
         toast({
           title: "Erro no cadastro",
-          description: error.message,
+          description: result.error.message,
           variant: "destructive",
         });
       }
-
-      return { data, error };
+      
+      return result;
     } catch (error) {
       console.error('Unexpected signup error:', error);
       toast({
@@ -372,7 +447,7 @@ export const useAuth = () => {
   const signOut = async () => {
     try {
       console.log('Attempting sign out');
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
       if (!error) {
         // Limpar estado local
         setUser(null);
@@ -384,6 +459,7 @@ export const useAuth = () => {
         });
         console.log('Sign out successful');
       }
+      
       return { error };
     } catch (error) {
       console.error('Unexpected signout error:', error);
