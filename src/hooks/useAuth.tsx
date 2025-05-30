@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,9 +18,9 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
-      console.log('Fetching profile for user:', userId);
+      console.log('Fetching profile for user:', userId, 'with email:', userEmail);
       
       // Primeiro tentar buscar na tabela profiles
       const { data: profileData, error: profileError } = await supabase
@@ -37,7 +36,7 @@ export const useAuth = () => {
         setProfile({
           id: profileData.id,
           full_name: profileData.full_name,
-          email: profileData.email,
+          email: userEmail, // Usar o email da sessão de autenticação
           role: profileData.role,
           department: profileData.department,
           phone: profileData.phone,
@@ -61,7 +60,7 @@ export const useAuth = () => {
         const userProfile: Profile = {
           id: userData.id,
           full_name: userData.name,
-          email: userData.email,
+          email: userEmail, // Usar o email da sessão de autenticação
           role: userData.role,
           department: userData.department,
           phone: userData.phone,
@@ -96,7 +95,7 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user && mounted) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user.id, session.user.email || '');
         } else {
           setProfile(null);
         }
@@ -127,7 +126,7 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user && mounted) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user.id, session.user.email || '');
         } else {
           setProfile(null);
         }
