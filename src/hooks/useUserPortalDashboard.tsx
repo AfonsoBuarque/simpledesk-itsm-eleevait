@@ -9,43 +9,31 @@ export const useUserPortalDashboard = () => {
   const { data: userTickets = [], isLoading: loadingTickets } = useQuery({
     queryKey: ['user-portal-tickets', user?.id],
     queryFn: async () => {
-      if (!user?.id) {
-        console.log('No user ID available for fetching tickets');
-        return [];
-      }
+      if (!user?.id) return [];
       
       console.log('Fetching tickets for user:', user.id);
-      
-      try {
-        const { data, error } = await supabase
-          .from('solicitacoes')
-          .select(`
-            *,
-            categoria:categorias_servico(nome),
-            sla:slas(nome),
-            cliente:clients(name),
-            grupo_responsavel:groups(name),
-            atendente:users!solicitacoes_atendente_id_fkey(name)
-          `)
-          .eq('solicitante_id', user.id)
-          .order('criado_em', { ascending: false });
+      const { data, error } = await supabase
+        .from('solicitacoes')
+        .select(`
+          *,
+          categoria:categorias_servico(nome),
+          sla:slas(nome),
+          cliente:clients(name),
+          grupo_responsavel:groups(name),
+          atendente:users!solicitacoes_atendente_id_fkey(name)
+        `)
+        .eq('solicitante_id', user.id)
+        .order('criado_em', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching user tickets:', error);
-          throw error;
-        }
-
-        console.log('User tickets fetched successfully:', data?.length || 0, 'tickets');
-        console.log('Tickets data:', data);
-        return data || [];
-      } catch (error) {
-        console.error('Exception while fetching tickets:', error);
+      if (error) {
+        console.error('Error fetching user tickets:', error);
         throw error;
       }
+
+      console.log('User tickets fetched:', data);
+      return data || [];
     },
     enabled: !!user?.id,
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Calcular métricas

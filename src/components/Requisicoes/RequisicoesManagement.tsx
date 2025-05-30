@@ -1,174 +1,58 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Plus, HelpCircle } from 'lucide-react';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
-import RequisicoesTable from './RequisicoesTable';
-import RequisicoesStatsCards from './RequisicoesStatsCards';
+import { Solicitacao } from '@/types/solicitacao';
 import { NewRequisicaoDialog } from './NewRequisicaoDialog';
 import { EditRequisicaoDialog } from './EditRequisicaoDialog';
-import { Solicitacao } from '@/types/solicitacao';
+import RequisicoesStatsCards from './RequisicoesStatsCards';
+import RequisicoesTable from './RequisicoesTable';
 
 const RequisicoesManagement = () => {
-  const { requisicoes, isLoading, error } = useRequisicoes();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [isNewRequisicaoDialogOpen, setIsNewRequisicaoDialogOpen] = useState(false);
-  const [isEditRequisicaoDialogOpen, setIsEditRequisicaoDialogOpen] = useState(false);
-  const [selectedRequisicao, setSelectedRequisicao] = useState<Solicitacao | null>(null);
-
-  console.log('🎫 RequisicoesManagement render:', {
-    requisicoes: requisicoes.length,
-    isLoading,
-    error: error?.message
-  });
-
-  useEffect(() => {
-    console.log('🔄 RequisicoesManagement mounted');
-    return () => {
-      console.log('🔄 RequisicoesManagement unmounted');
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log('📊 RequisicoesManagement data update:', {
-      requisicoes: requisicoes.length,
-      isLoading,
-      hasError: !!error
-    });
-  }, [requisicoes.length, isLoading, error]);
-
-  const filteredRequisicoes = useMemo(() => {
-    return requisicoes.filter((req) => {
-      const matchesSearch = req.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           req.numero?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           req.solicitante?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = !statusFilter || req.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    });
-  }, [requisicoes, searchTerm, statusFilter]);
-
-  const handleEditRequisicao = (requisicao: Solicitacao) => {
-    setSelectedRequisicao(requisicao);
-    setIsEditRequisicaoDialogOpen(true);
-  };
-
-  const handleNewRequisicao = () => {
-    setIsNewRequisicaoDialogOpen(true);
-  };
+  const { requisicoes, isLoading } = useRequisicoes();
+  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
+  const [editingRequisicao, setEditingRequisicao] = useState<Solicitacao | null>(null);
 
   if (isLoading) {
-    console.log('⏳ RequisicoesManagement is loading...');
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Gerenciamento de Requisições</h1>
-            <p className="text-gray-600 mt-2">
-              Gerencie todas as requisições de serviço do sistema
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center justify-center py-8">
-          <div className="text-lg">Carregando requisições...</div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Carregando requisições...</div>
       </div>
     );
   }
-
-  if (error) {
-    console.log('❌ RequisicoesManagement has error:', error);
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Gerenciamento de Requisições</h1>
-            <p className="text-gray-600 mt-2">
-              Gerencie todas as requisições de serviço do sistema
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center justify-center py-8">
-          <div className="text-lg text-red-500">Erro ao carregar requisições: {error.message}</div>
-        </div>
-      </div>
-    );
-  }
-
-  console.log('✅ RequisicoesManagement rendering content with', requisicoes.length, 'requisições');
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Gerenciamento de Requisições</h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie todas as requisições de serviço do sistema
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <HelpCircle className="h-6 w-6" />
+          <h1 className="text-2xl font-bold">Requisições</h1>
         </div>
-        <Button onClick={handleNewRequisicao}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button onClick={() => setIsNewDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
           Nova Requisição
         </Button>
       </div>
 
       <RequisicoesStatsCards requisicoes={requisicoes} />
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6">
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar por título, número ou solicitante..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="w-48">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Todos os status</option>
-                <option value="aberta">Aberta</option>
-                <option value="em_andamento">Em Andamento</option>
-                <option value="aguardando_usuario">Aguardando Usuário</option>
-                <option value="resolvida">Resolvida</option>
-                <option value="fechada">Fechada</option>
-                <option value="cancelada">Cancelada</option>
-              </select>
-            </div>
-          </div>
-
-          <RequisicoesTable 
-            requisicoes={filteredRequisicoes}
-            onEditRequisicao={handleEditRequisicao}
-            onNewRequisicao={handleNewRequisicao}
-          />
-        </div>
-      </div>
-
-      <NewRequisicaoDialog
-        isOpen={isNewRequisicaoDialogOpen}
-        onClose={() => setIsNewRequisicaoDialogOpen(false)}
+      <RequisicoesTable 
+        requisicoes={requisicoes}
+        onEditRequisicao={setEditingRequisicao}
+        onNewRequisicao={() => setIsNewDialogOpen(true)}
       />
 
-      {selectedRequisicao && (
+      <NewRequisicaoDialog
+        isOpen={isNewDialogOpen}
+        onClose={() => setIsNewDialogOpen(false)}
+      />
+
+      {editingRequisicao && (
         <EditRequisicaoDialog
-          isOpen={isEditRequisicaoDialogOpen}
-          onClose={() => {
-            setIsEditRequisicaoDialogOpen(false);
-            setSelectedRequisicao(null);
-          }}
-          requisicao={selectedRequisicao}
+          requisicao={editingRequisicao}
+          isOpen={!!editingRequisicao}
+          onClose={() => setEditingRequisicao(null)}
         />
       )}
     </div>

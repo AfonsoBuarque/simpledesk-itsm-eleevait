@@ -62,7 +62,8 @@ export const menuItems = [
     icon: Settings,
     children: [
       { id: 'clients', label: 'Clientes', icon: Users },
-      { id: 'categoria', label: 'Categoria', icon: Tags }
+      { id: 'categoria', label: 'Categoria', icon: Tags },
+      { id: 'solicitacoes', label: 'Solicitações', icon: FileText }
     ]
   }
 ];

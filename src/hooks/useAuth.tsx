@@ -1,149 +1,159 @@
-
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Profile {
   id: string;
   full_name: string | null;
-  email: string;
-  role: string | null;
+  email: string | null;
+  role: string;
+  department: string | null;
+  phone: string | null;
   client_id: string | null;
 }
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
-      // First try profiles table
+      // Primeiro tentar buscar na tabela profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-
-      if (profileData && !profileError) {
+      
+      if (profileData) {
         setProfile({
           id: profileData.id,
           full_name: profileData.full_name,
           email: profileData.email,
           role: profileData.role,
-          client_id: null // profiles table doesn't have client_id
+          department: profileData.department,
+          phone: profileData.phone,
+          client_id: null, // profiles table doesn't have client_id
         });
         return;
       }
 
-      // Fallback to users table
+      // Se não encontrar na profiles, buscar na tabela users
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id, name, email, role, client_id')
+        .select('*')
         .eq('id', userId)
         .single();
-
-      if (userData && !userError) {
-        setProfile({
+      
+      if (userData) {
+        // Converter dados da tabela users para o formato Profile
+        const userProfile: Profile = {
           id: userData.id,
           full_name: userData.name,
           email: userData.email,
           role: userData.role,
-          client_id: userData.client_id
-        });
-        return;
+          department: userData.department,
+          phone: userData.phone,
+          client_id: userData.client_id || null,
+        };
+        setProfile(userProfile);
       }
-
-      // Create a default profile if none exists
-      setProfile({
-        id: userId,
-        full_name: 'Usuário',
-        email: 'user@example.com',
-        role: 'technician',
-        client_id: null
-      });
-
     } catch (error) {
-      // Set a default profile even on error
-      setProfile({
-        id: userId,
-        full_name: 'Usuário',
-        email: 'user@example.com',
-        role: 'technician',
-        client_id: null
-      });
+      console.error('Error fetching profile:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('❌ Error getting session:', error);
-        }
-
-        if (mounted) {
-          if (session?.user) {
-            setUser(session.user);
-            await fetchProfile(session.user.id);
-          } else {
-            setUser(null);
-            setProfile(null);
-          }
-          setLoading(false);
-          setInitialized(true);
-        }
-      } catch (error) {
-        if (mounted) {
-          setLoading(false);
-          setInitialized(true);
-        }
-      }
-    };
-
-    // Set up auth state listener
+    // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user && mounted) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+        
         if (mounted) {
-          if (session?.user) {
-            setUser(session.user);
-            await fetchProfile(session.user.id);
-          } else {
-            setUser(null);
-            setProfile(null);
-          }
           setLoading(false);
-          setInitialized(true);
         }
       }
     );
 
-    initializeAuth();
+    // Verificar sessão existente
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user && mounted) {
+          await fetchProfile(session.user.id);
+        }
+        
+        if (mounted) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getInitialSession();
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile]);
+
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { data, error };
+  };
+
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+    return { data, error };
+  };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (!error) {
-      setUser(null);
-      setProfile(null);
-    }
     return { error };
   };
 
   return {
     user,
+    session,
     profile,
     loading,
+    signIn,
+    signUp,
     signOut,
   };
 };
