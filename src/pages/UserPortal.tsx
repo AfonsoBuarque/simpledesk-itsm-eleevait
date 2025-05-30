@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, LogOut, BarChart3, Plus } from 'lucide-react';
@@ -10,8 +12,20 @@ import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal
 
 const UserPortal = () => {
   const { signOut, profile } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
+
+  // Verificar se o usuário deve ser redirecionado para a área administrativa
+  useEffect(() => {
+    if (profile) {
+      console.log('UserPortal - Verificando redirecionamento, perfil:', profile);
+      if (profile.role !== 'user') {
+        console.log('UserPortal - Redirecionando para área administrativa');
+        navigate('/', { replace: true });
+      }
+    }
+  }, [profile, navigate]);
 
   const handleSignOut = async () => {
     await signOut();

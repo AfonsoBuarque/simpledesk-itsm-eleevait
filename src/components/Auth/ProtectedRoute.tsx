@@ -2,14 +2,14 @@
 import React, { useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, error } = useAuth();
 
   const renderContent = useMemo(() => {
     if (loading) {
@@ -28,11 +28,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
 
     // Redirecionar usuários com função "user" para o portal
-    if (profile?.role === 'user') {
+    console.log('Verificando redirecionamento - Perfil:', profile);
+    
+    if (profile && profile.role === 'user') {
+      console.log('Redirecionando para portal - usuário comum');
       return <Navigate to="/portal" replace />;
     }
 
     // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
+    console.log('Permitindo acesso à área administrativa');
     return <>{children}</>;
   }, [loading, user, profile, children]);
 

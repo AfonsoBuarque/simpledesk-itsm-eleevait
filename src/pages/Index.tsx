@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
 import { Loader2 } from 'lucide-react';
@@ -20,11 +22,23 @@ import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
-  const { loading, user } = useAuth();
+  const { loading, user, profile } = useAuth();
+  const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [localLoading, setLocalLoading] = useState<boolean>(true);
+
+  // Verificar se o usuário deve ser redirecionado para o portal
+  useEffect(() => {
+    if (!loading && user && profile) {
+      console.log('Index - Verificando redirecionamento, perfil:', profile);
+      if (profile.role === 'user') {
+        console.log('Index - Redirecionando para portal');
+        navigate('/portal', { replace: true });
+      }
+    }
+  }, [loading, user, profile, navigate]);
 
   // Forçar carregamento para terminar após 8 segundos
   useEffect(() => {

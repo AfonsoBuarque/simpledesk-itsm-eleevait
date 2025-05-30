@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -19,12 +20,68 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
       console.log('Iniciando busca de perfil para usuário:', userId);
 
-      // Criar um perfil padrão para evitar problemas de carregamento
+      // Buscar dados do usuário diretamente da tabela users
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      console.log('Resultado da busca de perfil:', { userData, userError });
+
+      if (userError) {
+        console.error('Erro ao buscar dados do usuário:', userError);
+        throw userError;
+      }
+
+      if (userData) {
+        console.log('Perfil encontrado na tabela users:', userData);
+        setProfile({
+          id: userData.id,
+          full_name: userData.name || null,
+          email: userData.email || userEmail,
+          role: userData.role || 'user',
+          department: userData.department || null,
+          phone: userData.phone || null,
+          client_id: userData.client_id || null,
+        });
+        return;
+      }
+
+      // Fallback para a tabela profiles se não encontrar em users
+      console.log('Buscando na tabela profiles...');
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.error('Erro ao buscar perfil:', profileError);
+        throw profileError;
+      }
+
+      if (profileData) {
+        console.log('Perfil encontrado na tabela profiles:', profileData);
+        setProfile({
+          id: profileData.id,
+          full_name: profileData.full_name,
+          email: profileData.email || userEmail,
+          role: profileData.role || 'user',
+          department: profileData.department,
+          phone: profileData.phone,
+          client_id: null,
+        });
+        return;
+      }
+
+      // Se não encontrou em nenhuma tabela, criar um perfil padrão
       console.log('Criando perfil padrão para o usuário');
       setProfile({
         id: userId,
@@ -35,34 +92,10 @@ export const useAuth = () => {
         phone: null,
         client_id: null,
       });
-      
-      // Tentar buscar dados reais em segundo plano
-      setTimeout(async () => {
-        try {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', userId)
-            .maybeSingle();
-            
-          if (userData) {
-            console.log('Perfil encontrado:', userData);
-            setProfile({
-              id: userData.id,
-              full_name: userData.name,
-              email: userData.email,
-              role: userData.role || 'user',
-              department: userData.department,
-              phone: userData.phone,
-              client_id: userData.client_id,
-            });
-          }
-        } catch (bgError) {
-          console.error('Erro ao buscar perfil em segundo plano:', bgError);
-        }
-      }, 1000);
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setError(error as Error);
+      
       // Criar um perfil padrão para evitar loop infinito
       setProfile({
         id: userId,
@@ -80,6 +113,7 @@ export const useAuth = () => {
     let mounted = true;
     let initialLoad = true;
     let timeoutId: number | null = null;
+    setError(null);
 
     console.log('Setting up auth state listener');
 
@@ -286,5 +320,6 @@ export const useAuth = () => {
     signIn,
     signUp,
     signOut,
+    error,
   };
 };
