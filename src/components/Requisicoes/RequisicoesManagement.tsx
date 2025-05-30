@@ -4,8 +4,8 @@ import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
-import { RequisicoesTable } from './RequisicoesTable';
-import { RequisicoesStatsCards } from './RequisicoesStatsCards';
+import RequisicoesTable from './RequisicoesTable';
+import RequisicoesStatsCards from './RequisicoesStatsCards';
 import { NewRequisicaoDialog } from './NewRequisicaoDialog';
 
 const RequisicoesManagement = () => {
@@ -140,8 +140,8 @@ const RequisicoesManagement = () => {
       </div>
 
       <NewRequisicaoDialog
-        open={isNewRequisicaoDialogOpen}
-        onOpenChange={setIsNewRequisicaoDialogOpen}
+        isOpen={isNewRequisicaoDialogOpen}
+        onClose={() => setIsNewRequisicaoDialogOpen(false)}
       />
     </div>
   );
