@@ -7,12 +7,16 @@ import { useRequisicoes } from '@/hooks/useRequisicoes';
 import RequisicoesTable from './RequisicoesTable';
 import RequisicoesStatsCards from './RequisicoesStatsCards';
 import { NewRequisicaoDialog } from './NewRequisicaoDialog';
+import { EditRequisicaoDialog } from './EditRequisicaoDialog';
+import { Solicitacao } from '@/types/solicitacao';
 
 const RequisicoesManagement = () => {
   const { requisicoes, isLoading, error } = useRequisicoes();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [isNewRequisicaoDialogOpen, setIsNewRequisicaoDialogOpen] = useState(false);
+  const [isEditRequisicaoDialogOpen, setIsEditRequisicaoDialogOpen] = useState(false);
+  const [selectedRequisicao, setSelectedRequisicao] = useState<Solicitacao | null>(null);
 
   console.log('🎫 RequisicoesManagement render:', {
     requisicoes: requisicoes.length,
@@ -46,6 +50,15 @@ const RequisicoesManagement = () => {
       return matchesSearch && matchesStatus;
     });
   }, [requisicoes, searchTerm, statusFilter]);
+
+  const handleEditRequisicao = (requisicao: Solicitacao) => {
+    setSelectedRequisicao(requisicao);
+    setIsEditRequisicaoDialogOpen(true);
+  };
+
+  const handleNewRequisicao = () => {
+    setIsNewRequisicaoDialogOpen(true);
+  };
 
   if (isLoading) {
     console.log('⏳ RequisicoesManagement is loading...');
@@ -96,7 +109,7 @@ const RequisicoesManagement = () => {
             Gerencie todas as requisições de serviço do sistema
           </p>
         </div>
-        <Button onClick={() => setIsNewRequisicaoDialogOpen(true)}>
+        <Button onClick={handleNewRequisicao}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Requisição
         </Button>
@@ -135,7 +148,11 @@ const RequisicoesManagement = () => {
             </div>
           </div>
 
-          <RequisicoesTable requisicoes={filteredRequisicoes} />
+          <RequisicoesTable 
+            requisicoes={filteredRequisicoes}
+            onEditRequisicao={handleEditRequisicao}
+            onNewRequisicao={handleNewRequisicao}
+          />
         </div>
       </div>
 
@@ -143,6 +160,17 @@ const RequisicoesManagement = () => {
         isOpen={isNewRequisicaoDialogOpen}
         onClose={() => setIsNewRequisicaoDialogOpen(false)}
       />
+
+      {selectedRequisicao && (
+        <EditRequisicaoDialog
+          isOpen={isEditRequisicaoDialogOpen}
+          onClose={() => {
+            setIsEditRequisicaoDialogOpen(false);
+            setSelectedRequisicao(null);
+          }}
+          requisicao={selectedRequisicao}
+        />
+      )}
     </div>
   );
 };
