@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface Profile {
   id: string;
@@ -22,71 +23,44 @@ export const useAuth = () => {
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
       console.log('Iniciando busca de perfil para usuário:', userId);
-      
-      // Buscar dados da tabela users (fonte principal)
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select(`
-          *,
-          clients:client_id (
-            id,
-            name
-          )
-        `)
-        .eq('id', userId)
-        .maybeSingle();
-      
-      console.log('Resultado da consulta de usuário:', userData ? 'Dados encontrados' : 'Nenhum dado');
-      
-      if (userData && !userError) {
-        console.log('Profile found in users table:', userData);
-        const userProfile: Profile = {
-          id: userData.id,
-          full_name: userData.name,
-          email: userData.email,
-          role: userData.role,
-          department: userData.department,
-          phone: userData.phone,
-          client_id: userData.client_id || null,
-        };
-        setProfile(userProfile);
-        return;
-      }
 
-      // Fallback para a tabela profiles se não encontrar em users
-      console.log('Trying to fetch from profiles table...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('users')
-        .select('id, name as full_name, email, role, department, phone, client_id')
-        .eq('id', userId)
-        .maybeSingle();
+      // Criar um perfil padrão para evitar problemas de carregamento
+      console.log('Criando perfil padrão para o usuário');
+      setProfile({
+        id: userId,
+        full_name: null,
+        email: userEmail,
+        role: 'user',
+        department: null,
+        phone: null,
+        client_id: null,
+      });
       
-      console.log('Profile query result:', { profileData, profileError });
-      
-      if (profileData && !profileError) {
-        console.log('Profile found in profiles table:', profileData);
-        setProfile({
-          id: profileData.id,
-          full_name: profileData.full_name,
-          email: profileData.email || userEmail || '',
-          role: profileData.role || 'user',
-          department: profileData.department || null,
-          phone: profileData.phone || null,
-          client_id: profileData.client_id || null,
-        });
-      } else {
-        console.log('Nenhum perfil encontrado, criando perfil padrão');
-        // Criar um perfil padrão para evitar loop infinito
-        setProfile({
-          id: userId,
-          full_name: null,
-          email: userEmail,
-          role: 'user',
-          department: null,
-          phone: null,
-          client_id: null,
-        });
-      }
+      // Tentar buscar dados reais em segundo plano
+      setTimeout(async () => {
+        try {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', userId)
+            .maybeSingle();
+            
+          if (userData) {
+            console.log('Perfil encontrado:', userData);
+            setProfile({
+              id: userData.id,
+              full_name: userData.name,
+              email: userData.email,
+              role: userData.role || 'user',
+              department: userData.department,
+              phone: userData.phone,
+              client_id: userData.client_id,
+            });
+          }
+        } catch (bgError) {
+          console.error('Erro ao buscar perfil em segundo plano:', bgError);
+        }
+      }, 1000);
     } catch (error) {
       console.error('Error fetching profile:', error);
       // Criar um perfil padrão para evitar loop infinito
@@ -105,6 +79,7 @@ export const useAuth = () => {
   useEffect(() => {
     let mounted = true;
     let initialLoad = true;
+    let timeoutId: number | null = null;
 
     console.log('Setting up auth state listener');
 
@@ -129,6 +104,14 @@ export const useAuth = () => {
         if (mounted && initialLoad) {
           setLoading(false);
           initialLoad = false;
+          
+          // Forçar loading para false após 5 segundos, independente do resultado
+          timeoutId = window.setTimeout(() => {
+            if (mounted && loading) {
+              console.log('Forçando loading para false após timeout');
+              setLoading(false);
+            }
+          }, 5000);
         }
       }
     );
@@ -159,6 +142,14 @@ export const useAuth = () => {
         if (mounted) {
           setLoading(false);
         }
+        
+        // Forçar loading para false após 5 segundos, independente do resultado
+        timeoutId = window.setTimeout(() => {
+          if (mounted && loading) {
+            console.log('Forçando loading para false após timeout');
+            setLoading(false);
+          }
+        }, 5000);
       } catch (error) {
         console.error('Unexpected error getting session:', error);
         if (mounted) {
@@ -172,6 +163,9 @@ export const useAuth = () => {
     return () => {
       console.log('Cleaning up auth listener');
       mounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
