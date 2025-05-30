@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, LogOut, BarChart3, Plus } from 'lucide-react';
+import { AlertTriangle, LogOut, BarChart3, Plus, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPortalForm } from '@/components/UserPortal/UserPortalForm';
 import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
@@ -21,6 +22,10 @@ const UserPortal = () => {
 
   const handleNovaRequisicaoClick = () => {
     setIsNovaRequisicaoModalOpen(true);
+  };
+
+  const handleAdminClick = () => {
+    navigate('/');
   };
 
   return (
@@ -48,6 +53,20 @@ const UserPortal = () => {
                 </p>
                 <p className="text-xs text-gray-500">Cliente</p>
               </div>
+              
+              {/* Link para Administração - apenas para admin */}
+              {profile?.role === 'admin' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAdminClick}
+                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Administração</span>
+                </Button>
+              )}
+              
               <Button
                 variant="outline"
                 size="sm"
