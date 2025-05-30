@@ -7,13 +7,17 @@ import { toast } from '@/components/ui/use-toast';
 export const useRequisicoes = () => {
   const queryClient = useQueryClient();
 
+  console.log('🔧 useRequisicoes hook initialized');
+
   // Fetch requisições (tipo = 'requisicao')
   const { data: requisicoes = [], isLoading, error } = useQuery({
     queryKey: ['requisicoes'],
     queryFn: async () => {
-      console.log('Fetching requisições...');
+      console.log('🔍 Starting requisições fetch...');
+      console.log('🔗 Supabase client status:', !!supabase);
       
       try {
+        console.log('📡 Making Supabase query for requisições...');
         const { data, error } = await supabase
           .from('solicitacoes')
           .select(`
@@ -28,29 +32,59 @@ export const useRequisicoes = () => {
           .eq('tipo', 'requisicao')
           .order('criado_em', { ascending: false });
 
+        console.log('📊 Supabase query response:', { 
+          hasData: !!data, 
+          dataLength: data?.length || 0, 
+          hasError: !!error,
+          error: error?.message 
+        });
+
         if (error) {
-          console.error('Error fetching requisições:', error);
+          console.error('❌ Error fetching requisições:', error);
+          console.error('❌ Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
           throw error;
         }
 
-        console.log('Requisições fetched successfully:', data?.length || 0, 'items');
+        console.log('✅ Requisições fetched successfully:', data?.length || 0, 'items');
+        console.log('📋 Sample requisição:', data?.[0]);
         return data as Solicitacao[];
       } catch (error) {
-        console.error('Exception while fetching requisições:', error);
+        console.error('💥 Exception while fetching requisições:', error);
+        console.error('💥 Exception stack:', error.stack);
         throw error;
       }
     },
-    retry: 1,
+    retry: (failureCount, error) => {
+      console.log('🔄 Query retry attempt:', failureCount, 'Error:', error?.message);
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => {
+      const delay = Math.min(1000 * 2 ** attemptIndex, 30000);
+      console.log('⏱️ Retry delay:', delay, 'ms');
+      return delay;
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
 
+  console.log('📈 useRequisicoes state:', { 
+    requisicoes: requisicoes?.length || 0, 
+    isLoading, 
+    hasError: !!error,
+    errorMessage: error?.message 
+  });
+
   // Create requisição
   const createRequisicao = useMutation({
     mutationFn: async (data: SolicitacaoFormData) => {
-      console.log('Creating requisição:', data);
+      console.log('➕ Creating requisição:', data);
       
       // Preparar dados removendo campos que não devem ser enviados e convertendo arrays
       const { anexos, ativos_envolvidos, tags, ...restData } = data;
@@ -65,6 +99,8 @@ export const useRequisicoes = () => {
         ...(tags && tags.length > 0 && { tags: JSON.stringify(tags) }),
       };
 
+      console.log('📤 Sending requisição data:', requisicaoData);
+
       const { data: result, error } = await supabase
         .from('solicitacoes')
         .insert(requisicaoData)
@@ -72,14 +108,15 @@ export const useRequisicoes = () => {
         .single();
 
       if (error) {
-        console.error('Error creating requisição:', error);
+        console.error('❌ Error creating requisição:', error);
         throw error;
       }
 
-      console.log('Requisição created successfully:', result);
+      console.log('✅ Requisição created successfully:', result);
       return result;
     },
     onSuccess: () => {
+      console.log('🔄 Invalidating requisições queries after creation');
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] });
       toast({
         title: 'Sucesso',
@@ -87,7 +124,7 @@ export const useRequisicoes = () => {
       });
     },
     onError: (error: any) => {
-      console.error('Error creating requisição:', error);
+      console.error('💥 Error creating requisição:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao criar requisição: ' + (error.message || 'Erro desconhecido'),
@@ -99,7 +136,7 @@ export const useRequisicoes = () => {
   // Update requisição
   const updateRequisicao = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
-      console.log('Updating requisição:', id, data);
+      console.log('✏️ Updating requisição:', id, data);
       
       // Preparar dados para atualização, convertendo arrays para JSON
       const { anexos, ativos_envolvidos, tags, ...restData } = data;
@@ -112,6 +149,8 @@ export const useRequisicoes = () => {
         ...(tags !== undefined && { tags: tags && tags.length > 0 ? JSON.stringify(tags) : null }),
       };
 
+      console.log('📤 Sending update data:', updateData);
+
       const { data: result, error } = await supabase
         .from('solicitacoes')
         .update(updateData)
@@ -120,14 +159,15 @@ export const useRequisicoes = () => {
         .single();
 
       if (error) {
-        console.error('Error updating requisição:', error);
+        console.error('❌ Error updating requisição:', error);
         throw error;
       }
 
-      console.log('Requisição updated successfully:', result);
+      console.log('✅ Requisição updated successfully:', result);
       return result;
     },
     onSuccess: () => {
+      console.log('🔄 Invalidating requisições queries after update');
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] });
       toast({
         title: 'Sucesso',
@@ -135,7 +175,7 @@ export const useRequisicoes = () => {
       });
     },
     onError: (error: any) => {
-      console.error('Error updating requisição:', error);
+      console.error('💥 Error updating requisição:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao atualizar requisição: ' + (error.message || 'Erro desconhecido'),
@@ -147,7 +187,7 @@ export const useRequisicoes = () => {
   // Delete requisição
   const deleteRequisicao = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting requisição:', id);
+      console.log('🗑️ Deleting requisição:', id);
       
       const { error } = await supabase
         .from('solicitacoes')
@@ -155,13 +195,14 @@ export const useRequisicoes = () => {
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting requisição:', error);
+        console.error('❌ Error deleting requisição:', error);
         throw error;
       }
 
-      console.log('Requisição deleted successfully');
+      console.log('✅ Requisição deleted successfully');
     },
     onSuccess: () => {
+      console.log('🔄 Invalidating requisições queries after deletion');
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] });
       toast({
         title: 'Sucesso',
@@ -169,7 +210,7 @@ export const useRequisicoes = () => {
       });
     },
     onError: (error: any) => {
-      console.error('Error deleting requisição:', error);
+      console.error('💥 Error deleting requisição:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao excluir requisição: ' + (error.message || 'Erro desconhecido'),

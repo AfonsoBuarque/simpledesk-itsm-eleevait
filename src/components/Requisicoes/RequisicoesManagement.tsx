@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, HelpCircle, Loader2 } from 'lucide-react';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
@@ -14,13 +14,29 @@ const RequisicoesManagement = () => {
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [editingRequisicao, setEditingRequisicao] = useState<Solicitacao | null>(null);
 
-  console.log('RequisicoesManagement render:', { 
+  console.log('🎫 RequisicoesManagement render:', { 
     requisicoes: requisicoes?.length, 
     isLoading, 
     error: error?.message 
   });
 
+  useEffect(() => {
+    console.log('🔄 RequisicoesManagement mounted');
+    return () => {
+      console.log('🔄 RequisicoesManagement unmounted');
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('📊 RequisicoesManagement data update:', {
+      requisicoes: requisicoes?.length || 0,
+      isLoading,
+      hasError: !!error
+    });
+  }, [requisicoes, isLoading, error]);
+
   if (error) {
+    console.error('💥 RequisicoesManagement error:', error);
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -32,6 +48,7 @@ const RequisicoesManagement = () => {
   }
 
   if (isLoading) {
+    console.log('⏳ RequisicoesManagement is loading...');
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -41,6 +58,8 @@ const RequisicoesManagement = () => {
       </div>
     );
   }
+
+  console.log('✅ RequisicoesManagement rendering content with', requisicoes?.length || 0, 'requisições');
 
   return (
     <div className="space-y-6">
