@@ -2,9 +2,51 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useCallback } from 'react';
-import { SolicitacaoFormData } from '@/types/solicitacao';
+import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
 import { useSLACalculation } from './useSLACalculation';
+
+// Type for the raw data from Supabase
+type SupabaseRequisicao = {
+  id: string;
+  numero: string;
+  titulo: string;
+  descricao?: string;
+  tipo?: string;
+  categoria_id?: string;
+  sla_id?: string;
+  urgencia?: string;
+  impacto?: string;
+  prioridade?: string;
+  status?: string;
+  solicitante_id?: string;
+  cliente_id?: string;
+  grupo_responsavel_id?: string;
+  atendente_id?: string;
+  canal_origem?: string;
+  data_abertura: string;
+  data_limite_resposta?: string;
+  data_limite_resolucao?: string;
+  data_primeiro_contato?: string;
+  data_resolucao?: string;
+  data_fechamento?: string;
+  origem_id?: string;
+  ativos_envolvidos?: any;
+  anexos?: any;
+  avaliacao_usuario?: number;
+  notas_internas?: string;
+  tags?: any;
+  criado_em: string;
+  criado_por?: string;
+  atualizado_em?: string;
+  atualizado_por?: string;
+  categoria?: { nome: string } | null;
+  sla?: { nome: string } | null;
+  solicitante?: { name: string } | null;
+  cliente?: { name: string } | null;
+  grupo_responsavel?: { name: string } | null;
+  atendente?: { name: string } | null;
+};
 
 export const useRequisicoes = () => {
   console.log('🔧 useRequisicoes hook initialized');
@@ -13,13 +55,13 @@ export const useRequisicoes = () => {
   const { calculateAndSetSLADeadlines } = useSLACalculation();
 
   const {
-    data: requisicoes = [],
+    data: rawRequisicoes = [],
     isLoading,
     error,
     refetch
   } = useQuery({
     queryKey: ['requisicoes'],
-    queryFn: async () => {
+    queryFn: async (): Promise<SupabaseRequisicao[]> => {
       console.log('🔍 Starting requisições fetch...');
       console.log('🔗 Supabase client status:', !!supabase);
       console.log('📡 Making Supabase query for requisições...');
@@ -61,6 +103,19 @@ export const useRequisicoes = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
+
+  // Transform the raw data to match Solicitacao type
+  const requisicoes: Solicitacao[] = useMemo(() => {
+    return rawRequisicoes.map((req): Solicitacao => ({
+      ...req,
+      tipo: (req.tipo as any) || 'solicitacao',
+      urgencia: (req.urgencia as any) || 'media',
+      impacto: (req.impacto as any) || 'medio',
+      prioridade: (req.prioridade as any) || 'media',
+      status: (req.status as any) || 'aberta',
+      canal_origem: (req.canal_origem as any) || 'portal',
+    }));
+  }, [rawRequisicoes]);
 
   const createRequisicao = useMutation({
     mutationFn: async (formData: SolicitacaoFormData) => {
@@ -206,23 +261,12 @@ export const useRequisicoes = () => {
     },
   });
 
-  const stats = useMemo(() => {
-    console.log('📈 useRequisicoes state:', {
-      requisicoes: requisicoes.length,
-      isLoading,
-      hasError: !!error,
-      errorMessage: error?.message
-    });
-
-    return {
-      requisicoes,
-      isLoading,
-      error,
-      refetch,
-      createRequisicao,
-      updateRequisicao
-    };
-  }, [requisicoes, isLoading, error, refetch, createRequisicao, updateRequisicao]);
-
-  return stats;
+  return {
+    requisicoes,
+    isLoading,
+    error,
+    refetch,
+    createRequisicao,
+    updateRequisicao
+  };
 };
