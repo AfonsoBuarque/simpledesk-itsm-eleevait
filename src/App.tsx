@@ -10,7 +10,6 @@ import Auth from "./pages/Auth";
 import UserPortal from "./pages/UserPortal";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
-import UserOnlyRoute from "./components/Auth/UserOnlyRoute";
 import { SecurityMonitor } from "./components/Auth/SecurityMonitor";
 
 const queryClient = new QueryClient();
@@ -23,17 +22,9 @@ const App = () => (
       <BrowserRouter>
         <SecurityMonitor />
         <Routes>
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/portal" element={
-            <UserOnlyRoute>
-              <UserPortal />
-            </UserOnlyRoute>
-          } />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Index />
-            </ProtectedRoute>
-          } />
+          <Route path="/portal" element={<UserPortal />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

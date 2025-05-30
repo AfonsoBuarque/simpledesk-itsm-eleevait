@@ -9,9 +9,9 @@ interface UserOnlyRouteProps {
 }
 
 const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
-  const { user, loading, profile } = useAuth();
+  const { user, loading } = useAuth();
 
-  console.log('UserOnlyRoute - Auth state:', {user, profile, loading});
+  console.log('UserOnlyRoute - Auth state:', {user, loading});
 
   if (loading) {
     return (
@@ -29,7 +29,7 @@ const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  console.log('UserOnlyRoute - Usuário autenticado, permitindo acesso');
+  console.log('UserOnlyRoute - Usuário autenticado, permitindo acesso ao portal');
   return <>{children}</>;
 };
 

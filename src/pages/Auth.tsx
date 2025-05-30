@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,9 +10,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
 
 const Auth = () => {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [signupForm, setSignupForm] = useState({ 
     email: '', 
@@ -24,14 +23,17 @@ const Auth = () => {
 
   // Redirecionar se já estiver logado
   useEffect(() => {
-    if (user) {
+    console.log('Auth - Auth state:', { user, loading });
+    
+    if (!loading && user) {
+      console.log('Auth - Usuário já autenticado, redirecionando para portal');
       navigate('/');
     }
   }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setFormLoading(true);
 
     try {
       const result = await signIn(loginForm.email, loginForm.password);
@@ -64,7 +66,7 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -89,7 +91,7 @@ const Auth = () => {
       return;
     }
 
-    setLoading(true);
+    setFormLoading(true);
 
     try {
       const result = await signUp(
@@ -126,7 +128,7 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -253,9 +255,9 @@ const Auth = () => {
                     <Button 
                       type="submit" 
                       className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium" 
-                      disabled={loading}
+                      disabled={formLoading}
                     >
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {formLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Login
                     </Button>
                   </form>
@@ -316,9 +318,9 @@ const Auth = () => {
                     <Button 
                       type="submit" 
                       className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium" 
-                      disabled={loading}
+                      disabled={formLoading}
                     >
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {formLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Sign up
                     </Button>
                   </form>

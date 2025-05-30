@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface Profile {
   id: string;
@@ -19,7 +19,7 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [authInitialized, setAuthInitialized] = useState(false);
+  const [authTimeoutReached, setAuthTimeoutReached] = useState(false);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
@@ -80,11 +80,7 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    let authTimeout: NodeJS.Timeout;
-
-    // Evitar múltiplas inicializações
-    if (authInitialized) return;
+    const mounted = true;
 
     async function initializeAuth() {
       try {
@@ -108,7 +104,6 @@ export const useAuth = () => {
         console.log('Current session:', session?.user?.id);
 
         if (mounted) {
-          setAuthInitialized(true);
           const currentUser = session?.user ?? null;
           setSession(session);
           setUser(currentUser);
@@ -118,7 +113,6 @@ export const useAuth = () => {
           } else {
             setProfile(null);
             setProfileLoading(false);
-            setLoading(false);
           }
         }
       } catch (error) {
@@ -133,18 +127,15 @@ export const useAuth = () => {
       }
     }
 
+    // Inicializar autenticação
+    initializeAuth();
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id, 'Previous user:', user?.id);
         
         if (!mounted) return;
-
-        // Evitar redefinir o mesmo usuário
-        if (event === 'SIGNED_IN' && user?.id === session?.user?.id) {
-          console.log('Mesmo usuário, ignorando evento de login duplicado');
-          return;
-        }
 
         setSession(session);
         setLoading(true);
@@ -161,20 +152,19 @@ export const useAuth = () => {
       }
     );
 
-    // Definir um timeout para evitar carregamento infinito
-    authTimeout = setTimeout(() => {
-      if (mounted && loading) {
-        console.log('Auth timeout reached, forcing loading states to false', { user, profile });
+    // Definir um timeout para evitar carregamento infinito (5 segundos)
+    const authTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('Auth timeout reached, forcing loading states to false');
+        setAuthTimeoutReached(true);
         setProfileLoading(false);
         setLoading(false);
       }
-    }, 3000);
-
-    // Initialize auth
-    initializeAuth();
+    }, 5000);
 
     // Cleanup
     return () => {
+      // Não podemos alterar mounted pois é uma constante
       mounted = false;
       clearTimeout(authTimeout);
       subscription?.unsubscribe();
@@ -183,16 +173,17 @@ export const useAuth = () => {
 
   // Atualizar o estado de loading quando o perfil for carregado
   useEffect(() => {
-    if (user && profile && loading) {
-      console.log('Profile loaded, setting loading to false');
-      setProfileLoading(false);
-      setLoading(false);
-    } else if (user && !profileLoading && loading) {
-      // Se temos usuário mas o perfil não está carregando, podemos finalizar o loading
-      console.log('User loaded but no profile, setting loading to false');
+    // Se o perfil foi carregado ou o timeout foi atingido, finalizamos o loading
+    if (user && (profile || authTimeoutReached) && loading) {
+      console.log('User and profile loaded or timeout reached, setting loading to false');
       setLoading(false);
     }
-  }, [user, profile, profileLoading, loading]);
+    
+    // Se o usuário foi carregado mas não temos perfil, também finalizamos o loading após um tempo
+    if (user && !profile && !loading && profileLoading) {
+      setProfileLoading(false);
+    }
+  }, [user, profile, loading, profileLoading, authTimeoutReached]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -210,7 +201,7 @@ export const useAuth = () => {
       console.log('Sign in response:', { data, error });
       
       if (error) {
-        console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
+        console.warn('Failed login attempt:', error.message);
       } else {
         console.log('Sign in successful');
         // Não definimos o usuário aqui, o evento onAuthStateChange vai lidar com isso
@@ -255,8 +246,7 @@ export const useAuth = () => {
         console.log('Sign out successful, clearing user data');
         setUser(null);
         setSession(null);
-        setProfile(null);
-        setAuthInitialized(false);
+        setProfile(null);        
         
         // Forçar recarregamento da página para limpar completamente o estado
         window.location.href = '/auth';

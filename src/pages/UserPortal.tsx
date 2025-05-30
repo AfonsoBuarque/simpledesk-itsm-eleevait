@@ -10,7 +10,7 @@ import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal';
 
 const UserPortal = () => {
-  const { signOut, profile, user, loading, profileLoading } = useAuth();
+  const { signOut, profile, user, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
@@ -38,7 +38,7 @@ const UserPortal = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {(loading || profileLoading) && (
+      {loading && (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
