@@ -15,17 +15,37 @@ import { Form } from '@/components/ui/form';
 import { Plus } from 'lucide-react';
 import { FornecedorFormFields } from './FornecedorFormFields';
 import { useFornecedores } from '@/hooks/useFornecedores';
+import { sanitizeInput, validateEmail, rateLimitCheck } from '@/utils/inputSanitizer';
+import { toast } from 'sonner';
 import type { FornecedorFormData } from '@/types/fornecedor';
 
 const fornecedorSchema = z.object({
-  nome: z.string().min(1, 'Nome é obrigatório'),
-  cnpj: z.string().optional(),
-  contato_responsavel: z.string().optional(),
-  telefone_contato: z.string().optional(),
-  email_contato: z.string().email('Email inválido').optional().or(z.literal('')),
-  endereco: z.string().optional(),
-  site: z.string().optional(),
-  observacoes: z.string().optional(),
+  nome: z.string()
+    .min(1, 'Nome é obrigatório')
+    .max(100, 'Nome deve ter no máximo 100 caracteres')
+    .refine(val => val.trim().length > 0, 'Nome não pode estar vazio'),
+  cnpj: z.string()
+    .optional()
+    .refine(val => !val || /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$|^\d{14}$/.test(val), 'CNPJ inválido'),
+  contato_responsavel: z.string()
+    .max(100, 'Nome do contato deve ter no máximo 100 caracteres')
+    .optional(),
+  telefone_contato: z.string()
+    .max(20, 'Telefone deve ter no máximo 20 caracteres')
+    .optional(),
+  email_contato: z.string()
+    .refine(val => !val || val === '' || validateEmail(val), 'Email inválido')
+    .optional(),
+  endereco: z.string()
+    .max(500, 'Endereço deve ter no máximo 500 caracteres')
+    .optional(),
+  site: z.string()
+    .max(200, 'Site deve ter no máximo 200 caracteres')
+    .refine(val => !val || /^https?:\/\/.+/.test(val), 'URL deve começar com http:// ou https://')
+    .optional(),
+  observacoes: z.string()
+    .max(1000, 'Observações devem ter no máximo 1000 caracteres')
+    .optional(),
 });
 
 export const NewFornecedorDialog = () => {
@@ -47,26 +67,57 @@ export const NewFornecedorDialog = () => {
   });
 
   const onSubmit = async (data: FornecedorFormData) => {
-    console.log('Submitting new fornecedor:', data);
-    
-    // Convert empty strings to undefined for optional fields
-    const cleanedData = {
-      ...data,
-      cnpj: data.cnpj === '' ? undefined : data.cnpj,
-      contato_responsavel: data.contato_responsavel === '' ? undefined : data.contato_responsavel,
-      telefone_contato: data.telefone_contato === '' ? undefined : data.telefone_contato,
-      email_contato: data.email_contato === '' ? undefined : data.email_contato,
-      endereco: data.endereco === '' ? undefined : data.endereco,
-      site: data.site === '' ? undefined : data.site,
-      observacoes: data.observacoes === '' ? undefined : data.observacoes,
-    };
-
     try {
+      // Rate limiting check
+      if (!rateLimitCheck('create_fornecedor', 10, 60000)) {
+        toast.error('Muitas tentativas. Tente novamente em alguns minutos.');
+        return;
+      }
+
+      console.log('Submitting new fornecedor:', data);
+      
+      // Sanitizar entradas
+      const sanitizedData = {
+        nome: sanitizeInput(data.nome),
+        cnpj: data.cnpj ? sanitizeInput(data.cnpj) : undefined,
+        contato_responsavel: data.contato_responsavel ? sanitizeInput(data.contato_responsavel) : undefined,
+        telefone_contato: data.telefone_contato ? sanitizeInput(data.telefone_contato) : undefined,
+        email_contato: data.email_contato ? sanitizeInput(data.email_contato) : undefined,
+        endereco: data.endereco ? sanitizeInput(data.endereco) : undefined,
+        site: data.site ? sanitizeInput(data.site) : undefined,
+        observacoes: data.observacoes ? sanitizeInput(data.observacoes) : undefined,
+      };
+
+      // Validações adicionais
+      if (!sanitizedData.nome || sanitizedData.nome.trim().length === 0) {
+        toast.error('Nome é obrigatório');
+        return;
+      }
+
+      if (sanitizedData.email_contato && !validateEmail(sanitizedData.email_contato)) {
+        toast.error('Email de contato inválido');
+        return;
+      }
+
+      // Convert empty strings to undefined for optional fields
+      const cleanedData = {
+        ...sanitizedData,
+        cnpj: sanitizedData.cnpj === '' ? undefined : sanitizedData.cnpj,
+        contato_responsavel: sanitizedData.contato_responsavel === '' ? undefined : sanitizedData.contato_responsavel,
+        telefone_contato: sanitizedData.telefone_contato === '' ? undefined : sanitizedData.telefone_contato,
+        email_contato: sanitizedData.email_contato === '' ? undefined : sanitizedData.email_contato,
+        endereco: sanitizedData.endereco === '' ? undefined : sanitizedData.endereco,
+        site: sanitizedData.site === '' ? undefined : sanitizedData.site,
+        observacoes: sanitizedData.observacoes === '' ? undefined : sanitizedData.observacoes,
+      };
+
       await createFornecedor.mutateAsync(cleanedData);
       form.reset();
       setOpen(false);
+      toast.success('Fornecedor criado com sucesso');
     } catch (error) {
       console.error('Error creating fornecedor:', error);
+      toast.error('Erro ao criar fornecedor. Tente novamente.');
     }
   };
 

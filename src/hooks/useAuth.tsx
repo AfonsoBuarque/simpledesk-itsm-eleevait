@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,29 +123,98 @@ export const useAuth = () => {
   }, [fetchProfile]);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
+    try {
+      // Validação de entrada
+      if (!email || !password) {
+        return { data: null, error: { message: 'Email e senha são obrigatórios' } };
+      }
+
+      if (!email.includes('@')) {
+        return { data: null, error: { message: 'Email inválido' } };
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        // Log tentativas de login falharam para monitoramento
+        console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
+      }
+
+      return { data, error };
+    } catch (error) {
+      console.error('Unexpected signin error:', error);
+      return { data: null, error: { message: 'Erro inesperado durante o login' } };
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      // Validação de entrada
+      if (!email || !password || !fullName) {
+        return { data: null, error: { message: 'Todos os campos são obrigatórios' } };
+      }
+
+      if (!email.includes('@')) {
+        return { data: null, error: { message: 'Email inválido' } };
+      }
+
+      if (password.length < 8) {
+        return { data: null, error: { message: 'Senha deve ter pelo menos 8 caracteres' } };
+      }
+
+      // Validação de política de senha mais forte
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumbers = /\d/.test(password);
+      
+      if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+        return { 
+          data: null, 
+          error: { message: 'Senha deve conter pelo menos uma letra maiúscula, minúscula e um número' } 
+        };
+      }
+
+      // Sanitizar entrada
+      const sanitizedEmail = email.trim().toLowerCase();
+      const sanitizedFullName = fullName.trim().replace(/[<>]/g, ''); // Básica proteção XSS
+
+      const redirectUrl = `${window.location.origin}/`;
+
+      const { data, error } = await supabase.auth.signUp({
+        email: sanitizedEmail,
+        password,
+        options: {
+          data: {
+            full_name: sanitizedFullName,
+          },
+          emailRedirectTo: redirectUrl,
         },
-      },
-    });
-    return { data, error };
+      });
+
+      return { data, error };
+    } catch (error) {
+      console.error('Unexpected signup error:', error);
+      return { data: null, error: { message: 'Erro inesperado durante o registro' } };
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (!error) {
+        // Limpar estado local
+        setUser(null);
+        setSession(null);
+        setProfile(null);
+      }
+      return { error };
+    } catch (error) {
+      console.error('Unexpected signout error:', error);
+      return { error: { message: 'Erro durante logout' } };
+    }
   };
 
   return {
