@@ -24,35 +24,58 @@ const queryClient = new QueryClient({
   },
 });
 
-console.log('App component rendering...');
+console.log('📱 App component rendering...');
 
 const App = () => {
-  console.log('App render');
+  console.log('🎯 App render start');
   
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/portal" element={
-              <UserOnlyRoute>
-                <UserPortal />
-              </UserOnlyRoute>
-            } />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+  try {
+    console.log('🔧 Setting up providers...');
+    
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={
+                <div>
+                  {console.log('🔑 Rendering Auth route')}
+                  <Auth />
+                </div>
+              } />
+              <Route path="/portal" element={
+                <div>
+                  {console.log('🏠 Rendering UserPortal route')}
+                  <UserOnlyRoute>
+                    <UserPortal />
+                  </UserOnlyRoute>
+                </div>
+              } />
+              <Route path="/" element={
+                <div>
+                  {console.log('🏢 Rendering Index route with ProtectedRoute')}
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                </div>
+              } />
+              <Route path="*" element={
+                <div>
+                  {console.log('❓ Rendering NotFound route')}
+                  <NotFound />
+                </div>
+              } />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  } catch (error) {
+    console.error('💥 Error in App component:', error);
+    return <div>Erro na aplicação: {error.message}</div>;
+  }
 };
 
 export default App;

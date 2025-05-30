@@ -1,42 +1,55 @@
 
-import React, { useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, profile, loading } = useAuth();
+  console.log('🔒 ProtectedRoute component rendering...');
+  
+  const { user, loading, profile } = useAuth();
+  
+  console.log('🔒 ProtectedRoute state:', { 
+    hasUser: !!user, 
+    userId: user?.id, 
+    loading, 
+    hasProfile: !!profile,
+    profileRole: profile?.role 
+  });
 
-  const renderContent = useMemo(() => {
-    if (loading) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Carregando...</p>
-          </div>
-        </div>
-      );
-    }
+  useEffect(() => {
+    console.log('🔒 ProtectedRoute useEffect - auth state changed:', { 
+      user: !!user, 
+      loading, 
+      profile: !!profile 
+    });
+  }, [user, loading, profile]);
 
-    if (!user) {
-      return <Navigate to="/auth" replace />;
-    }
+  if (loading) {
+    console.log('⏳ ProtectedRoute - still loading, showing spinner...');
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Carregando...</div>
+      </div>
+    );
+  }
 
-    // Redirecionar usuários com função "user" para o portal
-    if (profile?.role === 'user') {
-      return <Navigate to="/portal" replace />;
-    }
+  if (!user) {
+    console.log('🚫 ProtectedRoute - no user, redirecting to auth...');
+    return <Navigate to="/auth" replace />;
+  }
 
-    // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
-    return <>{children}</>;
-  }, [loading, user, profile, children]);
+  // Check if user has admin/manager/technician role
+  if (profile && !['admin', 'manager', 'technician'].includes(profile.role)) {
+    console.log('🚫 ProtectedRoute - user role not allowed:', profile.role, 'redirecting to portal...');
+    return <Navigate to="/portal" replace />;
+  }
 
-  return renderContent;
+  console.log('✅ ProtectedRoute - user authorized, rendering children...');
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
