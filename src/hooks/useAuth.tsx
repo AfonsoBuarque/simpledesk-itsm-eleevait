@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 
 interface Profile {
   id: string;
@@ -18,7 +17,7 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
@@ -82,7 +81,7 @@ export const useAuth = () => {
     let mounted = true;
     let authTimeout: NodeJS.Timeout;
 
-    const initializeAuth = async () => {
+    async function initializeAuth() {
       try {
         console.log('Initializing auth...');
         
@@ -92,6 +91,7 @@ export const useAuth = () => {
         if (error) {
           console.error('Error getting session:', error);
           if (mounted) {
+            setProfileLoading(false);
             setUser(null);
             setSession(null);
             setProfile(null);
@@ -103,27 +103,29 @@ export const useAuth = () => {
         console.log('Current session:', session?.user?.id);
 
         if (mounted) {
-          setSession(session);
           const currentUser = session?.user ?? null;
+          setSession(session);
           setUser(currentUser);
 
           if (currentUser) {
             await fetchProfile(currentUser.id, currentUser.email || '');
           } else {
             setProfile(null);
+            setProfileLoading(false);
             setLoading(false);
           }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
+          setProfileLoading(false);
           setUser(null);
           setSession(null);
           setProfile(null);
           setLoading(false);
         }
       }
-    };
+    }
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -133,6 +135,7 @@ export const useAuth = () => {
         if (!mounted) return;
 
         setSession(session);
+        setLoading(true);
         const currentUser = session?.user ?? null;
         setUser(currentUser);
 
@@ -140,6 +143,7 @@ export const useAuth = () => {
           await fetchProfile(currentUser.id, currentUser.email || '');
         } else {
           setProfile(null);
+          setProfileLoading(false);
           setLoading(false);
         }
       }
@@ -148,10 +152,11 @@ export const useAuth = () => {
     // Definir um timeout para evitar carregamento infinito
     authTimeout = setTimeout(() => {
       if (mounted && loading) {
-        console.log('Auth timeout reached, forcing loading to false');
+        console.log('Auth timeout reached, forcing loading states to false');
+        setProfileLoading(false);
         setLoading(false);
       }
-    }, 5000);
+    }, 3000);
 
     // Initialize auth
     initializeAuth();
@@ -167,9 +172,12 @@ export const useAuth = () => {
   // Atualizar o estado de loading quando o perfil for carregado
   useEffect(() => {
     if (user && profile && loading) {
+      console.log('Profile loaded, setting loading to false');
+      setProfileLoading(false);
       setLoading(false);
     } else if (user && !profileLoading && loading) {
       // Se temos usuário mas o perfil não está carregando, podemos finalizar o loading
+      console.log('User loaded but no profile, setting loading to false');
       setLoading(false);
     }
   }, [user, profile, profileLoading, loading]);
@@ -177,8 +185,10 @@ export const useAuth = () => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Attempting sign in');
+      setLoading(true);
       
       if (!email || !password) {
+        setLoading(false);
         return { error: new Error('Email and password are required') };
       }
 
@@ -192,12 +202,14 @@ export const useAuth = () => {
       if (error) {
         console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
       } else {
-        console.log('Sign in successful');
+        console.log('Sign in successful, user will be set by auth state change');
       }
 
+      // Não definimos loading como false aqui, pois o evento onAuthStateChange vai lidar com isso
       return { data, error };
     } catch (error) {
       console.error('Error:', error);
+      setLoading(false);
       return { error };
     }
   };
@@ -205,8 +217,10 @@ export const useAuth = () => {
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       console.log('Attempting sign up');
+      setLoading(true);
       
       if (!email || !password || !fullName) {
+        setLoading(false);
         return { error: new Error('All fields are required') };
       }
 
@@ -217,10 +231,12 @@ export const useAuth = () => {
           data: { full_name: fullName }
         }
       });
-
+      
+      // Não definimos loading como false aqui, pois o evento onAuthStateChange vai lidar com isso
       return { data, error };
     } catch (error) {
       console.error('Error:', error);
+      setLoading(false);
       return { error };
     }
   };
@@ -228,15 +244,20 @@ export const useAuth = () => {
   const signOut = async () => {
     try {
       console.log('Attempting sign out');
+      setLoading(true);
+      
       const { error } = await supabase.auth.signOut();
       if (!error) {
         setUser(null);
         setSession(null);
         setProfile(null);
       }
+      
+      setLoading(false);
       return { error };
     } catch (error) {
       console.error('Error:', error);
+      setLoading(false);
       return { error };
     }
   };
@@ -245,12 +266,14 @@ export const useAuth = () => {
     user,
     session,
     profile,
-    loading: loading || profileLoading,
+    loading,
+    profileLoading,
     signIn,
     signUp,
     signOut,
     refreshProfile: async () => {
       if (user) {
+        setProfileLoading(true);
         await fetchProfile(user.id, user.email || '');
       }
     }

@@ -10,23 +10,24 @@ import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal';
 
 const UserPortal = () => {
-  const { signOut, profile, user, loading: authLoading } = useAuth();
+  const { signOut, profile, user, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
-  const [redirectChecked, setRedirectChecked] = useState<boolean>(false);
 
   // Verificar se o usuário está autenticado
   useEffect(() => {
-    // Se não estamos carregando e não temos usuário, redirecionar para login
-    if (!authLoading && !user) {
-      console.log('UserPortal - Usuário não autenticado, redirecionando para login');
-      navigate('/auth', { replace: true });
-    } else if (!authLoading && user && !redirectChecked) {
-      console.log('UserPortal - Usuário autenticado, permanecendo no portal');
-      setRedirectChecked(true);
+    console.log('UserPortal - Auth state:', { user, loading });
+    
+    if (!loading) {
+      if (!user) {
+        console.log('UserPortal - Usuário não autenticado, redirecionando para login');
+        navigate('/auth', { replace: true });
+      } else {
+        console.log('UserPortal - Usuário autenticado, permanecendo no portal');
+      }
     }
-  }, [authLoading, user, navigate, redirectChecked]);
+  }, [loading, user, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,6 +39,15 @@ const UserPortal = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {loading && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      )}
+      
       {/* Header moderno */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

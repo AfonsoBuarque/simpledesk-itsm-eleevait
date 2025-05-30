@@ -21,42 +21,26 @@ import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
-  const { loading: authLoading, user } = useAuth();
+  const { loading, user } = useAuth();
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [localLoading, setLocalLoading] = useState<boolean>(true);
 
   // Redirecionar todos os usuários para o portal
   useEffect(() => {
-    if (!authLoading) {
-      setLocalLoading(false);
-    }
-    
-    if (!authLoading && user) {
-      console.log('Index - Redirecionando usuário para portal');
-      navigate('/portal', { replace: true });
-    } else if (!authLoading && !user) {
-      console.log('Index - Usuário não autenticado, redirecionando para login');
-      navigate('/auth', { replace: true }); 
-    }
-  }, [authLoading, user, navigate]);
+    console.log('Index - Auth state:', { user, loading });
 
-  // Forçar carregamento para terminar após 8 segundos
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLocalLoading(false);
-    }, 3000);
-
-    // Se o loading do auth terminar, atualizar o estado local
-    if (!authLoading && user) {
-      setLocalLoading(false);
-      clearTimeout(timer);
+    if (!loading) {
+      if (user) {
+        console.log('Index - Redirecionando usuário para portal');
+        navigate('/portal', { replace: true });
+      } else {
+        console.log('Index - Usuário não autenticado, redirecionando para login');
+        navigate('/auth', { replace: true });
+      }
     }
-
-    return () => clearTimeout(timer);
-  }, [authLoading]);
+  }, [loading, user, navigate]);
 
   const handleMenuItemClick = (item: string) => {
     setActiveItem(item);
@@ -98,19 +82,13 @@ const Index: React.FC = () => {
     }
   };
 
-  if (localLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-lg font-medium text-gray-900">Inicializando o sistema...</p>
           <p className="text-sm text-gray-500">Isso pode levar alguns instantes</p>
-          <button 
-            onClick={() => setLocalLoading(false)}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Continuar mesmo assim
-          </button>
         </div>
       </div>
     );
