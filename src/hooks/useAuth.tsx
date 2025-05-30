@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import { toast } from '@/components/ui/use-toast';
 
 interface Profile {
@@ -320,18 +319,18 @@ export const useAuth = () => {
             ? "Email ou senha incorretos" 
             : result.error.message,
           variant: "destructive",
-        console.warn('Failed login attempt:', { email: email.trim(), error });
+        });
       } else {
         console.log('Sign in successful');
         
         // Verificar se o usuário existe na tabela users, se não, criar
-        if (data?.user) {
+        if (result.data?.user) {
           try {
             // Primeiro verificar se o usuário já existe
             const { data: existingUser, error: checkError } = await supabase
               .from('users')
               .select('id')
-              .eq('id', data.user.id)
+              .eq('id', result.data.user.id)
               .maybeSingle();
             
             if (checkError) {
@@ -344,9 +343,9 @@ export const useAuth = () => {
               const { error: insertError } = await supabase
                 .from('users')
                 .insert({
-                  id: data.user.id,
-                  email: data.user.email,
-                  name: data.user.user_metadata?.full_name || data.user.email,
+                  id: result.data.user.id,
+                  email: result.data.user.email,
+                  name: result.data.user.user_metadata?.full_name || result.data.user.email,
                   role: 'user',
                   status: 'active'
                 });
@@ -437,25 +436,6 @@ export const useAuth = () => {
         return { data: null, error: { message: 'Senha deve ter pelo menos 8 caracteres' } };
       }
 
-      // Validação de política de senha mais forte
-        console.error('Senha deve conter pelo menos uma letra maiúscula, minúscula e um número');
-        toast({
-          title: "Erro",
-          description: "Senha deve conter pelo menos uma letra maiúscula, minúscula e um número",
-          variant: "destructive",
-        });
-      // Simplificando requisitos de senha para facilitar testes
-      // const hasUpperCase = /[A-Z]/.test(password);
-      // const hasLowerCase = /[a-z]/.test(password);
-      // const hasNumbers = /\d/.test(password);
-      // 
-      // if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
-      //   return { 
-      //     data: null, 
-      //     error: { message: 'Senha deve conter pelo menos uma letra maiúscula, minúscula e um número' } 
-      //   };
-      // }
-
       // Sanitizar entrada
       const sanitizedEmail = email.trim().toLowerCase();
       const sanitizedFullName = fullName.trim().replace(/[<>]/g, '');
@@ -500,49 +480,29 @@ export const useAuth = () => {
   const signOut = async () => {
     try {
       console.log('Attempting sign out');
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      const { error } = await supabase.auth.signOut();
+      
       if (error) {
-        console.error('Sign up error:', error);
-        return { data, error };
-      }
-      
-      if (data?.user) {
-        // Limpar estado local
-        setUser(null);
-        setSession(null);
-        setProfile(null);
+        console.error('Sign out error:', error);
         toast({
-          title: "Logout realizado",
-          description: "Você saiu do sistema com sucesso",
+          title: "Erro",
+          description: "Erro durante logout",
+          variant: "destructive",
         });
-        console.log('Sign out successful');
-        
-        // Inserir o usuário na tabela users
-        try {
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert({
-              id: data.user.id,
-              email: data.user.email,
-              name: sanitizedFullName,
-              role: 'user',
-              status: 'active'
-            });
-          
-          if (insertError) {
-            console.error('Error inserting user record:', insertError);
-            toast({
-              title: "Aviso",
-              description: "Cadastro realizado, mas houve um erro ao configurar seu perfil.",
-              variant: "destructive",
-            });
-          }
-        } catch (err) {
-          console.error('Error handling user record:', err);
-        }
+        return { error };
       }
       
-      return { error };
+      // Limpar estado local
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu do sistema com sucesso",
+      });
+      console.log('Sign out successful');
+      
+      return { error: null };
     } catch (error) {
       console.error('Unexpected signout error:', error);
       toast({
