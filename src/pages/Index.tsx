@@ -21,7 +21,7 @@ import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
-  const { loading, user } = useAuth();
+  const { loading, user, profile } = useAuth();
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -29,16 +29,18 @@ const Index: React.FC = () => {
 
   // Redirecionar todos os usuários para o portal
   useEffect(() => {
-    console.log('Index - Auth state:', { user, loading });
+    console.log('Index - Auth state:', { user, profile, loading });
 
-    if (!loading) {
+    // Apenas redirecionar se não estiver carregando
+    if (!loading && user) {
       if (user) {
         console.log('Index - Redirecionando usuário para portal');
         navigate('/portal', { replace: true });
-      } else {
+      }
+    } else if (!loading && !user) {
+      // Se não estiver carregando e não houver usuário, redirecionar para login
         console.log('Index - Usuário não autenticado, redirecionando para login');
         navigate('/auth', { replace: true });
-      }
     }
   }, [loading, user, navigate]);
 

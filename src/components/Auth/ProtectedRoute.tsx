@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+  const { user, loading, profile } = useAuth();
   
   console.log('ProtectedRoute - Auth state:', {user, loading});
 
@@ -26,10 +26,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
 
     if (!user) {
+      console.log('ProtectedRoute - Usuário não autenticado, redirecionando para login');
       return <Navigate to="/auth" replace />;
     }
 
-    // Redirecionar todos os usuários para o portal
+    // Redirecionar para o portal
+    console.log('ProtectedRoute - Usuário autenticado, redirecionando para portal');
     return <Navigate to="/portal" replace />;
   }, [loading, user]);
 

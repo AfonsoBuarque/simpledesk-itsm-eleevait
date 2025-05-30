@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface Profile {
   id: string;
@@ -18,6 +19,7 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
@@ -81,6 +83,9 @@ export const useAuth = () => {
     let mounted = true;
     let authTimeout: NodeJS.Timeout;
 
+    // Evitar múltiplas inicializações
+    if (authInitialized) return;
+
     async function initializeAuth() {
       try {
         console.log('Initializing auth...');
@@ -103,6 +108,7 @@ export const useAuth = () => {
         console.log('Current session:', session?.user?.id);
 
         if (mounted) {
+          setAuthInitialized(true);
           const currentUser = session?.user ?? null;
           setSession(session);
           setUser(currentUser);
@@ -130,9 +136,15 @@ export const useAuth = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        console.log('Auth state changed:', event, session?.user?.id, 'Previous user:', user?.id);
         
         if (!mounted) return;
+
+        // Evitar redefinir o mesmo usuário
+        if (event === 'SIGNED_IN' && user?.id === session?.user?.id) {
+          console.log('Mesmo usuário, ignorando evento de login duplicado');
+          return;
+        }
 
         setSession(session);
         setLoading(true);
@@ -152,7 +164,7 @@ export const useAuth = () => {
     // Definir um timeout para evitar carregamento infinito
     authTimeout = setTimeout(() => {
       if (mounted && loading) {
-        console.log('Auth timeout reached, forcing loading states to false');
+        console.log('Auth timeout reached, forcing loading states to false', { user, profile });
         setProfileLoading(false);
         setLoading(false);
       }
@@ -165,9 +177,9 @@ export const useAuth = () => {
     return () => {
       mounted = false;
       clearTimeout(authTimeout);
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
-  }, []);
+  }, [authInitialized]);
 
   // Atualizar o estado de loading quando o perfil for carregado
   useEffect(() => {
@@ -185,10 +197,8 @@ export const useAuth = () => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Attempting sign in');
-      setLoading(true);
       
       if (!email || !password) {
-        setLoading(false);
         return { error: new Error('Email and password are required') };
       }
 
@@ -202,14 +212,13 @@ export const useAuth = () => {
       if (error) {
         console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
       } else {
-        console.log('Sign in successful, user will be set by auth state change');
+        console.log('Sign in successful');
+        // Não definimos o usuário aqui, o evento onAuthStateChange vai lidar com isso
       }
 
-      // Não definimos loading como false aqui, pois o evento onAuthStateChange vai lidar com isso
       return { data, error };
     } catch (error) {
       console.error('Error:', error);
-      setLoading(false);
       return { error };
     }
   };
@@ -217,10 +226,8 @@ export const useAuth = () => {
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       console.log('Attempting sign up');
-      setLoading(true);
       
       if (!email || !password || !fullName) {
-        setLoading(false);
         return { error: new Error('All fields are required') };
       }
 
@@ -232,11 +239,9 @@ export const useAuth = () => {
         }
       });
       
-      // Não definimos loading como false aqui, pois o evento onAuthStateChange vai lidar com isso
       return { data, error };
     } catch (error) {
       console.error('Error:', error);
-      setLoading(false);
       return { error };
     }
   };
@@ -244,20 +249,23 @@ export const useAuth = () => {
   const signOut = async () => {
     try {
       console.log('Attempting sign out');
-      setLoading(true);
       
       const { error } = await supabase.auth.signOut();
       if (!error) {
+        console.log('Sign out successful, clearing user data');
         setUser(null);
         setSession(null);
         setProfile(null);
+        setAuthInitialized(false);
+        
+        // Forçar recarregamento da página para limpar completamente o estado
+        window.location.href = '/auth';
+        return { error: null };
       }
       
-      setLoading(false);
       return { error };
     } catch (error) {
       console.error('Error:', error);
-      setLoading(false);
       return { error };
     }
   };
