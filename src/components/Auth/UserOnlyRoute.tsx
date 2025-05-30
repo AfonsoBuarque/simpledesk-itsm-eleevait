@@ -1,15 +1,15 @@
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 interface UserOnlyRouteProps {
   children: React.ReactNode;
 }
 
 const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
-  const { user, profile, loading, error } = useAuth();
+  const { user, profile, loading } = useAuth();
+  console.log('UserOnlyRoute - Auth state:', { user, profile, loading });
 
   if (loading) {
     return (
@@ -23,17 +23,16 @@ const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   }
 
   if (!user) {
+    console.log('UserOnlyRoute - No user, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
 
-  console.log('UserOnlyRoute - Verificando perfil:', profile);
-  
-  if (profile && profile.role !== 'user') {
-    console.log('Redirecionando para home - usuário não é comum');
-    return <Navigate to="/\" replace />;
+  if (profile?.role !== 'user') {
+    console.log('UserOnlyRoute - User role is not "user", redirecting to /');
+    return <Navigate to="/" replace />;
   }
 
-  console.log('Permitindo acesso ao portal de usuário');
+  console.log('UserOnlyRoute - User has "user" role, showing portal content');
   return <>{children}</>;
 };
 

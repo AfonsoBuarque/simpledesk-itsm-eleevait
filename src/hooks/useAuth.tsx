@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface Profile {
   id: string;
@@ -18,67 +18,64 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
-      console.log('Iniciando busca de perfil para usuário:', userId);
+      console.log('Fetching profile for user:', userId, 'with email:', userEmail);
+      
+      // Primeiro, tentar buscar na tabela users
+      try {
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
 
-      // Buscar dados do usuário diretamente da tabela users
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select(`
-          *,
-          clients:client_id (
-            id,
-            name
-          )
-        `)
-        .eq('id', userId)
-        .maybeSingle(); // Usando maybeSingle() ao invés de single()
-
-      console.log('Resultado da busca de perfil:', { userData, userError });
-
-      // Se encontrou dados na tabela users e não houve erro, use esses dados
-      if (userData && !userError) {
-        console.log('Perfil encontrado na tabela users:', userData);
-        setProfile({
-          id: userData.id,
-          full_name: userData.name || null,
-          email: userData.email || userEmail,
-          role: userData.role || 'user',
-          department: userData.department || null,
-          phone: userData.phone || null,
-          client_id: userData.client_id || null,
-        });
-        return;
+        if (userData) {
+          console.log('Profile found in users table:', userData);
+          const userProfile: Profile = {
+            id: userData.id,
+            full_name: userData.name,
+            email: userData.email,
+            role: userData.role || 'user',
+            department: userData.department,
+            phone: userData.phone,
+            client_id: userData.client_id || null,
+          };
+          setProfile(userProfile);
+          return;
+        }
+      } catch (userQueryError) {
+        console.error('Error querying users table:', userQueryError);
       }
 
-      // Se não encontrou na users, tenta na profiles
-      console.log('Buscando na tabela profiles...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle(); // Usando maybeSingle() ao invés de single()
-
-      // Se encontrou dados na tabela profiles e não houve erro, use esses dados
-      if (profileData && !profileError) {
-        console.log('Perfil encontrado na tabela profiles:', profileData);
-        setProfile({
-          id: profileData.id,
-          full_name: profileData.full_name,
-          email: profileData.email || userEmail,
-          role: profileData.role || 'user',
-          department: profileData.department,
-          phone: profileData.phone,
-          client_id: null,
-        });
-        return;
+      // Se não encontrou na tabela users, tentar na tabela profiles
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+        
+        if (profileData) {
+          console.log('Profile found in profiles table:', profileData);
+          setProfile({
+            id: profileData.id,
+            full_name: profileData.full_name,
+            email: profileData.email || userEmail,
+            role: profileData.role || 'user',
+            department: profileData.department,
+            phone: profileData.phone,
+            client_id: null,
+          });
+          return;
+        }
+      } catch (profileQueryError) {
+        console.error('Error querying profiles table:', profileQueryError);
       }
-
-      // Se não encontrou em nenhuma tabela, criar um perfil padrão
-      console.log('Criando perfil padrão para o usuário');
+      
+      // Se não encontrou em nenhuma tabela, criar um perfil básico
+      console.log('No profile found, creating basic profile for:', userId);
       setProfile({
         id: userId,
         full_name: null,
@@ -90,9 +87,7 @@ export const useAuth = () => {
       });
     } catch (error) {
       console.error('Error fetching profile:', error);
-      setError(error as Error);
-      
-      // Criar um perfil padrão para evitar loop infinito
+      // Definir um perfil básico mesmo em caso de erro
       setProfile({
         id: userId,
         full_name: null,
@@ -108,8 +103,7 @@ export const useAuth = () => {
   useEffect(() => {
     let mounted = true;
     let initialLoad = true;
-    let timeoutId: number | null = null;
-    setError(null);
+    let loadingTimeout: NodeJS.Timeout;
 
     console.log('Setting up auth state listener');
 
@@ -123,15 +117,21 @@ export const useAuth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && mounted) {
-          await fetchProfile(session.user.id, session.user.email || '');
-        } else {
+        try {
+          if (session?.user && mounted) {
+            await fetchProfile(session.user.id, session.user.email || '');
+          } else {
+            setProfile(null);
+          }
+        } catch (error) {
+          console.error('Error in auth state change handler:', error);
           setProfile(null);
         }
         
-        // Definir loading como false após processar o evento
-        if (mounted) {
+        // Só definir loading como false após a primeira verificação
+        if (mounted && initialLoad) {
           setLoading(false);
+          initialLoad = false;
         }
       }
     );
@@ -139,55 +139,54 @@ export const useAuth = () => {
     // Verificar sessão existente
     const getInitialSession = async () => {
       try {
+        // Definir um timeout para garantir que o loading termine
+        loadingTimeout = setTimeout(() => {
+          if (mounted && loading) {
+            console.log('Loading timeout reached, forcing loading to false');
+            setLoading(false);
+          }
+        }, 3000);
+
         console.log('Checking for existing session');
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error('Error getting session:', error);
-          if (mounted) setLoading(false);
-          return;
-        }
-        
+        if (error) throw error;
         if (!mounted) return;
 
-        console.log('Initial session:', session?.user?.id);
+        console.log('Initial user details:', session?.user);
         setSession(session);
         setUser(session?.user ?? null);
-        
-        if (session?.user && mounted) {
-          await fetchProfile(session.user.id, session.user.email || '');
-        } else {
+
+        try {
+          if (session?.user && mounted) {
+            await fetchProfile(session.user.id, session.user.email || '');
+          } else {
+            setProfile(null);
+          }
+        } catch (error) {
+          console.error('Error fetching profile in getInitialSession:', error);
           setProfile(null);
         }
         
-        // Definir loading como false após processar a sessão inicial
         if (mounted) {
           setLoading(false);
+          initialLoad = false;
         }
       } catch (error) {
-        console.error('Unexpected error getting session:', error);
+        console.error('Error:', error);
         if (mounted) {
           setLoading(false);
+          initialLoad = false;
         }
       }
     };
 
     getInitialSession();
 
-    // Forçar loading para false após 3 segundos, independente do resultado
-    timeoutId = window.setTimeout(() => {
-      if (mounted && loading) {
-        console.log('Forçando loading para false após timeout');
-        setLoading(false);
-      }
-    }, 3000);
-
     return () => {
       console.log('Cleaning up auth listener');
       mounted = false;
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
@@ -197,11 +196,30 @@ export const useAuth = () => {
       console.log('Attempting sign in for:', email);
       
       // Validação de entrada
-      if (!email || !password) {
-        return { data: null, error: { message: 'Email e senha são obrigatórios' } };
+      if (!email) {
+        toast({
+          title: "Erro",
+          description: "Email é obrigatório",
+          variant: "destructive",
+        });
+        return { data: null, error: { message: 'Email é obrigatório' } };
+      }
+      
+      if (!password) {
+        toast({
+          title: "Erro",
+          description: "Senha é obrigatória",
+          variant: "destructive",
+        });
+        return { data: null, error: { message: 'Senha é obrigatória' } };
       }
 
       if (!email.includes('@')) {
+        toast({
+          title: "Erro",
+          description: "Email inválido",
+          variant: "destructive",
+        });
         return { data: null, error: { message: 'Email inválido' } };
       }
 
@@ -214,13 +232,29 @@ export const useAuth = () => {
 
       if (error) {
         console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
+        toast({
+          title: "Erro de Login",
+          description: error.message === "Invalid login credentials" 
+            ? "Email ou senha incorretos" 
+            : error.message,
+          variant: "destructive",
+        });
       } else {
         console.log('Sign in successful');
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao sistema",
+        });
       }
 
       return { data, error };
     } catch (error) {
       console.error('Unexpected signin error:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado durante o login",
+        variant: "destructive",
+      });
       return { data: null, error: { message: 'Erro inesperado durante o login' } };
     }
   };
@@ -230,15 +264,48 @@ export const useAuth = () => {
       console.log('Attempting sign up for:', email);
       
       // Validação de entrada
-      if (!email || !password || !fullName) {
-        return { data: null, error: { message: 'Todos os campos são obrigatórios' } };
+      if (!email) {
+        toast({
+          title: "Erro",
+          description: "Email é obrigatório",
+          variant: "destructive",
+        });
+        return { data: null, error: { message: 'Email é obrigatório' } };
+      }
+      
+      if (!password) {
+        toast({
+          title: "Erro",
+          description: "Senha é obrigatória",
+          variant: "destructive",
+        });
+        return { data: null, error: { message: 'Senha é obrigatória' } };
+      }
+      
+      if (!fullName) {
+        toast({
+          title: "Erro",
+          description: "Nome completo é obrigatório",
+          variant: "destructive",
+        });
+        return { data: null, error: { message: 'Nome completo é obrigatório' } };
       }
 
       if (!email.includes('@')) {
+        toast({
+          title: "Erro",
+          description: "Email inválido",
+          variant: "destructive",
+        });
         return { data: null, error: { message: 'Email inválido' } };
       }
 
       if (password.length < 8) {
+        toast({
+          title: "Erro",
+          description: "Senha deve ter pelo menos 8 caracteres",
+          variant: "destructive",
+        });
         return { data: null, error: { message: 'Senha deve ter pelo menos 8 caracteres' } };
       }
 
@@ -248,6 +315,11 @@ export const useAuth = () => {
       const hasNumbers = /\d/.test(password);
       
       if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+        toast({
+          title: "Erro",
+          description: "Senha deve conter pelo menos uma letra maiúscula, minúscula e um número",
+          variant: "destructive",
+        });
         return { 
           data: null, 
           error: { message: 'Senha deve conter pelo menos uma letra maiúscula, minúscula e um número' } 
@@ -273,11 +345,26 @@ export const useAuth = () => {
 
       if (!error) {
         console.log('Sign up successful');
+        toast({
+          title: "Cadastro realizado com sucesso",
+          description: "Sua conta foi criada com sucesso",
+        });
+      } else {
+        toast({
+          title: "Erro no cadastro",
+          description: error.message,
+          variant: "destructive",
+        });
       }
 
       return { data, error };
     } catch (error) {
       console.error('Unexpected signup error:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado durante o registro",
+        variant: "destructive",
+      });
       return { data: null, error: { message: 'Erro inesperado durante o registro' } };
     }
   };
@@ -291,11 +378,20 @@ export const useAuth = () => {
         setUser(null);
         setSession(null);
         setProfile(null);
+        toast({
+          title: "Logout realizado",
+          description: "Você saiu do sistema com sucesso",
+        });
         console.log('Sign out successful');
       }
       return { error };
     } catch (error) {
       console.error('Unexpected signout error:', error);
+      toast({
+        title: "Erro",
+        description: "Erro durante logout",
+        variant: "destructive",
+      });
       return { error: { message: 'Erro durante logout' } };
     }
   };
@@ -308,6 +404,5 @@ export const useAuth = () => {
     signIn,
     signUp,
     signOut,
-    error,
   };
 };

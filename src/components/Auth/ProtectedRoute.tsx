@@ -1,15 +1,15 @@
-
 import React, { useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, profile, loading, error } = useAuth();
+  const { user, profile, loading } = useAuth();
+  console.log('ProtectedRoute - Auth state:', { user, profile, loading });
 
   const renderContent = useMemo(() => {
     if (loading) {
@@ -24,19 +24,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
 
     if (!user) {
+      console.log('ProtectedRoute - No user, redirecting to /auth');
       return <Navigate to="/auth" replace />;
     }
 
     // Redirecionar usuários com função "user" para o portal
-    console.log('Verificando redirecionamento - Perfil:', profile);
-    
-    if (profile && profile.role === 'user') {
-      console.log('Redirecionando para portal - usuário comum');
-      return <Navigate to="/portal\" replace />;
+    if (profile?.role === 'user') {
+      console.log('ProtectedRoute - User role is "user", redirecting to /portal');
+      return <Navigate to="/portal" replace />;
     }
 
+    console.log('ProtectedRoute - User has admin/tech role, showing admin content');
     // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
-    console.log('Permitindo acesso à área administrativa');
     return <>{children}</>;
   }, [loading, user, profile, children]);
 
