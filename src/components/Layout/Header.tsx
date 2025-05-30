@@ -50,7 +50,7 @@ const Header = ({
     try {
       console.log('Fetching user client for profile:', profile?.id);
       
-      // Buscar dados do usuário diretamente da tabela users
+      // Buscar dados do usuário diretamente da tabela users com cliente
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select(`

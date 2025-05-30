@@ -23,10 +23,16 @@ export const useAuth = () => {
     try {
       console.log('Fetching profile for user:', userId, 'with email:', userEmail);
       
-      // Buscar primeiro na tabela users (fonte principal)
+      // Buscar dados da tabela users (fonte principal)
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('*')
+        .select(`
+          *,
+          clients:client_id (
+            id,
+            name
+          )
+        `)
         .eq('id', userId)
         .single();
       
@@ -44,13 +50,10 @@ export const useAuth = () => {
           client_id: userData.client_id || null,
         };
         setProfile(userProfile);
-        
-        // Sincronizar com a tabela profiles se necessário
-        await syncWithProfiles(userData);
         return;
       }
 
-      // Se não encontrar na users, tentar na tabela profiles como fallback
+      // Fallback para a tabela profiles se não encontrar em users
       console.log('Trying to fetch from profiles table...');
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -80,43 +83,6 @@ export const useAuth = () => {
       setProfile(null);
     }
   }, []);
-
-  const syncWithProfiles = async (userData: any) => {
-    try {
-      // Verificar se existe perfil e sincronizar se necessário
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userData.id)
-        .single();
-
-      if (existingProfile) {
-        // Atualizar perfil se os dados estão diferentes
-        const needsUpdate = 
-          existingProfile.full_name !== userData.name ||
-          existingProfile.email !== userData.email ||
-          existingProfile.role !== userData.role ||
-          existingProfile.department !== userData.department ||
-          existingProfile.phone !== userData.phone;
-
-        if (needsUpdate) {
-          await supabase
-            .from('profiles')
-            .update({
-              full_name: userData.name,
-              email: userData.email,
-              role: userData.role,
-              department: userData.department,
-              phone: userData.phone,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', userData.id);
-        }
-      }
-    } catch (error) {
-      console.error('Error syncing with profiles:', error);
-    }
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -190,7 +156,7 @@ export const useAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []); // Removido fetchProfile das dependências para evitar loops
+  }, [fetchProfile]);
 
   const signIn = async (email: string, password: string) => {
     try {
