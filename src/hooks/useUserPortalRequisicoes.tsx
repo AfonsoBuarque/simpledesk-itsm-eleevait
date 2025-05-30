@@ -5,7 +5,7 @@ import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
-export const useUserPortalRequisicoes = () => {
+export function useUserPortalRequisicoes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -61,4 +61,4 @@ export const useUserPortalRequisicoes = () => {
   return {
     createRequisicao,
   };
-};
+}
