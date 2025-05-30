@@ -18,11 +18,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
-  console.log('🔑 Auth component - user:', !!user, 'profile:', !!profile);
-
   useEffect(() => {
     if (user && profile) {
-      console.log('🔑 Auth - user already logged in, redirecting...');
       if (['admin', 'manager', 'technician'].includes(profile.role || '')) {
         navigate('/', { replace: true });
       } else {
@@ -38,16 +35,13 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        console.log('🔑 Attempting login...');
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
-        console.log('✅ Login successful:', data.user?.id);
       } else {
-        console.log('🔑 Attempting signup...');
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -59,10 +53,8 @@ const Auth = () => {
         });
 
         if (error) throw error;
-        console.log('✅ Signup successful:', data.user?.id);
       }
     } catch (error: any) {
-      console.error('❌ Auth error:', error);
       setError(error.message || 'Erro na autenticação');
     } finally {
       setLoading(false);

@@ -24,14 +24,8 @@ const queryClient = new QueryClient({
   },
 });
 
-console.log('📱 App component rendering...');
-
 const App = () => {
-  console.log('🎯 App render start');
-  
   try {
-    console.log('🔧 Setting up providers...');
-    
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -39,53 +33,24 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={
-                <>
-                  {(() => {
-                    console.log('🔑 Rendering Auth route');
-                    return null;
-                  })()}
-                  <Auth />
-                </>
-              } />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/portal" element={
-                <>
-                  {(() => {
-                    console.log('🏠 Rendering UserPortal route');
-                    return null;
-                  })()}
-                  <UserOnlyRoute>
-                    <UserPortal />
-                  </UserOnlyRoute>
-                </>
+                <UserOnlyRoute>
+                  <UserPortal />
+                </UserOnlyRoute>
               } />
               <Route path="/" element={
-                <>
-                  {(() => {
-                    console.log('🏢 Rendering Index route with ProtectedRoute');
-                    return null;
-                  })()}
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                </>
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
               } />
-              <Route path="*" element={
-                <>
-                  {(() => {
-                    console.log('❓ Rendering NotFound route');
-                    return null;
-                  })()}
-                  <NotFound />
-                </>
-              } />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
     );
   } catch (error) {
-    console.error('💥 Error in App component:', error);
     return <div>Erro na aplicação: {(error as Error).message}</div>;
   }
 };

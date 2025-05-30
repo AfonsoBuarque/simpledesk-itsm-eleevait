@@ -17,12 +17,8 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
-  console.log('🔐 useAuth hook initializing...');
-
   const fetchProfile = async (userId: string) => {
     try {
-      console.log('👤 Fetching profile for user:', userId);
-      
       // First try profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -31,7 +27,6 @@ export const useAuth = () => {
         .single();
 
       if (profileData && !profileError) {
-        console.log('✅ Profile found in profiles table:', profileData);
         setProfile({
           id: profileData.id,
           full_name: profileData.full_name,
@@ -42,8 +37,6 @@ export const useAuth = () => {
         return;
       }
 
-      console.log('⚠️ No profile in profiles table, trying users table...');
-      
       // Fallback to users table
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -52,7 +45,6 @@ export const useAuth = () => {
         .single();
 
       if (userData && !userError) {
-        console.log('✅ Profile found in users table:', userData);
         setProfile({
           id: userData.id,
           full_name: userData.name,
@@ -63,7 +55,6 @@ export const useAuth = () => {
         return;
       }
 
-      console.log('⚠️ No profile found in either table, creating default profile...');
       // Create a default profile if none exists
       setProfile({
         id: userId,
@@ -74,7 +65,6 @@ export const useAuth = () => {
       });
 
     } catch (error) {
-      console.error('💥 Error fetching profile:', error);
       // Set a default profile even on error
       setProfile({
         id: userId,
@@ -87,13 +77,10 @@ export const useAuth = () => {
   };
 
   useEffect(() => {
-    console.log('🔐 useAuth useEffect - getting initial session...');
-    
     let mounted = true;
 
     const initializeAuth = async () => {
       try {
-        console.log('📡 Getting initial session from Supabase...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -102,11 +89,9 @@ export const useAuth = () => {
 
         if (mounted) {
           if (session?.user) {
-            console.log('✅ Initial session found:', session.user.id);
             setUser(session.user);
             await fetchProfile(session.user.id);
           } else {
-            console.log('ℹ️ No initial session found');
             setUser(null);
             setProfile(null);
           }
@@ -114,7 +99,6 @@ export const useAuth = () => {
           setInitialized(true);
         }
       } catch (error) {
-        console.error('💥 Error in initializeAuth:', error);
         if (mounted) {
           setLoading(false);
           setInitialized(true);
@@ -125,15 +109,11 @@ export const useAuth = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session?.user?.id);
-        
         if (mounted) {
           if (session?.user) {
-            console.log('👤 Setting user from auth change:', session.user.id);
             setUser(session.user);
             await fetchProfile(session.user.id);
           } else {
-            console.log('👤 Clearing user from auth change');
             setUser(null);
             setProfile(null);
           }
@@ -152,7 +132,6 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    console.log('🚪 Signing out...');
     const { error } = await supabase.auth.signOut();
     if (!error) {
       setUser(null);
@@ -160,23 +139,6 @@ export const useAuth = () => {
     }
     return { error };
   };
-
-  const currentState = {
-    hasUser: !!user,
-    hasProfile: !!profile,
-    loading,
-    initialized
-  };
-
-  console.log('🔐 useAuth current state:', currentState);
-
-  const returnState = {
-    hasUser: !!user,
-    hasProfile: !!profile,
-    loading
-  };
-
-  console.log('🔐 useAuth returning state:', returnState);
 
   return {
     user,
