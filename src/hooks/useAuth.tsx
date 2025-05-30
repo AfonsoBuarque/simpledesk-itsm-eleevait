@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -28,7 +27,13 @@ export const useAuth = () => {
       // Buscar dados do usuário diretamente da tabela users
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('*')
+        .select(`
+          *,
+          clients:client_id (
+            id,
+            name
+          )
+        `)
         .eq('id', userId)
         .maybeSingle(); // Usando maybeSingle() ao invés de single()
 
@@ -112,7 +117,6 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
-        console.log('User details:', session?.user);
         
         if (!mounted) return;
 
@@ -125,18 +129,9 @@ export const useAuth = () => {
           setProfile(null);
         }
         
-        // Só definir loading como false após a primeira verificação
-        if (mounted && initialLoad) {
+        // Definir loading como false após processar o evento
+        if (mounted) {
           setLoading(false);
-          initialLoad = false;
-          
-          // Forçar loading para false após 5 segundos, independente do resultado
-          timeoutId = window.setTimeout(() => {
-            if (mounted && loading) {
-              console.log('Forçando loading para false após timeout');
-              setLoading(false);
-            }
-          }, 5000);
         }
       }
     );
@@ -149,12 +144,13 @@ export const useAuth = () => {
         
         if (error) {
           console.error('Error getting session:', error);
+          if (mounted) setLoading(false);
+          return;
         }
         
         if (!mounted) return;
 
         console.log('Initial session:', session?.user?.id);
-        console.log('Initial user details:', session?.user);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -164,17 +160,10 @@ export const useAuth = () => {
           setProfile(null);
         }
         
+        // Definir loading como false após processar a sessão inicial
         if (mounted) {
           setLoading(false);
         }
-        
-        // Forçar loading para false após 5 segundos, independente do resultado
-        timeoutId = window.setTimeout(() => {
-          if (mounted && loading) {
-            console.log('Forçando loading para false após timeout');
-            setLoading(false);
-          }
-        }, 5000);
       } catch (error) {
         console.error('Unexpected error getting session:', error);
         if (mounted) {
@@ -184,6 +173,14 @@ export const useAuth = () => {
     };
 
     getInitialSession();
+
+    // Forçar loading para false após 3 segundos, independente do resultado
+    timeoutId = window.setTimeout(() => {
+      if (mounted && loading) {
+        console.log('Forçando loading para false após timeout');
+        setLoading(false);
+      }
+    }, 3000);
 
     return () => {
       console.log('Cleaning up auth listener');
