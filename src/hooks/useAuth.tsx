@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +29,8 @@ export const useAuth = () => {
         .eq('id', userId)
         .single();
       
+      console.log('Profile query result:', { profileData, profileError });
+      
       if (profileData && !profileError) {
         console.log('Profile found in profiles table:', profileData);
         setProfile({
@@ -45,11 +46,14 @@ export const useAuth = () => {
       }
 
       // Se não encontrar na profiles, buscar na tabela users
+      console.log('Trying to fetch from users table...');
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
         .single();
+      
+      console.log('Users query result:', { userData, userError });
       
       if (userData && !userError) {
         console.log('Profile found in users table:', userData);
@@ -64,7 +68,7 @@ export const useAuth = () => {
         };
         setProfile(userProfile);
       } else {
-        console.log('No profile found for user:', userId);
+        console.log('No profile found for user:', userId, { userError });
         setProfile(null);
       }
     } catch (error) {
@@ -83,6 +87,7 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
+        console.log('User details:', session?.user);
         
         if (!mounted) return;
 
@@ -116,6 +121,7 @@ export const useAuth = () => {
         if (!mounted) return;
 
         console.log('Initial session:', session?.user?.id);
+        console.log('Initial user details:', session?.user);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -162,6 +168,8 @@ export const useAuth = () => {
         email: email.trim(),
         password,
       });
+
+      console.log('Sign in response:', { data, error });
 
       if (error) {
         console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
