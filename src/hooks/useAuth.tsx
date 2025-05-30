@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -77,32 +78,38 @@ export const useAuth = () => {
 
   useEffect(() => {
     let mounted = true;
+    let initialSessionChecked = false;
 
     console.log('Setting up auth state listener');
 
-    // Configurar listener de mudanças de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        console.log('User details:', session?.user);
+    // Função para processar mudanças de sessão
+    const handleAuthChange = async (event: string, session: Session | null) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
+      if (!mounted) return;
 
-        if (!mounted) return;
+      setSession(session);
+      setUser(session?.user ?? null);
 
-        setSession(session);
-        setUser(session?.user ?? null);
+      if (session?.user && mounted) {
+        await fetchProfile(session.user.id, session.user.email || '');
+      } else {
+        setProfile(null);
+      }
 
-        if (session?.user && mounted) {
-          await fetchProfile(session.user.id, session.user.email || '');
-        } else {
-          setProfile(null);
-        }
-
+      if (mounted) {
         setLoading(false);
       }
-    );
+    };
 
-    // Verificar sessão existente
+    // Configurar listener de mudanças de auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange);
+
+    // Verificar sessão existente apenas uma vez
     const getInitialSession = async () => {
+      if (initialSessionChecked) return;
+      initialSessionChecked = true;
+
       try {
         console.log('Checking for existing session');
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -114,17 +121,17 @@ export const useAuth = () => {
         }
 
         console.log('Initial session:', session?.user?.id);
-        console.log('Initial user details:', session?.user);
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user && mounted) {
-          await fetchProfile(session.user.id, session.user.email || '');
-        } else {
-          setProfile(null);
-        }
-
+        
         if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user) {
+            await fetchProfile(session.user.id, session.user.email || '');
+          } else {
+            setProfile(null);
+          }
+
           setLoading(false);
         }
       } catch (error) {
@@ -135,21 +142,12 @@ export const useAuth = () => {
       }
     };
 
-    // Adicionar um timeout para garantir que loading seja definido como false
-    const loadingTimeout = setTimeout(() => {
-      if (mounted && loading) {
-        console.log('Loading timeout reached, forcing loading to false');
-        setLoading(false);
-      }
-    }, 5000);
-
     getInitialSession();
 
     return () => {
       console.log('Cleaning up auth listener');
       mounted = false;
       subscription.unsubscribe();
-      clearTimeout(loadingTimeout);
     };
   }, [fetchProfile]);
 
