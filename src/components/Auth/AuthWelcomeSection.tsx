@@ -1,9 +1,6 @@
-
 import React from 'react';
-
 const AuthWelcomeSection = () => {
-  return (
-    <div className="flex-1 flex items-center justify-center relative z-10 px-16">
+  return <div className="flex-1 flex items-center justify-center relative z-10 px-16">
       <div className="text-white max-w-lg">
         {/* Logo */}
         <div className="mb-12">
@@ -11,7 +8,7 @@ const AuthWelcomeSection = () => {
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
               <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
             </div>
-            <span className="text-xl font-bold">YOUR LOGO</span>
+            <span className="text-xl font-bold">SIMPLE DESK</span>
           </div>
         </div>
         
@@ -24,8 +21,6 @@ const AuthWelcomeSection = () => {
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus et nibh risus.
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AuthWelcomeSection;
