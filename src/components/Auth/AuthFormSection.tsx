@@ -133,18 +133,6 @@ const AuthFormSection = ({
           </form>
 
           <AuthSocialLinks />
-
-          {isLogin && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-xs text-blue-700 mb-2">
-                <strong>Credenciais de teste:</strong>
-              </p>
-              <p className="text-xs text-blue-600">
-                Email: admin@example.com<br />
-                Senha: 123456
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
