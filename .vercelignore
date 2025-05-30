@@ -54,13 +54,3 @@ jspm_packages/
 # Supabase
 supabase/.temp
 supabase/.branches
-
-# Development files
-src/**/*.test.ts
-src/**/*.test.tsx
-src/**/*.spec.ts
-src/**/*.spec.tsx
-
-# Documentation
-README.md
-docs/
