@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Facebook, Twitter, Instagram } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const { signIn, signUp, user } = useAuth();
@@ -34,10 +34,10 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await signIn(loginForm.email, loginForm.password);
+      const result = await signIn(loginForm.email, loginForm.password);
       
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+      if (result.error) {
+        if (result.error.message?.includes('Invalid login credentials')) {
           toast({
             title: "Erro de Login",
             description: "Email ou senha incorretos.",
@@ -46,7 +46,7 @@ const Auth = () => {
         } else {
           toast({
             title: "Erro de Login",
-            description: error.message,
+            description: result.error.message || "Erro ao fazer login",
             variant: "destructive",
           });
         }
@@ -92,14 +92,14 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(
+      const result = await signUp(
         signupForm.email, 
         signupForm.password, 
         signupForm.fullName
       );
       
-      if (error) {
-        if (error.message.includes('User already registered')) {
+      if (result.error) {
+        if (result.error.message?.includes('User already registered')) {
           toast({
             title: "Erro de Cadastro",
             description: "Este email já está cadastrado.",
@@ -108,7 +108,7 @@ const Auth = () => {
         } else {
           toast({
             title: "Erro de Cadastro",
-            description: error.message,
+            description: result.error.message || "Erro ao criar conta",
             variant: "destructive",
           });
         }
