@@ -8,6 +8,7 @@ interface Profile {
   full_name: string | null;
   email: string;
   role: string | null;
+  client_id: string | null;
 }
 
 export const useAuth = () => {
