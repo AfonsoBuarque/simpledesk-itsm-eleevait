@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Facebook, Twitter, Instagram } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 const Auth = () => {
   const { signIn, signUp, user } = useAuth();
@@ -36,8 +36,8 @@ const Auth = () => {
     try {
       const result = await signIn(loginForm.email, loginForm.password);
       
-      if (result.error) {
-        if (result.error.message?.includes('Invalid login credentials')) {
+      if (result?.error) {
+        if (result.error.message && result.error.message.includes('Invalid login credentials')) {
           toast({
             title: "Erro de Login",
             description: "Email ou senha incorretos.",
@@ -94,12 +94,12 @@ const Auth = () => {
     try {
       const result = await signUp(
         signupForm.email, 
-        signupForm.password, 
+        signupForm.password,
         signupForm.fullName
       );
       
-      if (result.error) {
-        if (result.error.message?.includes('User already registered')) {
+      if (result?.error) {
+        if (result.error.message && result.error.message.includes('User already registered')) {
           toast({
             title: "Erro de Cadastro",
             description: "Este email já está cadastrado.",

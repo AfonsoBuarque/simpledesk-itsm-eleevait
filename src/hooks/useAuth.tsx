@@ -77,6 +77,11 @@ export const useAuth = () => {
           console.log('Trying to insert new user record');
           const { data: insertData, error: insertError } = await supabase.auth.getSession();
           
+          if (insertError) {
+            console.error('Error getting session for user insert:', insertError);
+            throw insertError;
+          }
+          
           if (insertData?.session) {
             const { data: newUser, error: createError } = await supabase
               .from('users')
@@ -90,7 +95,12 @@ export const useAuth = () => {
               .select()
               .single();
               
-            if (newUser && !createError) {
+            if (createError) {
+              console.error('Error inserting user record:', createError);
+              throw createError;
+            }
+            
+            if (newUser) {
               console.log('Created new user record:', newUser);
               setProfile({
                 id: newUser.id,
@@ -102,9 +112,6 @@ export const useAuth = () => {
                 client_id: newUser.client_id || null,
               });
               profileFound = true;
-              return;
-            } else {
-              console.error('Error inserting user record:', createError);
             }
           }
         } catch (insertError) {
@@ -205,18 +212,15 @@ export const useAuth = () => {
     // Verificar sessão existente
     const getInitialSession = async () => {
       try {
-        // Definir um timeout para garantir que o loading termine
-        loadingTimeout = setTimeout(() => {
-          if (mounted && loading) {
-            console.log('Loading timeout reached, forcing loading to false');
-            setLoading(false);
-          } 
-        }, 3000);
-
         console.log('Checking for existing session');
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error getting session:', error);
+          if (mounted) setLoading(false);
+          return;
+        }
+        
         if (!mounted) return;
 
         console.log('Initial session:', session?.user?.id);
@@ -227,7 +231,6 @@ export const useAuth = () => {
         try {
           if (session?.user && mounted) {
             await fetchProfile(session.user.id, session.user.email || '');
-            clearTimeout(loadingTimeout); // Limpar timeout se o perfil foi carregado com sucesso
           } else {
             setProfile(null);
           }
@@ -237,17 +240,15 @@ export const useAuth = () => {
         }
 
         // Definir um timeout para verificar novamente a sessão se o perfil não foi carregado
-        if (!profile && session?.user) {
+        if (!profile && session?.user && mounted) {
           authCheckTimeout = setTimeout(async () => {
             if (mounted && session?.user && !profile) {
               await fetchProfile(session.user.id, session.user.email || '');
+              if (mounted) setLoading(false);
             }
           }, 2000);
-        }
-        
-        if (mounted) {
-          setLoading(false);
-          initialLoad = false;
+        } else {
+          if (mounted) setLoading(false);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -344,8 +345,8 @@ export const useAuth = () => {
                 .from('users')
                 .insert({
                   id: result.data.user.id,
-                  email: result.data.user.email,
-                  name: result.data.user.user_metadata?.full_name || result.data.user.email,
+                  email: result.data.user.email || '',
+                  name: result.data.user.user_metadata?.full_name || result.data.user.email || '',
                   role: 'user',
                   status: 'active'
                 });
@@ -440,14 +441,11 @@ export const useAuth = () => {
       const sanitizedEmail = email.trim().toLowerCase();
       const sanitizedFullName = fullName.trim().replace(/[<>]/g, '');
 
-      const redirectUrl = `${window.location.origin}/`;
-
       const result = await supabase.auth.signUp({
         email: sanitizedEmail.trim(),
         password: password,
         options: { 
-          data: { full_name: sanitizedFullName },
-          emailRedirectTo: redirectUrl
+          data: { full_name: sanitizedFullName }
         }
       });
 
