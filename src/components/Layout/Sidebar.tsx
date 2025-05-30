@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import SidebarHeader from './SidebarHeader';
-import SidebarNavigation from './SidebarNavigation';
+import SidebarNavigation from './SidebarNavigation'; 
+import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, onToggleCollapse }: SidebarProps) => {
   const [expandedItems, setExpandedItems] = React.useState<string[]>(['tickets']);
+  const { signOut } = useAuth();
 
   const toggleExpanded = (itemId: string) => {
     if (isCollapsed) return;
@@ -49,6 +50,15 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, o
             onModuleChange={onModuleChange}
             onToggleExpanded={toggleExpanded}
           />
+          
+          <div className="mt-auto p-4">
+            <button 
+              onClick={() => signOut()}
+              className="w-full text-left text-sm text-gray-400 hover:text-white px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+            >
+              {!isCollapsed ? 'Sair do Sistema' : ''}
+            </button>
+          </div>
         </div>
       </aside>
     </>
