@@ -40,32 +40,32 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={
-                <div>
-                  {console.log('🔑 Rendering Auth route')}
+                <>
+                  {console.log('🔑 Rendering Auth route') || null}
                   <Auth />
-                </div>
+                </>
               } />
               <Route path="/portal" element={
-                <div>
-                  {console.log('🏠 Rendering UserPortal route')}
+                <>
+                  {console.log('🏠 Rendering UserPortal route') || null}
                   <UserOnlyRoute>
                     <UserPortal />
                   </UserOnlyRoute>
-                </div>
+                </>
               } />
               <Route path="/" element={
-                <div>
-                  {console.log('🏢 Rendering Index route with ProtectedRoute')}
+                <>
+                  {console.log('🏢 Rendering Index route with ProtectedRoute') || null}
                   <ProtectedRoute>
                     <Index />
                   </ProtectedRoute>
-                </div>
+                </>
               } />
               <Route path="*" element={
-                <div>
-                  {console.log('❓ Rendering NotFound route')}
+                <>
+                  {console.log('❓ Rendering NotFound route') || null}
                   <NotFound />
-                </div>
+                </>
               } />
             </Routes>
           </BrowserRouter>
@@ -74,7 +74,7 @@ const App = () => {
     );
   } catch (error) {
     console.error('💥 Error in App component:', error);
-    return <div>Erro na aplicação: {error.message}</div>;
+    return <div>Erro na aplicação: {(error as Error).message}</div>;
   }
 };
 

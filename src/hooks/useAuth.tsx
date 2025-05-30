@@ -11,6 +11,7 @@ interface Profile {
   role: string | null;
   department: string | null;
   phone: string | null;
+  client_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -124,6 +125,47 @@ export const useAuth = () => {
     }
   };
 
+  const signIn = async (email: string, password: string) => {
+    console.log('🔑 Signing in user:', email);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      console.log('🔑 Sign in result:', { hasData: !!data, error: error?.message });
+      
+      return { data, error };
+    } catch (error) {
+      console.error('💥 Exception signing in:', error);
+      return { data: null, error };
+    }
+  };
+
+  const signUp = async (email: string, password: string, fullName: string) => {
+    console.log('📝 Signing up user:', email);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+      
+      console.log('📝 Sign up result:', { hasData: !!data, error: error?.message });
+      
+      return { data, error };
+    } catch (error) {
+      console.error('💥 Exception signing up:', error);
+      return { data: null, error };
+    }
+  };
+
   const signOut = async () => {
     console.log('🚪 Signing out...');
     
@@ -153,6 +195,8 @@ export const useAuth = () => {
     user,
     profile,
     loading,
+    signIn,
+    signUp,
     signOut,
   };
 };
