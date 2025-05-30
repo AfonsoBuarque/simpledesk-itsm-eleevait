@@ -72,68 +72,64 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-400 relative overflow-hidden">
+      {/* Background Geometric Shapes */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Large Circle - Top Left */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-white bg-opacity-10 rounded-full"></div>
+        
+        {/* Medium Circle - Top Right */}
+        <div className="absolute top-20 right-20 w-64 h-64 bg-purple-300 bg-opacity-20 rounded-full"></div>
+        
+        {/* Small Circle - Bottom Left */}
+        <div className="absolute bottom-32 left-40 w-32 h-32 bg-cyan-300 bg-opacity-30 rounded-full"></div>
+        
+        {/* Rectangle - Bottom Right */}
+        <div className="absolute bottom-20 right-10 w-48 h-32 bg-blue-300 bg-opacity-25 rounded-lg transform rotate-12"></div>
+        
+        {/* Triangle shapes */}
+        <div className="absolute top-1/3 left-1/4 w-0 h-0 border-l-[30px] border-r-[30px] border-b-[52px] border-l-transparent border-r-transparent border-b-white border-opacity-15"></div>
+        
+        {/* Zigzag patterns */}
+        <div className="absolute bottom-1/4 right-1/3">
+          <svg width="60" height="60" viewBox="0 0 60 60" className="text-white opacity-20">
+            <path d="M10,10 L20,30 L30,10 L40,30 L50,10" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <path d="M10,25 L20,45 L30,25 L40,45 L50,25" stroke="currentColor" strokeWidth="2" fill="none"/>
+          </svg>
+        </div>
+        
+        {/* More geometric elements */}
+        <div className="absolute top-1/2 left-10 w-16 h-16 border-2 border-white border-opacity-25 rounded-lg transform rotate-45"></div>
+        <div className="absolute top-3/4 right-1/4 w-12 h-12 bg-purple-200 bg-opacity-30 transform rotate-12"></div>
+      </div>
+
       {/* Left Side - Welcome Section */}
-      <div className="flex-1 relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-32 h-32 border-4 border-white rounded-full"></div>
-          <div className="absolute top-20 right-20 w-20 h-20 border-2 border-white rotate-45"></div>
-          <div className="absolute bottom-20 left-20 w-16 h-16 bg-white bg-opacity-20 rounded-lg rotate-12"></div>
-          <div className="absolute bottom-32 right-32 w-24 h-24 border-3 border-white border-opacity-30 rounded-full"></div>
-          
-          {/* Decorative Lines */}
-          <div className="absolute top-1/4 left-10">
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-1 bg-white bg-opacity-30 rounded" style={{ width: `${(i + 1) * 30}px` }}></div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="absolute bottom-1/4 right-10">
-            <div className="space-y-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-1 bg-white bg-opacity-30 rounded" style={{ width: `${(4 - i) * 25}px` }}></div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Logo */}
-        <div className="absolute top-8 left-8">
-          <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-            <div className="w-8 h-8 bg-orange-400 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-lg">👑</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Welcome Content */}
-        <div className="flex items-center justify-center h-full px-16">
-          <div className="text-center text-white max-w-md">
-            <div className="mb-6">
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">○</span>
+      <div className="flex-1 flex items-center justify-center relative z-10 px-16">
+        <div className="text-white max-w-lg">
+          {/* Logo */}
+          <div className="mb-12">
+            <div className="flex items-center space-x-3 mb-8">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
               </div>
-              <div className="text-sm font-medium mb-2">YOUR LOGO</div>
+              <span className="text-xl font-bold">YOUR LOGO</span>
             </div>
-            
-            <h1 className="text-5xl font-bold mb-4 leading-tight">
-              Hello,<br />
-              welcome!
-            </h1>
-            
-            <p className="text-blue-100 text-lg leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nisi risus.
-            </p>
           </div>
+          
+          <h1 className="text-5xl font-bold mb-6 leading-tight">
+            Hello,<br />
+            welcome!
+          </h1>
+          
+          <p className="text-blue-100 text-lg leading-relaxed">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus et nibh risus.
+          </p>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 bg-gray-50 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md bg-white shadow-xl border-0">
+      <div className="flex-1 flex items-center justify-center relative z-10 p-8">
+        <Card className="w-full max-w-md bg-white shadow-2xl border-0 rounded-2xl">
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               {!isLogin && (
@@ -145,7 +141,7 @@ const Auth = () => {
                     onChange={(e) => setFullName(e.target.value)}
                     required
                     disabled={loading}
-                    className="h-12 border-gray-300 rounded-lg"
+                    className="h-12 border-gray-200 rounded-lg text-sm"
                   />
                 </div>
               )}
@@ -153,12 +149,12 @@ const Auth = () => {
               <div>
                 <Input
                   type="email"
-                  placeholder="Email address"
+                  placeholder="E-mail address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12 border-gray-300 rounded-lg"
+                  className="h-12 border-gray-200 rounded-lg text-sm text-blue-600"
                 />
               </div>
               
@@ -170,7 +166,7 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12 border-gray-300 rounded-lg"
+                  className="h-12 border-gray-200 rounded-lg text-sm"
                 />
               </div>
 
@@ -181,7 +177,7 @@ const Auth = () => {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-gray-300"
+                      className="rounded border-gray-300 text-blue-600"
                     />
                     <span className="text-gray-600">Remember me</span>
                   </label>
@@ -197,11 +193,11 @@ const Auth = () => {
                 </Alert>
               )}
 
-              <div className="flex space-x-4">
+              <div className="space-y-3">
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
                 >
                   {loading ? (
                     <>
@@ -209,7 +205,7 @@ const Auth = () => {
                       {isLogin ? 'Signing in...' : 'Creating...'}
                     </>
                   ) : (
-                    isLogin ? 'Login' : 'Sign up'
+                    isLogin ? 'Login' : 'Create account'
                   )}
                 </Button>
                 
@@ -218,7 +214,7 @@ const Auth = () => {
                   variant="outline"
                   onClick={() => setIsLogin(!isLogin)}
                   disabled={loading}
-                  className="flex-1 h-12 border-gray-300 text-gray-600 rounded-lg font-medium"
+                  className="w-full h-12 border-blue-200 text-blue-600 rounded-lg font-medium hover:bg-blue-50"
                 >
                   {isLogin ? 'Sign up' : 'Login'}
                 </Button>
@@ -227,16 +223,16 @@ const Auth = () => {
 
             {/* Social Media */}
             <div className="mt-8 text-center">
-              <p className="text-sm text-gray-600 mb-4">FOLLOW</p>
+              <p className="text-xs text-gray-500 mb-4">FOLLOW</p>
               <div className="flex justify-center space-x-4">
-                <a href="#" className="text-blue-600 hover:text-blue-800">
-                  <Facebook className="w-5 h-5" />
+                <a href="#" className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white hover:bg-blue-700">
+                  <Facebook className="w-4 h-4" />
                 </a>
-                <a href="#" className="text-blue-400 hover:text-blue-600">
-                  <Twitter className="w-5 h-5" />
+                <a href="#" className="w-8 h-8 bg-blue-400 rounded flex items-center justify-center text-white hover:bg-blue-500">
+                  <Twitter className="w-4 h-4" />
                 </a>
-                <a href="#" className="text-pink-600 hover:text-pink-800">
-                  <Instagram className="w-5 h-5" />
+                <a href="#" className="w-8 h-8 bg-pink-500 rounded flex items-center justify-center text-white hover:bg-pink-600">
+                  <Instagram className="w-4 h-4" />
                 </a>
               </div>
             </div>
