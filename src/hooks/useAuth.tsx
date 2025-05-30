@@ -24,7 +24,6 @@ export const useAuth = () => {
     try {
       console.log('Fetching profile for user:', userId);
       
-      // Buscar dados do usuário
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -34,7 +33,6 @@ export const useAuth = () => {
       if (error) {
         console.error('Error fetching user profile:', error);
         
-        // Tentar criar um perfil básico se não existir
         if (error.code === 'PGRST116') {
           console.log('User not found, creating basic profile');
           
@@ -58,7 +56,6 @@ export const useAuth = () => {
 
       console.log('User profile found:', data);
       
-      // Converter dados para o formato de perfil
       const userProfile: Profile = {
         id: data.id,
         full_name: data.name,
@@ -78,50 +75,24 @@ export const useAuth = () => {
 
   useEffect(() => {
     let mounted = true;
-    let initialSessionChecked = false;
 
-    console.log('Setting up auth state listener');
-
-    // Função para processar mudanças de sessão
-    const handleAuthChange = async (event: string, session: Session | null) => {
-      console.log('Auth state changed:', event, session?.user?.id);
-      
-      if (!mounted) return;
-
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      if (session?.user && mounted) {
-        await fetchProfile(session.user.id, session.user.email || '');
-      } else {
-        setProfile(null);
-      }
-
-      if (mounted) {
-        setLoading(false);
-      }
-    };
-
-    // Configurar listener de mudanças de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange);
-
-    // Verificar sessão existente apenas uma vez
-    const getInitialSession = async () => {
-      if (initialSessionChecked) return;
-      initialSessionChecked = true;
-
+    const initializeAuth = async () => {
       try {
-        console.log('Checking for existing session');
+        console.log('Initializing auth...');
+        
+        // Get current session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
-          if (mounted) setLoading(false);
+          if (mounted) {
+            setLoading(false);
+          }
           return;
         }
 
-        console.log('Initial session:', session?.user?.id);
-        
+        console.log('Current session:', session?.user?.id);
+
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
@@ -135,17 +106,38 @@ export const useAuth = () => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error initializing auth:', error);
         if (mounted) {
           setLoading(false);
         }
       }
     };
 
-    getInitialSession();
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (!mounted) return;
 
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await fetchProfile(session.user.id, session.user.email || '');
+        } else {
+          setProfile(null);
+        }
+
+        setLoading(false);
+      }
+    );
+
+    // Initialize auth
+    initializeAuth();
+
+    // Cleanup
     return () => {
-      console.log('Cleaning up auth listener');
       mounted = false;
       subscription.unsubscribe();
     };
@@ -155,7 +147,6 @@ export const useAuth = () => {
     try {
       console.log('Attempting sign in');
       
-      // Validação de entrada
       if (!email || !password) {
         return { error: new Error('Email and password are required') };
       }
@@ -184,7 +175,6 @@ export const useAuth = () => {
     try {
       console.log('Attempting sign up');
       
-      // Validação de entrada
       if (!email || !password || !fullName) {
         return { error: new Error('All fields are required') };
       }
@@ -209,7 +199,6 @@ export const useAuth = () => {
       console.log('Attempting sign out');
       const { error } = await supabase.auth.signOut();
       if (!error) {
-        // Limpar estado local
         setUser(null);
         setSession(null);
         setProfile(null);
