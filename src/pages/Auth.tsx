@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { Loader2, Facebook, Twitter, Instagram } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +16,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
@@ -71,109 +72,189 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mx-auto shadow-lg">
-            <AlertTriangle className="h-8 w-8 text-white" />
+    <div className="min-h-screen flex">
+      {/* Left Side - Welcome Section */}
+      <div className="flex-1 relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-32 h-32 border-4 border-white rounded-full"></div>
+          <div className="absolute top-20 right-20 w-20 h-20 border-2 border-white rotate-45"></div>
+          <div className="absolute bottom-20 left-20 w-16 h-16 bg-white bg-opacity-20 rounded-lg rotate-12"></div>
+          <div className="absolute bottom-32 right-32 w-24 h-24 border-3 border-white border-opacity-30 rounded-full"></div>
+          
+          {/* Decorative Lines */}
+          <div className="absolute top-1/4 left-10">
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-1 bg-white bg-opacity-30 rounded" style={{ width: `${(i + 1) * 30}px` }}></div>
+              ))}
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              SimpleDesk ITSM
-            </CardTitle>
-            <CardDescription className="text-gray-600 mt-2">
-              {isLogin ? 'Entre com suas credenciais' : 'Crie sua conta'}
-            </CardDescription>
+          
+          <div className="absolute bottom-1/4 right-10">
+            <div className="space-y-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-1 bg-white bg-opacity-30 rounded" style={{ width: `${(4 - i) * 25}px` }}></div>
+              ))}
+            </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+        </div>
+
+        {/* Logo */}
+        <div className="absolute top-8 left-8">
+          <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-orange-400 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-lg">👑</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Welcome Content */}
+        <div className="flex items-center justify-center h-full px-16">
+          <div className="text-center text-white max-w-md">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">○</span>
+              </div>
+              <div className="text-sm font-medium mb-2">YOUR LOGO</div>
+            </div>
+            
+            <h1 className="text-5xl font-bold mb-4 leading-tight">
+              Hello,<br />
+              welcome!
+            </h1>
+            
+            <p className="text-blue-100 text-lg leading-relaxed">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nisi risus.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="flex-1 bg-gray-50 flex items-center justify-center p-8">
+        <Card className="w-full max-w-md bg-white shadow-xl border-0">
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {!isLogin && (
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="h-12 border-gray-300 rounded-lg"
+                  />
+                </div>
+              )}
+              
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome Completo
-                </label>
                 <Input
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
+                  className="h-12 border-gray-300 rounded-lg"
                 />
               </div>
-            )}
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Senha
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
+              
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="h-12 border-gray-300 rounded-lg"
+                />
+              </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isLogin ? 'Entrando...' : 'Criando conta...'}
-                </>
-              ) : (
-                isLogin ? 'Entrar' : 'Criar Conta'
+              {isLogin && (
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                    <span className="text-gray-600">Remember me</span>
+                  </label>
+                  <button type="button" className="text-blue-600 hover:underline">
+                    Forgot password?
+                  </button>
+                </div>
               )}
-            </Button>
-          </form>
 
-          <div className="mt-6 text-center">
-            <Button
-              variant="link"
-              onClick={() => setIsLogin(!isLogin)}
-              disabled={loading}
-              className="text-sm text-gray-600 hover:text-blue-600"
-            >
-              {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Entre'}
-            </Button>
-          </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-          {isLogin && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-xs text-blue-700 mb-2">
-                <strong>Credenciais de teste:</strong>
-              </p>
-              <p className="text-xs text-blue-600">
-                Email: admin@example.com<br />
-                Senha: 123456
-              </p>
+              <div className="flex space-x-4">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {isLogin ? 'Signing in...' : 'Creating...'}
+                    </>
+                  ) : (
+                    isLogin ? 'Login' : 'Sign up'
+                  )}
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsLogin(!isLogin)}
+                  disabled={loading}
+                  className="flex-1 h-12 border-gray-300 text-gray-600 rounded-lg font-medium"
+                >
+                  {isLogin ? 'Sign up' : 'Login'}
+                </Button>
+              </div>
+            </form>
+
+            {/* Social Media */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-gray-600 mb-4">FOLLOW</p>
+              <div className="flex justify-center space-x-4">
+                <a href="#" className="text-blue-600 hover:text-blue-800">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-blue-400 hover:text-blue-600">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-pink-600 hover:text-pink-800">
+                  <Instagram className="w-5 h-5" />
+                </a>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {isLogin && (
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <p className="text-xs text-blue-700 mb-2">
+                  <strong>Credenciais de teste:</strong>
+                </p>
+                <p className="text-xs text-blue-600">
+                  Email: admin@example.com<br />
+                  Senha: 123456
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
