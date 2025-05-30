@@ -31,25 +31,44 @@ export const useFornecedores = () => {
   } = useQuery({
     queryKey: ['fornecedores'],
     queryFn: async () => {
+      console.log('Fetching fornecedores...');
+      
       const { data, error } = await supabase
         .from('fornecedores')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching fornecedores:', error);
+        throw error;
+      }
+      
+      console.log('Fornecedores fetched successfully:', data?.length || 0);
       return (data as FornecedorFromDB[]).map(convertToFornecedor);
-    }
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const createFornecedor = useMutation({
     mutationFn: async (fornecedor: FornecedorFormData) => {
+      console.log('Creating fornecedor:', fornecedor);
+      
       const { data, error } = await supabase
         .from('fornecedores')
         .insert([fornecedor])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating fornecedor:', error);
+        throw error;
+      }
+      
+      console.log('Fornecedor created successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -71,6 +90,8 @@ export const useFornecedores = () => {
 
   const updateFornecedor = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: FornecedorFormData }) => {
+      console.log('Updating fornecedor:', id, updates);
+      
       const { data, error } = await supabase
         .from('fornecedores')
         .update(updates)
@@ -78,7 +99,12 @@ export const useFornecedores = () => {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating fornecedor:', error);
+        throw error;
+      }
+      
+      console.log('Fornecedor updated successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -100,12 +126,19 @@ export const useFornecedores = () => {
 
   const deleteFornecedor = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting fornecedor:', id);
+      
       const { error } = await supabase
         .from('fornecedores')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting fornecedor:', error);
+        throw error;
+      }
+      
+      console.log('Fornecedor deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fornecedores'] });

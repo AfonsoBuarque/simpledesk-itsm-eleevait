@@ -43,6 +43,8 @@ export const useRequisicoes = () => {
     retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   // Create requisição
@@ -58,9 +60,9 @@ export const useRequisicoes = () => {
         tipo: 'requisicao' as const,
         numero: '', // Será gerado automaticamente pelo trigger
         // Converter arrays para JSON se existirem
-        ...(anexos && { anexos: JSON.stringify(anexos) }),
-        ...(ativos_envolvidos && { ativos_envolvidos: JSON.stringify(ativos_envolvidos) }),
-        ...(tags && { tags: JSON.stringify(tags) }),
+        ...(anexos && anexos.length > 0 && { anexos: JSON.stringify(anexos) }),
+        ...(ativos_envolvidos && ativos_envolvidos.length > 0 && { ativos_envolvidos: JSON.stringify(ativos_envolvidos) }),
+        ...(tags && tags.length > 0 && { tags: JSON.stringify(tags) }),
       };
 
       const { data: result, error } = await supabase
@@ -105,9 +107,9 @@ export const useRequisicoes = () => {
       const updateData = {
         ...restData,
         // Converter arrays para JSON apenas se estiverem presentes
-        ...(anexos !== undefined && { anexos: anexos ? JSON.stringify(anexos) : null }),
-        ...(ativos_envolvidos !== undefined && { ativos_envolvidos: ativos_envolvidos ? JSON.stringify(ativos_envolvidos) : null }),
-        ...(tags !== undefined && { tags: tags ? JSON.stringify(tags) : null }),
+        ...(anexos !== undefined && { anexos: anexos && anexos.length > 0 ? JSON.stringify(anexos) : null }),
+        ...(ativos_envolvidos !== undefined && { ativos_envolvidos: ativos_envolvidos && ativos_envolvidos.length > 0 ? JSON.stringify(ativos_envolvidos) : null }),
+        ...(tags !== undefined && { tags: tags && tags.length > 0 ? JSON.stringify(tags) : null }),
       };
 
       const { data: result, error } = await supabase
