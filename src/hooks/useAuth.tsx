@@ -21,6 +21,8 @@ export const useAuth = () => {
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
+      
       // Primeiro tentar buscar na tabela profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -28,7 +30,8 @@ export const useAuth = () => {
         .eq('id', userId)
         .single();
       
-      if (profileData) {
+      if (profileData && !profileError) {
+        console.log('Profile found in profiles table:', profileData);
         setProfile({
           id: profileData.id,
           full_name: profileData.full_name,
@@ -36,7 +39,7 @@ export const useAuth = () => {
           role: profileData.role,
           department: profileData.department,
           phone: profileData.phone,
-          client_id: null, // profiles table doesn't have client_id
+          client_id: null,
         });
         return;
       }
@@ -48,8 +51,8 @@ export const useAuth = () => {
         .eq('id', userId)
         .single();
       
-      if (userData) {
-        // Converter dados da tabela users para o formato Profile
+      if (userData && !userError) {
+        console.log('Profile found in users table:', userData);
         const userProfile: Profile = {
           id: userData.id,
           full_name: userData.name,
@@ -60,20 +63,59 @@ export const useAuth = () => {
           client_id: userData.client_id || null,
         };
         setProfile(userProfile);
+      } else {
+        console.log('No profile found for user:', userId);
+        setProfile(null);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setProfile(null);
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
+    let initialLoad = true;
+
+    console.log('Setting up auth state listener');
 
     // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
         if (!mounted) return;
 
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user && mounted) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+        
+        // Só definir loading como false após a primeira verificação
+        if (mounted && initialLoad) {
+          setLoading(false);
+          initialLoad = false;
+        }
+      }
+    );
+
+    // Verificar sessão existente
+    const getInitialSession = async () => {
+      try {
+        console.log('Checking for existing session');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+        }
+        
+        if (!mounted) return;
+
+        console.log('Initial session:', session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -86,28 +128,8 @@ export const useAuth = () => {
         if (mounted) {
           setLoading(false);
         }
-      }
-    );
-
-    // Verificar sessão existente
-    const getInitialSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user && mounted) {
-          await fetchProfile(session.user.id);
-        }
-        
-        if (mounted) {
-          setLoading(false);
-        }
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('Unexpected error getting session:', error);
         if (mounted) {
           setLoading(false);
         }
@@ -117,13 +139,16 @@ export const useAuth = () => {
     getInitialSession();
 
     return () => {
+      console.log('Cleaning up auth listener');
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, []); // Removido fetchProfile das dependências para evitar loops
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Attempting sign in for:', email);
+      
       // Validação de entrada
       if (!email || !password) {
         return { data: null, error: { message: 'Email e senha são obrigatórios' } };
@@ -139,8 +164,9 @@ export const useAuth = () => {
       });
 
       if (error) {
-        // Log tentativas de login falharam para monitoramento
         console.warn('Failed login attempt:', { email: email.trim(), error: error.message });
+      } else {
+        console.log('Sign in successful');
       }
 
       return { data, error };
@@ -152,6 +178,8 @@ export const useAuth = () => {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
+      console.log('Attempting sign up for:', email);
+      
       // Validação de entrada
       if (!email || !password || !fullName) {
         return { data: null, error: { message: 'Todos os campos são obrigatórios' } };
@@ -179,7 +207,7 @@ export const useAuth = () => {
 
       // Sanitizar entrada
       const sanitizedEmail = email.trim().toLowerCase();
-      const sanitizedFullName = fullName.trim().replace(/[<>]/g, ''); // Básica proteção XSS
+      const sanitizedFullName = fullName.trim().replace(/[<>]/g, '');
 
       const redirectUrl = `${window.location.origin}/`;
 
@@ -194,6 +222,10 @@ export const useAuth = () => {
         },
       });
 
+      if (!error) {
+        console.log('Sign up successful');
+      }
+
       return { data, error };
     } catch (error) {
       console.error('Unexpected signup error:', error);
@@ -203,12 +235,14 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
+      console.log('Attempting sign out');
       const { error } = await supabase.auth.signOut();
       if (!error) {
         // Limpar estado local
         setUser(null);
         setSession(null);
         setProfile(null);
+        console.log('Sign out successful');
       }
       return { error };
     } catch (error) {
