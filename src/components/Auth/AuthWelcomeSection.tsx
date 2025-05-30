@@ -13,12 +13,12 @@ const AuthWelcomeSection = () => {
         </div>
         
         <h1 className="text-5xl font-bold mb-6 leading-tight">
-          Hello,<br />
-          welcome!
+          Olá,<br />
+          Bem Vindo!
         </h1>
         
         <p className="text-blue-100 text-lg leading-relaxed">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus et nibh risus.
+          Sua central de ajuda, descomplicada.
         </p>
       </div>
     </div>;
