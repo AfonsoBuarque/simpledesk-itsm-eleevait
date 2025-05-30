@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,13 +48,19 @@ const Header = ({
 
   const fetchUserClient = async () => {
     try {
-      console.log('Fetching user client for profile:', profile?.email);
+      console.log('Fetching user client for profile:', profile?.id);
       
-      // Primeiro buscar dados do usuário na tabela users
+      // Buscar dados do usuário diretamente da tabela users
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('client_id')
-        .eq('email', profile?.email)
+        .select(`
+          client_id,
+          clients:client_id (
+            id,
+            name
+          )
+        `)
+        .eq('id', profile?.id)
         .single();
 
       console.log('User data result:', { userData, userError });
@@ -64,15 +71,16 @@ const Header = ({
         return;
       }
 
-      // Se tem client_id, buscar o nome do cliente
-      if (userData?.client_id) {
+      // Se tem client_id e dados do cliente
+      if (userData?.clients) {
+        setUserClient(userData.clients.name);
+      } else if (userData?.client_id) {
+        // Fallback: buscar cliente separadamente se a query com join falhou
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('name')
           .eq('id', userData.client_id)
           .single();
-
-        console.log('Client data result:', { clientData, clientError });
 
         if (clientData && !clientError) {
           setUserClient(clientData.name);

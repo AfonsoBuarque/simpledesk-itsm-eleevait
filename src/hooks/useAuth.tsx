@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,31 +23,7 @@ export const useAuth = () => {
     try {
       console.log('Fetching profile for user:', userId, 'with email:', userEmail);
       
-      // Primeiro tentar buscar na tabela profiles
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      
-      console.log('Profile query result:', { profileData, profileError });
-      
-      if (profileData && !profileError) {
-        console.log('Profile found in profiles table:', profileData);
-        setProfile({
-          id: profileData.id,
-          full_name: profileData.full_name,
-          email: userEmail, // Usar o email da sessão de autenticação
-          role: profileData.role,
-          department: profileData.department,
-          phone: profileData.phone,
-          client_id: null,
-        });
-        return;
-      }
-
-      // Se não encontrar na profiles, buscar na tabela users (sem joins problemáticos)
-      console.log('Trying to fetch from users table...');
+      // Buscar primeiro na tabela users (fonte principal)
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
@@ -60,15 +37,42 @@ export const useAuth = () => {
         const userProfile: Profile = {
           id: userData.id,
           full_name: userData.name,
-          email: userEmail, // Usar o email da sessão de autenticação
+          email: userData.email,
           role: userData.role,
           department: userData.department,
           phone: userData.phone,
           client_id: userData.client_id || null,
         };
         setProfile(userProfile);
+        
+        // Sincronizar com a tabela profiles se necessário
+        await syncWithProfiles(userData);
+        return;
+      }
+
+      // Se não encontrar na users, tentar na tabela profiles como fallback
+      console.log('Trying to fetch from profiles table...');
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      console.log('Profile query result:', { profileData, profileError });
+      
+      if (profileData && !profileError) {
+        console.log('Profile found in profiles table:', profileData);
+        setProfile({
+          id: profileData.id,
+          full_name: profileData.full_name,
+          email: profileData.email || userEmail,
+          role: profileData.role,
+          department: profileData.department,
+          phone: profileData.phone,
+          client_id: null,
+        });
       } else {
-        console.log('No profile found for user:', userId, { userError });
+        console.log('No profile found for user:', userId);
         setProfile(null);
       }
     } catch (error) {
@@ -76,6 +80,43 @@ export const useAuth = () => {
       setProfile(null);
     }
   }, []);
+
+  const syncWithProfiles = async (userData: any) => {
+    try {
+      // Verificar se existe perfil e sincronizar se necessário
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userData.id)
+        .single();
+
+      if (existingProfile) {
+        // Atualizar perfil se os dados estão diferentes
+        const needsUpdate = 
+          existingProfile.full_name !== userData.name ||
+          existingProfile.email !== userData.email ||
+          existingProfile.role !== userData.role ||
+          existingProfile.department !== userData.department ||
+          existingProfile.phone !== userData.phone;
+
+        if (needsUpdate) {
+          await supabase
+            .from('profiles')
+            .update({
+              full_name: userData.name,
+              email: userData.email,
+              role: userData.role,
+              department: userData.department,
+              phone: userData.phone,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', userData.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing with profiles:', error);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
