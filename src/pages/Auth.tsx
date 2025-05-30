@@ -3,351 +3,177 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/components/ui/use-toast';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 const Auth = () => {
-  const { signIn, signUp, user } = useAuth();
-  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('admin@example.com');
+  const [password, setPassword] = useState('123456');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signupForm, setSignupForm] = useState({ 
-    email: '', 
-    password: '', 
-    fullName: '', 
-    confirmPassword: '' 
-  });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
 
-  // Redirecionar se já estiver logado
+  console.log('🔑 Auth component - user:', !!user, 'profile:', !!profile);
+
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user && profile) {
+      console.log('🔑 Auth - user already logged in, redirecting...');
+      if (['admin', 'manager', 'technician'].includes(profile.role || '')) {
+        navigate('/', { replace: true });
+      } else {
+        navigate('/portal', { replace: true });
+      }
     }
-  }, [user, navigate]);
+  }, [user, profile, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
-      const { error } = await signIn(loginForm.email, loginForm.password);
-      
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Erro de Login",
-            description: "Email ou senha incorretos.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Erro de Login",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo ao SimpleDesk ITSM.",
+      if (isLogin) {
+        console.log('🔑 Attempting login...');
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        navigate('/');
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (signupForm.password !== signupForm.confirmPassword) {
-      toast({
-        title: "Erro",
-        description: "As senhas não coincidem.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (signupForm.password.length < 6) {
-      toast({
-        title: "Erro",
-        description: "A senha deve ter pelo menos 6 caracteres.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { error } = await signUp(
-        signupForm.email, 
-        signupForm.password, 
-        signupForm.fullName
-      );
-      
-      if (error) {
-        if (error.message.includes('User already registered')) {
-          toast({
-            title: "Erro de Cadastro",
-            description: "Este email já está cadastrado.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Erro de Cadastro",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
+        if (error) throw error;
+        console.log('✅ Login successful:', data.user?.id);
       } else {
-        toast({
-          title: "Cadastro realizado com sucesso!",
-          description: "Bem-vindo ao SimpleDesk ITSM.",
+        console.log('🔑 Attempting signup...');
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+            },
+          },
         });
-        navigate('/');
+
+        if (error) throw error;
+        console.log('✅ Signup successful:', data.user?.id);
       }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.error('❌ Auth error:', error);
+      setError(error.message || 'Erro na autenticação');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Hero Section */}
-      <div className="flex-1 relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400">
-        {/* Decorative Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-32 right-20 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-          <div className="absolute top-1/2 left-10 w-24 h-24 bg-cyan-300/20 rounded-full blur-lg"></div>
-          
-          {/* Geometric Patterns */}
-          <div className="absolute top-16 right-32">
-            <div className="flex flex-col space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex space-x-1">
-                  {[...Array(3)].map((_, j) => (
-                    <div key={j} className="w-2 h-2 bg-white/30 transform rotate-45"></div>
-                  ))}
-                </div>
-              ))}
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mx-auto shadow-lg">
+            <AlertTriangle className="h-8 w-8 text-white" />
           </div>
-          
-          <div className="absolute bottom-20 left-32">
-            <div className="flex flex-col space-y-1">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="w-8 h-0.5 bg-white/40" style={{ width: `${32 - i * 4}px` }}></div>
-              ))}
-            </div>
+          <div>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              SimpleDesk ITSM
+            </CardTitle>
+            <CardDescription className="text-gray-600 mt-2">
+              {isLogin ? 'Entre com suas credenciais' : 'Crie sua conta'}
+            </CardDescription>
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center h-full px-16 text-white">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 flex items-center justify-center">
-                <img 
-                  src="/lovable-uploads/4c57429c-8e5a-4e57-b3b8-da1a8b7b7909.png" 
-                  alt="SimpleDesk Logo" 
-                  className="w-full h-full object-contain"
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome Completo
+                </label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  disabled={loading}
                 />
               </div>
-              <span className="text-xl font-semibold">SimpleDesk</span>
+            )}
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+              />
             </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Senha
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isLogin ? 'Entrando...' : 'Criando conta...'}
+                </>
+              ) : (
+                isLogin ? 'Entrar' : 'Criar Conta'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <Button
+              variant="link"
+              onClick={() => setIsLogin(!isLogin)}
+              disabled={loading}
+              className="text-sm text-gray-600 hover:text-blue-600"
+            >
+              {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Entre'}
+            </Button>
           </div>
-          
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold mb-6 leading-tight">
-              Olá,<br />
-              bem-vindo!
-            </h1>
-            <p className="text-lg text-blue-100 leading-relaxed">
-              Plataforma completa de gestão de serviços de TI baseada no ITIL v3 
-              com gestão de tickets, SLA e base de conhecimento.
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* Right Side - Auth Form */}
-      <div className="w-96 bg-white flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">
-          <Card className="border-none shadow-none">
-            <CardContent className="p-0">
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100">
-                  <TabsTrigger 
-                    value="login" 
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    Login
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="signup"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    Sign up
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-gray-700 font-medium">Email address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="name@mail.com"
-                        value={loginForm.email}
-                        onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                        required
-                        className="h-12 border-2 border-gray-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••••••"
-                        value={loginForm.password}
-                        onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                        required
-                        className="h-12 border-2 border-gray-200 focus:border-blue-500"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          id="remember" 
-                          className="rounded border-gray-300"
-                        />
-                        <label htmlFor="remember" className="text-sm text-gray-600">
-                          Remember me
-                        </label>
-                      </div>
-                      <a href="#" className="text-sm text-blue-600 hover:underline">
-                        Forgot password?
-                      </a>
-                    </div>
-
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium" 
-                      disabled={loading}
-                    >
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Login
-                    </Button>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignup} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName" className="text-gray-700 font-medium">Nome Completo</Label>
-                      <Input
-                        id="fullName"
-                        type="text"
-                        placeholder="Seu nome completo"
-                        value={signupForm.fullName}
-                        onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
-                        required
-                        className="h-12 border-2 border-gray-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signupEmail" className="text-gray-700 font-medium">Email address</Label>
-                      <Input
-                        id="signupEmail"
-                        type="email"
-                        placeholder="name@mail.com"
-                        value={signupForm.email}
-                        onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
-                        required
-                        className="h-12 border-2 border-gray-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signupPassword" className="text-gray-700 font-medium">Password</Label>
-                      <Input
-                        id="signupPassword"
-                        type="password"
-                        placeholder="••••••••••••"
-                        value={signupForm.password}
-                        onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
-                        required
-                        minLength={6}
-                        className="h-12 border-2 border-gray-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirmar Senha</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="••••••••••••"
-                        value={signupForm.confirmPassword}
-                        onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
-                        required
-                        minLength={6}
-                        className="h-12 border-2 border-gray-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium" 
-                      disabled={loading}
-                    >
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Sign up
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-
-              {/* Social Links */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-center space-x-4">
-                  <span className="text-sm text-gray-600 mr-2">FOLLOW</span>
-                  <a href="#" className="text-blue-600 hover:text-blue-700">
-                    <Facebook className="h-5 w-5" />
-                  </a>
-                  <a href="#" className="text-blue-400 hover:text-blue-500">
-                    <Twitter className="h-5 w-5" />
-                  </a>
-                  <a href="#" className="text-pink-600 hover:text-pink-700">
-                    <Instagram className="h-5 w-5" />
-                  </a>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          {isLogin && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-xs text-blue-700 mb-2">
+                <strong>Credenciais de teste:</strong>
+              </p>
+              <p className="text-xs text-blue-600">
+                Email: admin@example.com<br />
+                Senha: 123456
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
