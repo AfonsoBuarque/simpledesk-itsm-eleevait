@@ -10,7 +10,7 @@ import Auth from "./pages/Auth";
 import UserPortal from "./pages/UserPortal";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
-import { SecurityMonitor } from "./components/Auth/SecurityMonitor";
+import UserOnlyRoute from "./components/Auth/UserOnlyRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,11 +20,18 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SecurityMonitor />
         <Routes>
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/portal" element={<UserPortal />} />
+          <Route path="/portal" element={
+            <UserOnlyRoute>
+              <UserPortal />
+            </UserOnlyRoute>
+          } />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

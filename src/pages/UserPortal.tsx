@@ -10,23 +10,10 @@ import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal';
 
 const UserPortal = () => {
-  const { signOut, profile, user, loading } = useAuth();
+  const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
-
-  // Verificar se o usuário está autenticado
-  useEffect(() => {
-    console.log('UserPortal - Auth state:', { user, loading });
-
-    // Apenas redirecionar se não estiver carregando e não houver usuário
-    if (!loading && !user) {
-      if (!user) {
-        console.log('UserPortal - Usuário não autenticado, redirecionando para login');
-        navigate('/auth', { replace: true });
-      }
-    }
-  }, [loading, user, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,15 +25,6 @@ const UserPortal = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {loading && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando...</p>
-          </div>
-        </div>
-      )}
-      
       {/* Header moderno */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

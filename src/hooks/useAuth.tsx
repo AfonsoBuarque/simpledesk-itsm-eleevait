@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface Profile {
   id: string;
@@ -19,7 +19,6 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [authTimeoutReached, setAuthTimeoutReached] = useState(false);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
@@ -80,7 +79,7 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    const mounted = true;
+    let mounted = true;
 
     async function initializeAuth() {
       try {
@@ -155,8 +154,7 @@ export const useAuth = () => {
     // Definir um timeout para evitar carregamento infinito (5 segundos)
     const authTimeout = setTimeout(() => {
       if (loading) {
-        console.log('Auth timeout reached, forcing loading states to false');
-        setAuthTimeoutReached(true);
+        console.log('Auth timeout reached, forcing loading states to false', {user, profile});
         setProfileLoading(false);
         setLoading(false);
       }
@@ -165,16 +163,16 @@ export const useAuth = () => {
     // Cleanup
     return () => {
       // Não podemos alterar mounted pois é uma constante
-      mounted = false;
+      // mounted = false; // Isso causa erro pois mounted é uma constante
       clearTimeout(authTimeout);
       subscription?.unsubscribe();
     };
-  }, [authInitialized]);
+  }, [fetchProfile]);
 
   // Atualizar o estado de loading quando o perfil for carregado
   useEffect(() => {
     // Se o perfil foi carregado ou o timeout foi atingido, finalizamos o loading
-    if (user && (profile || authTimeoutReached) && loading) {
+    if (user && profile && loading) {
       console.log('User and profile loaded or timeout reached, setting loading to false');
       setLoading(false);
     }
@@ -183,7 +181,7 @@ export const useAuth = () => {
     if (user && !profile && !loading && profileLoading) {
       setProfileLoading(false);
     }
-  }, [user, profile, loading, profileLoading, authTimeoutReached]);
+  }, [user, profile, loading, profileLoading]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -243,14 +241,10 @@ export const useAuth = () => {
       
       const { error } = await supabase.auth.signOut();
       if (!error) {
-        console.log('Sign out successful, clearing user data');
+        console.log('Sign out successful');
         setUser(null);
         setSession(null);
         setProfile(null);        
-        
-        // Forçar recarregamento da página para limpar completamente o estado
-        window.location.href = '/auth';
-        return { error: null };
       }
       
       return { error };

@@ -3,16 +3,13 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Usar as variáveis de ambiente do projeto
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Usar as variáveis de ambiente corretas do projeto atual
+const SUPABASE_URL = "https://idctavngatyyileoitgz.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkY3Rhdm5nYXR5eWlsZW9pdGd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzOTUyMTYsImV4cCI6MjA2Mzk3MTIxNn0.RJVZcUzCn03Jp4K1eIuP2kjT5zV-1sFnDfoZNvB7UK0";
 
 console.log('Supabase client initialized with URL:', SUPABASE_URL);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);

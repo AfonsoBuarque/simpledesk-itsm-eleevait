@@ -21,26 +21,12 @@ import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
-  const { loading, user } = useAuth();
+  const { loading, user, profile } = useAuth();
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-
-  // Redirecionar todos os usuários para o portal
-  useEffect(() => {
-    console.log('Index - Auth state:', { user, loading });
-
-    // Apenas redirecionar se não estiver carregando
-    if (!loading && user) {
-      console.log('Index - Redirecionando usuário para portal');
-      navigate('/portal', { replace: true });
-    } else if (!loading && !user) {
-      // Se não estiver carregando e não houver usuário, redirecionar para login
-      console.log('Index - Usuário não autenticado, redirecionando para login');
-      navigate('/auth', { replace: true });
-    }
-  }, [loading, user, navigate]);
+  const [localLoading, setLocalLoading] = useState<boolean>(true);
 
   const handleMenuItemClick = (item: string) => {
     setActiveItem(item);
@@ -82,7 +68,21 @@ const Index: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // Forçar carregamento para terminar após 8 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocalLoading(false);
+    }, 8000);
+
+    // Se o loading do auth terminar, atualizar o estado local
+    if (!loading && user) {
+      setLocalLoading(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [loading, user]);
+
+  if (localLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

@@ -9,33 +9,45 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+  const { user, loading, profile } = useAuth();
   
   console.log('ProtectedRoute - Auth state:', {user, loading});
 
-  const renderContent = useMemo(() => {
-    if (loading) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Carregando...</p>
-          </div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Carregando...</p>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (!user) {
-      console.log('ProtectedRoute - Usuário não autenticado, redirecionando para login');
-      return <Navigate to="/auth" replace />;
-    }
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
-    // Permitir acesso ao conteúdo protegido
-    console.log('ProtectedRoute - Usuário autenticado, permitindo acesso');
-    return <>{children}</>;
-  }, [loading, user]);
+  // Verificar se o perfil foi carregado
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Carregando perfil...</p>
+        </div>
+      </div>
+    );
+  }
 
-  return renderContent;
+  // Redirecionar usuários com função "user" para o portal
+  if (profile.role === 'user') {
+    return <Navigate to="/portal" replace />;
+  }
+
+  // Permitir acesso para usuários que NÃO são "user" (admin, technician, etc.)
+  // Estes devem acessar a área administrativa
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

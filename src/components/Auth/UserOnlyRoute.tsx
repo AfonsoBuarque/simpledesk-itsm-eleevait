@@ -9,7 +9,7 @@ interface UserOnlyRouteProps {
 }
 
 const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   console.log('UserOnlyRoute - Auth state:', {user, loading});
 
@@ -25,11 +25,27 @@ const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   }
 
   if (!user) {
-    console.log('UserOnlyRoute - Usuário não autenticado, redirecionando para login');
     return <Navigate to="/auth" replace />;
   }
 
-  console.log('UserOnlyRoute - Usuário autenticado, permitindo acesso ao portal');
+  // Verificar se o perfil foi carregado
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Carregando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirecionar usuários que NÃO são "user" para a área administrativa
+  if (profile.role !== 'user') {
+    return <Navigate to="/" replace />;
+  }
+
+  // Permitir acesso apenas para usuários com role "user"
   return <>{children}</>;
 };
 
