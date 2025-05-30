@@ -20,9 +20,14 @@ const UserPortal = () => {
   useEffect(() => {
     if (profile) {
       console.log('UserPortal - Verificando redirecionamento, perfil:', profile);
+      console.log('UserPortal - Role do usuário:', profile.role);
+      
+      // Usuários que NÃO são "user" devem ser redirecionados para a área administrativa
       if (profile.role !== 'user') {
-        console.log('UserPortal - Redirecionando para área administrativa');
+        console.log('UserPortal - Redirecionando admin/técnico para área administrativa');
         navigate('/', { replace: true });
+      } else {
+        console.log('UserPortal - Usuário comum permanece no portal');
       }
     }
   }, [profile, navigate]);

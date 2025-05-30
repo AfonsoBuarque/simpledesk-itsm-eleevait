@@ -33,9 +33,14 @@ const Index: React.FC = () => {
   useEffect(() => {
     if (!loading && user && profile) {
       console.log('Index - Verificando redirecionamento, perfil:', profile);
+      console.log('Index - Role do usuário:', profile.role);
+      
+      // Apenas usuários com role "user" devem ser redirecionados para o portal
       if (profile.role === 'user') {
-        console.log('Index - Redirecionando para portal');
+        console.log('Index - Redirecionando usuário comum para portal');
         navigate('/portal', { replace: true });
+      } else {
+        console.log('Index - Usuário admin/técnico permanece na área administrativa');
       }
     }
   }, [loading, user, profile, navigate]);

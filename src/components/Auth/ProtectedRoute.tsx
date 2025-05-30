@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,12 +29,25 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       return <Navigate to="/auth" replace />;
     }
 
+    // Verificar se o perfil foi carregado
+    if (!profile) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Carregando perfil...</p>
+          </div>
+        </div>
+      );
+    }
+
     // Redirecionar usuários com função "user" para o portal
-    if (profile && profile.role === 'user') {
+    if (profile.role === 'user') {
       return <Navigate to="/portal" replace />;
     }
 
-    // Permitir acesso apenas para usuários que não são "user" (admin, technician, etc.)
+    // Permitir acesso para usuários que NÃO são "user" (admin, technician, etc.)
+    // Estes devem acessar a área administrativa
     return <>{children}</>;
   }, [loading, user, profile, children]);
 
