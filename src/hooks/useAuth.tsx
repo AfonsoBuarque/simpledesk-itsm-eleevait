@@ -32,7 +32,13 @@ export const useAuth = () => {
 
       if (profileData && !profileError) {
         console.log('✅ Profile found in profiles table:', profileData);
-        setProfile(profileData);
+        setProfile({
+          id: profileData.id,
+          full_name: profileData.full_name,
+          email: profileData.email,
+          role: profileData.role,
+          client_id: null // profiles table doesn't have client_id
+        });
         return;
       }
 
@@ -41,7 +47,7 @@ export const useAuth = () => {
       // Fallback to users table
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id, name, email, role')
+        .select('id, name, email, role, client_id')
         .eq('id', userId)
         .single();
 
@@ -51,7 +57,8 @@ export const useAuth = () => {
           id: userData.id,
           full_name: userData.name,
           email: userData.email,
-          role: userData.role
+          role: userData.role,
+          client_id: userData.client_id
         });
         return;
       }
@@ -62,7 +69,8 @@ export const useAuth = () => {
         id: userId,
         full_name: 'Usuário',
         email: 'user@example.com',
-        role: 'technician'
+        role: 'technician',
+        client_id: null
       });
 
     } catch (error) {
@@ -72,7 +80,8 @@ export const useAuth = () => {
         id: userId,
         full_name: 'Usuário',
         email: 'user@example.com',
-        role: 'technician'
+        role: 'technician',
+        client_id: null
       });
     }
   };
