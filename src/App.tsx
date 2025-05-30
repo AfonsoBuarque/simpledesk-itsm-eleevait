@@ -41,13 +41,19 @@ const App = () => {
             <Routes>
               <Route path="/auth" element={
                 <>
-                  {console.log('🔑 Rendering Auth route') || null}
+                  {(() => {
+                    console.log('🔑 Rendering Auth route');
+                    return null;
+                  })()}
                   <Auth />
                 </>
               } />
               <Route path="/portal" element={
                 <>
-                  {console.log('🏠 Rendering UserPortal route') || null}
+                  {(() => {
+                    console.log('🏠 Rendering UserPortal route');
+                    return null;
+                  })()}
                   <UserOnlyRoute>
                     <UserPortal />
                   </UserOnlyRoute>
@@ -55,7 +61,10 @@ const App = () => {
               } />
               <Route path="/" element={
                 <>
-                  {console.log('🏢 Rendering Index route with ProtectedRoute') || null}
+                  {(() => {
+                    console.log('🏢 Rendering Index route with ProtectedRoute');
+                    return null;
+                  })()}
                   <ProtectedRoute>
                     <Index />
                   </ProtectedRoute>
@@ -63,7 +72,10 @@ const App = () => {
               } />
               <Route path="*" element={
                 <>
-                  {console.log('❓ Rendering NotFound route') || null}
+                  {(() => {
+                    console.log('❓ Rendering NotFound route');
+                    return null;
+                  })()}
                   <NotFound />
                 </>
               } />
