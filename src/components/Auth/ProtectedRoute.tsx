@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,26 +10,11 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, profile, loading } = useAuth();
-  const [localLoading, setLocalLoading] = useState(true);
   
   console.log('ProtectedRoute - Auth state:', {user, profile, loading});
 
-  // Adicionar um timeout para evitar carregamento infinito
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLocalLoading(false);
-    }, 3000);
-    
-    if (!loading) {
-      setLocalLoading(false);
-      clearTimeout(timer);
-    }
-    
-    return () => clearTimeout(timer);
-  }, [loading]);
-
   const renderContent = useMemo(() => {
-    if (loading && localLoading) {
+    if (loading) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
@@ -57,15 +41,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       );
     }
 
-    // Redirecionar usuários com função "user" para o portal
-    if (profile.role === 'user') {
-      return <Navigate to="/portal" replace />;
-    }
-
-    // Permitir acesso para usuários que NÃO são "user" (admin, technician, etc.)
-    // Estes devem acessar a área administrativa
-    return <>{children}</>;
-  }, [loading, localLoading, user, profile, children]);
+    // Redirecionar todos os usuários para o portal
+    return <Navigate to="/portal" replace />;
+  }, [loading, user, profile, children]);
 
   return renderContent;
 };

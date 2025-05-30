@@ -21,35 +21,27 @@ import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
 
 const Index: React.FC = () => {
-  const { loading: authLoading, user, profile } = useAuth();
+  const { loading: authLoading, user } = useAuth();
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [localLoading, setLocalLoading] = useState<boolean>(true);
-  const [redirectChecked, setRedirectChecked] = useState<boolean>(false);
 
-  // Verificar se o usuário deve ser redirecionado para o portal
+  // Redirecionar todos os usuários para o portal
   useEffect(() => {
-    if (!authLoading && user && profile && !redirectChecked) {
-      console.log('Index - Verificando redirecionamento, perfil:', profile);
-      console.log('Index - Role do usuário:', profile.role);
-      
-      // Apenas usuários com role "user" devem ser redirecionados para o portal
-      if (profile.role === 'user') {
-        console.log('Index - Redirecionando usuário comum para portal');
-        navigate('/portal', { replace: true });
-      } else {
-        setRedirectChecked(true);
-        console.log('Index - Usuário admin/técnico permanece na área administrativa');
-      }
+    if (!authLoading) {
+      setLocalLoading(false);
     }
     
-    // Se não estamos carregando e não temos usuário, redirecionar para login
-    if (!authLoading && !user) {
-      navigate('/auth', { replace: true });
+    if (!authLoading && user) {
+      console.log('Index - Redirecionando usuário para portal');
+      navigate('/portal', { replace: true });
+    } else if (!authLoading && !user) {
+      console.log('Index - Usuário não autenticado, redirecionando para login');
+      navigate('/auth', { replace: true }); 
     }
-  }, [authLoading, user, profile, navigate, redirectChecked]);
+  }, [authLoading, user, navigate]);
 
   // Forçar carregamento para terminar após 8 segundos
   useEffect(() => {
@@ -58,7 +50,7 @@ const Index: React.FC = () => {
     }, 3000);
 
     // Se o loading do auth terminar, atualizar o estado local
-    if (!authLoading) {
+    if (!authLoading && user) {
       setLocalLoading(false);
       clearTimeout(timer);
     }

@@ -10,33 +10,23 @@ import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal';
 
 const UserPortal = () => {
-  const { signOut, profile, loading: authLoading, user } = useAuth();
+  const { signOut, profile, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
   const [redirectChecked, setRedirectChecked] = useState<boolean>(false);
 
-  // Verificar se o usuário deve ser redirecionado para a área administrativa
+  // Verificar se o usuário está autenticado
   useEffect(() => {
-    if (!authLoading && profile && !redirectChecked) {
-      console.log('UserPortal - Verificando redirecionamento, perfil:', profile);
-      console.log('UserPortal - Role do usuário:', profile.role);
-      
-      // Usuários que NÃO são "user" devem ser redirecionados para a área administrativa
-      if (profile.role !== 'user') {
-        console.log('UserPortal - Redirecionando admin/técnico para área administrativa');
-        navigate('/', { replace: true });
-      } else {
-        setRedirectChecked(true);
-        console.log('UserPortal - Usuário comum permanece no portal');
-      }
-    }
-    
     // Se não estamos carregando e não temos usuário, redirecionar para login
     if (!authLoading && !user) {
+      console.log('UserPortal - Usuário não autenticado, redirecionando para login');
       navigate('/auth', { replace: true });
+    } else if (!authLoading && user && !redirectChecked) {
+      console.log('UserPortal - Usuário autenticado, permanecendo no portal');
+      setRedirectChecked(true);
     }
-  }, [authLoading, user, profile, navigate, redirectChecked]);
+  }, [authLoading, user, navigate, redirectChecked]);
 
   const handleSignOut = async () => {
     await signOut();
