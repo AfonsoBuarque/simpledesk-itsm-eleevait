@@ -3,6 +3,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface UserOnlyRouteProps {
   children: React.ReactNode;
@@ -10,10 +11,25 @@ interface UserOnlyRouteProps {
 
 const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   const { user, profile, loading } = useAuth();
+  const [localLoading, setLocalLoading] = useState(true);
 
   console.log('UserOnlyRoute - Auth state:', {user, profile, loading});
 
-  if (loading) {
+  // Adicionar um timeout para evitar carregamento infinito
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocalLoading(false);
+    }, 3000);
+    
+    if (!loading) {
+      setLocalLoading(false);
+      clearTimeout(timer);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  if (loading && localLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -29,7 +45,7 @@ const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   }
 
   // Verificar se o perfil foi carregado
-  if (!profile) {
+  if (!profile && user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

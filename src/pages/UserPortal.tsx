@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState } from 'react';
 import { AlertTriangle, LogOut, BarChart3, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPortalForm } from '@/components/UserPortal/UserPortalForm';
@@ -11,14 +12,15 @@ import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal';
 
 const UserPortal = () => {
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, loading: authLoading, user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
+  const [redirectChecked, setRedirectChecked] = useState<boolean>(false);
 
   // Verificar se o usuário deve ser redirecionado para a área administrativa
   useEffect(() => {
-    if (profile) {
+    if (!authLoading && profile && !redirectChecked) {
       console.log('UserPortal - Verificando redirecionamento, perfil:', profile);
       console.log('UserPortal - Role do usuário:', profile.role);
       
@@ -27,10 +29,16 @@ const UserPortal = () => {
         console.log('UserPortal - Redirecionando admin/técnico para área administrativa');
         navigate('/', { replace: true });
       } else {
+        setRedirectChecked(true);
         console.log('UserPortal - Usuário comum permanece no portal');
       }
     }
-  }, [profile, navigate]);
+    
+    // Se não estamos carregando e não temos usuário, redirecionar para login
+    if (!authLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [authLoading, user, profile, navigate, redirectChecked]);
 
   const handleSignOut = async () => {
     await signOut();

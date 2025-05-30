@@ -1,8 +1,8 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Profile {
   id: string;
@@ -19,9 +19,11 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
     try {
+      setProfileLoading(true);
       console.log('Fetching profile for user:', userId);
       
       const { data, error } = await supabase
@@ -47,10 +49,12 @@ export const useAuth = () => {
           };
           
           setProfile(newProfile);
+          setProfileLoading(false);
           return;
         }
         
         setProfile(null);
+        setProfileLoading(false);
         return;
       }
 
@@ -67,14 +71,17 @@ export const useAuth = () => {
       };
       
       setProfile(userProfile);
+      setProfileLoading(false);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
+      setProfileLoading(false);
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
+    let authTimeout: NodeJS.Timeout;
 
     const initializeAuth = async () => {
       try {
@@ -86,6 +93,9 @@ export const useAuth = () => {
         if (error) {
           console.error('Error getting session:', error);
           if (mounted) {
+            setUser(null);
+            setSession(null);
+            setProfile(null);
             setLoading(false);
           }
           return;
@@ -95,19 +105,22 @@ export const useAuth = () => {
 
         if (mounted) {
           setSession(session);
-          setUser(session?.user ?? null);
+          const currentUser = session?.user ?? null;
+          setUser(currentUser);
 
-          if (session?.user) {
-            await fetchProfile(session.user.id, session.user.email || '');
+          if (currentUser) {
+            await fetchProfile(currentUser.id, currentUser.email || '');
           } else {
             setProfile(null);
+            setLoading(false);
           }
-
-          setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
+          setUser(null);
+          setSession(null);
+          setProfile(null);
           setLoading(false);
         }
       }
@@ -121,17 +134,25 @@ export const useAuth = () => {
         if (!mounted) return;
 
         setSession(session);
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-        if (session?.user) {
-          await fetchProfile(session.user.id, session.user.email || '');
+        if (currentUser) {
+          await fetchProfile(currentUser.id, currentUser.email || '');
         } else {
           setProfile(null);
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
+
+    // Definir um timeout para evitar carregamento infinito
+    authTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.log('Auth timeout reached, forcing loading to false');
+        setLoading(false);
+      }
+    }, 5000);
 
     // Initialize auth
     initializeAuth();
@@ -139,9 +160,20 @@ export const useAuth = () => {
     // Cleanup
     return () => {
       mounted = false;
+      clearTimeout(authTimeout);
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, []);
+
+  // Atualizar o estado de loading quando o perfil for carregado
+  useEffect(() => {
+    if (user && profile && loading) {
+      setLoading(false);
+    } else if (user && !profileLoading && loading) {
+      // Se temos usuário mas o perfil não está carregando, podemos finalizar o loading
+      setLoading(false);
+    }
+  }, [user, profile, profileLoading, loading]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -214,7 +246,7 @@ export const useAuth = () => {
     user,
     session,
     profile,
-    loading,
+    loading: loading || profileLoading,
     signIn,
     signUp,
     signOut,

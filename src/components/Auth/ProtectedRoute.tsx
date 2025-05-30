@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,11 +11,26 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, profile, loading } = useAuth();
+  const [localLoading, setLocalLoading] = useState(true);
   
   console.log('ProtectedRoute - Auth state:', {user, profile, loading});
 
+  // Adicionar um timeout para evitar carregamento infinito
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocalLoading(false);
+    }, 3000);
+    
+    if (!loading) {
+      setLocalLoading(false);
+      clearTimeout(timer);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   const renderContent = useMemo(() => {
-    if (loading) {
+    if (loading && localLoading) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
@@ -30,7 +46,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
 
     // Verificar se o perfil foi carregado
-    if (!profile) {
+    if (!profile && user) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
@@ -49,7 +65,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     // Permitir acesso para usuários que NÃO são "user" (admin, technician, etc.)
     // Estes devem acessar a área administrativa
     return <>{children}</>;
-  }, [loading, user, profile, children]);
+  }, [loading, localLoading, user, profile, children]);
 
   return renderContent;
 };
