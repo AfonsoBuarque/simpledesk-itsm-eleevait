@@ -50,12 +50,13 @@ export const useRequisicoes = () => {
     mutationFn: async (data: SolicitacaoFormData) => {
       console.log('Creating requisição:', data);
       
-      // Preparar dados removendo campos que não devem ser enviados
+      // Preparar dados removendo campos que não devem ser enviados e convertendo arrays
       const { anexos, ativos_envolvidos, tags, ...restData } = data;
       
       const requisicaoData = {
         ...restData,
         tipo: 'requisicao' as const,
+        numero: '', // Será gerado automaticamente pelo trigger
         // Converter arrays para JSON se existirem
         ...(anexos && { anexos: JSON.stringify(anexos) }),
         ...(ativos_envolvidos && { ativos_envolvidos: JSON.stringify(ativos_envolvidos) }),
