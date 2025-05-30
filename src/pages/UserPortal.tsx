@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
 import { AlertTriangle, LogOut, BarChart3, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPortalForm } from '@/components/UserPortal/UserPortalForm';
