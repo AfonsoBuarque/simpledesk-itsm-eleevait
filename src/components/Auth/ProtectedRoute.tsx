@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -12,13 +12,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   const { user, loading, profile } = useAuth();
   
-  console.log('🔒 ProtectedRoute state:', { 
-    hasUser: !!user, 
-    userId: user?.id, 
-    loading, 
+  const authState = useMemo(() => ({
+    hasUser: !!user,
+    userId: user?.id,
+    loading,
     hasProfile: !!profile,
-    profileRole: profile?.role 
-  });
+    profileRole: profile?.role
+  }), [user, loading, profile]);
+  
+  console.log('🔒 ProtectedRoute state:', authState);
 
   useEffect(() => {
     console.log('🔒 ProtectedRoute useEffect - auth state changed:', { 
@@ -43,7 +45,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // Check if user has admin/manager/technician role
-  if (profile && !['admin', 'manager', 'technician'].includes(profile.role)) {
+  if (profile && !['admin', 'manager', 'technician'].includes(profile.role || '')) {
     console.log('🚫 ProtectedRoute - user role not allowed:', profile.role, 'redirecting to portal...');
     return <Navigate to="/portal" replace />;
   }

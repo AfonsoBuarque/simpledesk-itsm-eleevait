@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/use-toast';
@@ -22,78 +22,16 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   console.log('🔐 useAuth current state:', { 
     hasUser: !!user, 
     hasProfile: !!profile, 
-    loading 
+    loading,
+    initialized
   });
 
-  useEffect(() => {
-    console.log('🔐 useAuth useEffect - getting initial session...');
-    
-    const getInitialSession = async () => {
-      try {
-        console.log('📡 Getting initial session from Supabase...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log('📡 Initial session result:', { 
-          hasSession: !!session, 
-          hasUser: !!session?.user,
-          userId: session?.user?.id,
-          error: error?.message 
-        });
-
-        if (error) {
-          console.error('❌ Error getting initial session:', error);
-          setLoading(false);
-          return;
-        }
-
-        if (session?.user) {
-          console.log('👤 Setting user from session:', session.user.id);
-          setUser(session.user);
-          await fetchProfile(session.user.id);
-        } else {
-          console.log('👤 No user in session');
-        }
-        
-        setLoading(false);
-      } catch (error) {
-        console.error('💥 Exception getting initial session:', error);
-        setLoading(false);
-      }
-    };
-
-    getInitialSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Auth state changed:', event, session?.user?.id);
-      
-      try {
-        if (session?.user) {
-          console.log('👤 Setting user from auth change:', session.user.id);
-          setUser(session.user);
-          await fetchProfile(session.user.id);
-        } else {
-          console.log('👤 Clearing user from auth change');
-          setUser(null);
-          setProfile(null);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('💥 Error handling auth state change:', error);
-        setLoading(false);
-      }
-    });
-
-    return () => {
-      console.log('🧹 Cleaning up auth subscription');
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       console.log('👤 Fetching profile for user:', userId);
       
@@ -123,9 +61,78 @@ export const useAuth = () => {
     } catch (error) {
       console.error('💥 Exception fetching profile:', error);
     }
-  };
+  }, []);
 
-  const signIn = async (email: string, password: string) => {
+  useEffect(() => {
+    if (initialized) return;
+    
+    console.log('🔐 useAuth useEffect - getting initial session...');
+    
+    const getInitialSession = async () => {
+      try {
+        console.log('📡 Getting initial session from Supabase...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log('📡 Initial session result:', { 
+          hasSession: !!session, 
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          error: error?.message 
+        });
+
+        if (error) {
+          console.error('❌ Error getting initial session:', error);
+          setLoading(false);
+          setInitialized(true);
+          return;
+        }
+
+        if (session?.user) {
+          console.log('👤 Setting user from session:', session.user.id);
+          setUser(session.user);
+          await fetchProfile(session.user.id);
+        } else {
+          console.log('👤 No user in session');
+        }
+        
+        setLoading(false);
+        setInitialized(true);
+      } catch (error) {
+        console.error('💥 Exception getting initial session:', error);
+        setLoading(false);
+        setInitialized(true);
+      }
+    };
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth state changed:', event, session?.user?.id);
+      
+      try {
+        if (session?.user) {
+          console.log('👤 Setting user from auth change:', session.user.id);
+          setUser(session.user);
+          await fetchProfile(session.user.id);
+        } else {
+          console.log('👤 Clearing user from auth change');
+          setUser(null);
+          setProfile(null);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('💥 Error handling auth state change:', error);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      console.log('🧹 Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
+  }, [initialized, fetchProfile]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
     console.log('🔑 Signing in user:', email);
     
     try {
@@ -141,9 +148,9 @@ export const useAuth = () => {
       console.error('💥 Exception signing in:', error);
       return { data: null, error };
     }
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     console.log('📝 Signing up user:', email);
     
     try {
@@ -164,9 +171,9 @@ export const useAuth = () => {
       console.error('💥 Exception signing up:', error);
       return { data: null, error };
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     console.log('🚪 Signing out...');
     
     try {
@@ -178,12 +185,15 @@ export const useAuth = () => {
       }
       
       console.log('✅ Signed out successfully');
+      setUser(null);
+      setProfile(null);
+      setInitialized(false);
       return { error: null };
     } catch (error) {
       console.error('💥 Exception signing out:', error);
       return { error };
     }
-  };
+  }, []);
 
   console.log('🔐 useAuth returning state:', { 
     hasUser: !!user, 
