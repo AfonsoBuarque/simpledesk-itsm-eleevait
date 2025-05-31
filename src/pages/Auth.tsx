@@ -112,10 +112,10 @@ const Auth = () => {
     }
   };
 
-  // Redirecionamento simplificado - se o usuário estiver autenticado e não estiver carregando, redirecionar
+  // Redirecionar usuários autenticados para /portal
   if (user && !loading) {
-    console.log('Auth - Usuário autenticado, redirecionando para /');
-    return <Navigate to="/" replace />;
+    console.log('Auth - Usuário autenticado, redirecionando para /portal');
+    return <Navigate to="/portal" replace />;
   }
 
   return (
