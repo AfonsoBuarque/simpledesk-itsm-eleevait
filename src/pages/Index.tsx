@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
@@ -46,10 +45,13 @@ const Index = () => {
       case 'dashboard':
         return <DashboardOverview />;
       case 'incidents':
+        return <TicketList ticketType="incidents" />;
       case 'requests':
+        return <RequisicoesManagement />;
       case 'problems':
+        return <TicketList ticketType="problems" />;
       case 'changes':
-        return <TicketList ticketType={activeModule} />;
+        return <TicketList ticketType="changes" />;
       case 'knowledge':
         return <KnowledgeBase />;
       case 'users':
