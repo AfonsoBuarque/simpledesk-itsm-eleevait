@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
@@ -113,10 +114,36 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <EditRequisicaoReadOnlyFields form={form} />
             
-            {/* Campos editáveis usando SolicitacaoFormFields, excluindo apenas os read-only e as datas limite */}
+            {/* Campo Status */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="aberta">Aberta</SelectItem>
+                      <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="resolvida">Resolvida</SelectItem>
+                      <SelectItem value="fechada">Fechada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Campos editáveis usando SolicitacaoFormFields, excluindo os campos já renderizados */}
             <SolicitacaoFormFields 
               form={form} 
-              excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao']}
+              excludeFields={['titulo', 'descricao', 'status', 'data_limite_resposta', 'data_limite_resolucao']}
             />
 
             <EditRequisicaoDateFields form={form} />
