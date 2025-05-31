@@ -1,44 +1,69 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '@/components/Layout/Sidebar';
+
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
-import { Loader2 } from 'lucide-react';
+import Sidebar from '@/components/Layout/Sidebar';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
+import TicketList from '@/components/Tickets/TicketList';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
-import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
-import AtivoManagement from '@/components/Ativos/AtivoManagement';
-import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
-import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
-import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManagement';
-import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import UserManagement from '@/components/Users/UserManagement';
 import GroupManagement from '@/components/Groups/GroupManagement';
+import ProfileManagement from '@/components/Profiles/ProfileManagement';
 import ClientManagement from '@/components/Clients/ClientManagement';
 import CategoriaManagement from '@/components/Categorias/CategoriaManagement';
-import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
-import { useAuth } from '@/hooks/useAuth';
 import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagement';
+import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
+import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
+import AtivoManagement from '@/components/Ativos/AtivoManagement';
+import ContratoManagement from '@/components/Contratos/ContratoManagement';
+import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
+import FornecedorManagement from '@/components/Fornecedores/FornecedorManagement';
+import LocalizacaoManagement from '@/components/Localizacoes/LocalizacaoManagement';
+import SLAManagement from '@/components/SLAs/SLAManagement';
 
-const Index: React.FC = () => {
-  const { loading, user, profile } = useAuth();
-  const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState<string>('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [localLoading, setLocalLoading] = useState<boolean>(true);
+const Index = () => {
+  const { user, loading } = useAuth();
+  const [activeModule, setActiveModule] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const handleMenuItemClick = (item: string) => {
-    setActiveItem(item);
-    setIsSidebarOpen(false); // Close mobile sidebar after selection
-  };
+  // Redirecionar usuários não autenticados para /portal
+  if (!loading && !user) {
+    return <Navigate to="/portal" replace />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const renderContent = () => {
-    switch (activeItem) {
+    switch (activeModule) {
       case 'dashboard':
         return <DashboardOverview />;
+      case 'incidents':
+      case 'requests':
+      case 'problems':
+      case 'changes':
+        return <TicketList type={activeModule} />;
       case 'knowledge':
         return <KnowledgeBase />;
+      case 'users':
+        return <UserManagement />;
+      case 'groups':
+        return <GroupManagement />;
+      case 'profiles':
+        return <ProfileManagement />;
+      case 'clients':
+        return <ClientManagement />;
+      case 'categoria':
+        return <CategoriaManagement />;
+      case 'solicitacoes':
+        return <SolicitacaoManagement />;
       case 'cmdb':
         return <CMDBDashboard />;
       case 'ativos':
@@ -51,69 +76,32 @@ const Index: React.FC = () => {
         return <FornecedorManagement />;
       case 'localizacao':
         return <LocalizacaoManagement />;
-      case 'users':
-        return <UserManagement />;
-      case 'groups':
-        return <GroupManagement />;
-      case 'clients':
-        return <ClientManagement />;
-      case 'categoria':
-        return <CategoriaManagement />;
-      case 'solicitacoes':
-        return <SolicitacaoManagement />;
-      case 'requests':
-        return <RequisicoesManagement />;
       default:
         return <DashboardOverview />;
     }
   };
 
-  // Forçar carregamento para terminar após 8 segundos
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLocalLoading(false);
-    }, 8000);
-
-    // Se o loading do auth terminar, atualizar o estado local
-    if (!loading && user) {
-      setLocalLoading(false);
-    }
-
-    return () => clearTimeout(timer);
-  }, [loading, user]);
-
-  if (localLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-lg font-medium text-gray-900">Inicializando o sistema...</p>
-          <p className="text-sm text-gray-500">Isso pode levar alguns instantes</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50 flex w-full">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        activeModule={activeItem}
-        onModuleChange={handleMenuItemClick}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        activeModule={activeModule}
+        onModuleChange={setActiveModule}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header
           onMenuClick={() => setIsSidebarOpen(true)}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
           isSidebarOpen={isSidebarOpen}
           onCloseSidebar={() => setIsSidebarOpen(false)}
         />
-        <main className="flex-1 overflow-y-auto p-6">
+        
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
           {renderContent()}
         </main>
       </div>

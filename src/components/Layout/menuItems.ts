@@ -17,7 +17,8 @@ import {
   HelpCircle,
   ArrowUpDown,
   Bug,
-  Tags
+  Tags,
+  UserCheck
 } from 'lucide-react';
 
 export const menuItems = [
@@ -53,7 +54,8 @@ export const menuItems = [
     icon: Users,
     children: [
       { id: 'users', label: 'Usuários', icon: User },
-      { id: 'groups', label: 'Grupos', icon: Users }
+      { id: 'groups', label: 'Grupos', icon: Users },
+      { id: 'profiles', label: 'Perfis', icon: UserCheck }
     ]
   },
   { 
