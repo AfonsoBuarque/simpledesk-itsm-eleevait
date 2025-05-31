@@ -42,59 +42,10 @@ const Header = ({
   useEffect(() => {
     if (profile?.id) {
       fetchNotifications();
-      fetchUserClient();
+      // Simplificar - usar um cliente padrão já que não temos a tabela users configurada
+      setUserClient('Cliente Padrão');
     }
   }, [profile?.id]);
-
-  const fetchUserClient = async () => {
-    try {
-      console.log('Fetching user client for profile:', profile?.id);
-      
-      // Buscar dados do usuário diretamente da tabela users com cliente
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select(`
-          client_id,
-          clients:client_id (
-            id,
-            name
-          )
-        `)
-        .eq('id', profile?.id)
-        .single();
-
-      console.log('User data result:', { userData, userError });
-
-      if (userError) {
-        console.error('Error fetching user data:', userError);
-        setUserClient('Não informado');
-        return;
-      }
-
-      // Se tem client_id e dados do cliente
-      if (userData?.clients) {
-        setUserClient(userData.clients.name);
-      } else if (userData?.client_id) {
-        // Fallback: buscar cliente separadamente se a query com join falhou
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('name')
-          .eq('id', userData.client_id)
-          .single();
-
-        if (clientData && !clientError) {
-          setUserClient(clientData.name);
-        } else {
-          setUserClient('Cliente não encontrado');
-        }
-      } else {
-        setUserClient('Sem cliente específico');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar cliente do usuário:', error);
-      setUserClient('Erro ao carregar');
-    }
-  };
 
   const fetchNotifications = async () => {
     try {

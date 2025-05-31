@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // Função simplificada para criar um perfil básico a partir do usuário
   const createBasicProfile = useCallback((user: User): Profile => {
@@ -27,8 +29,10 @@ export const useAuth = () => {
     };
   }, []);
 
-  // Inicializar autenticação
+  // Inicializar autenticação apenas uma vez
   useEffect(() => {
+    if (initialized) return;
+    
     let mounted = true;
     let timeoutId: NodeJS.Timeout;
 
@@ -39,7 +43,7 @@ export const useAuth = () => {
         // Verificar sessão atual
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session?.user) {
+        if (session?.user && mounted) {
           console.log('Session found, user:', session.user.id);
           setUser(session.user);
           
@@ -51,11 +55,13 @@ export const useAuth = () => {
         // Finalizar loading independentemente do resultado
         if (mounted) {
           setLoading(false);
+          setInitialized(true);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
           setLoading(false);
+          setInitialized(true);
         }
       }
     }
@@ -80,17 +86,19 @@ export const useAuth = () => {
         
         // Finalizar loading após processamento
         setLoading(false);
+        setInitialized(true);
       }
     );
 
-    // Inicializar autenticação
+    // Inicializar autenticação apenas se não foi inicializado
     initializeAuth();
 
     // Definir um timeout de segurança para garantir que loading não fique preso
     timeoutId = setTimeout(() => {
-      if (mounted && loading) {
+      if (mounted && loading && !initialized) {
         console.log('Safety timeout reached, forcing loading to false');
         setLoading(false);
+        setInitialized(true);
       }
     }, 3000);
 
@@ -100,7 +108,7 @@ export const useAuth = () => {
       clearTimeout(timeoutId);
       subscription?.unsubscribe();
     };
-  }, [createBasicProfile]);
+  }, [initialized, createBasicProfile, loading]);
 
   const signIn = async (email: string, password: string) => {
     try {
