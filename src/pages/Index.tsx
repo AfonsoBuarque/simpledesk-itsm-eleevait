@@ -16,10 +16,10 @@ import RequisicoesManagement from '@/components/Requisicoes/RequisicoesManagemen
 import SolicitacaoManagement from '@/components/Solicitacoes/SolicitacaoManagement';
 import CMDBDashboard from '@/components/CMDB/CMDBDashboard';
 import AtivoManagement from '@/components/Ativos/AtivoManagement';
-import ContratoManagement from '@/components/Contratos/ContratoManagement';
+import { ContratoManagement } from '@/components/Contratos/ContratoManagement';
 import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement';
-import FornecedorManagement from '@/components/Fornecedores/FornecedorManagement';
-import LocalizacaoManagement from '@/components/Localizacoes/LocalizacaoManagement';
+import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManagement';
+import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import SLAManagement from '@/components/SLAs/SLAManagement';
 
 const Index = () => {
@@ -49,7 +49,7 @@ const Index = () => {
       case 'requests':
       case 'problems':
       case 'changes':
-        return <TicketList type={activeModule} />;
+        return <TicketList ticketType={activeModule} />;
       case 'knowledge':
         return <KnowledgeBase />;
       case 'users':
