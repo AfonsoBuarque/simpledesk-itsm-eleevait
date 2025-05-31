@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -16,15 +17,9 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
   const { categorias } = useCategorias();
   const { profile } = useAuth();
 
-  // Filter categories to only show those where the category's client matches the user's client
-  const filteredCategorias = categorias.filter(categoria => {
-    // If user doesn't have a client_id, show all categories with no client_id
-    if (!profile?.client_id) {
-      return !categoria.cliente_id;
-    }
-    // Show categories that match the user's client or have no client assigned
-    return categoria.cliente_id === profile.client_id || !categoria.cliente_id;
-  });
+  // Como estamos usando um perfil simplificado, mostrar todas as categorias
+  // Em uma implementação futura, pode-se filtrar por cliente específico
+  const filteredCategorias = categorias;
 
   return (
     <>
