@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,11 +9,13 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { Loader2, Search, UserCheck, Mail, Phone, Calendar, Edit, Trash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { EditProfileDialog } from './EditProfileDialog';
 
 const ProfileManagement = () => {
   const { profiles, isLoading, error } = useProfiles();
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const filteredProfiles = profiles.filter(profile =>
@@ -51,12 +52,14 @@ const ProfileManagement = () => {
     }
   };
 
-  const handleEdit = (profileId: string) => {
-    // TODO: Implementar modal de edição ou navegação para página de edição
-    toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "A edição de perfis será implementada em breve.",
-    });
+  const handleEdit = (profile: any) => {
+    setEditingProfile(profile);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    // Refresh the data
+    window.location.reload();
   };
 
   const handleDelete = async (profileId: string) => {
@@ -193,7 +196,7 @@ const ProfileManagement = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEdit(profile.id)}
+                        onClick={() => handleEdit(profile)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -248,6 +251,15 @@ const ProfileManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      {editingProfile && (
+        <EditProfileDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          profile={editingProfile}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   );
 };
