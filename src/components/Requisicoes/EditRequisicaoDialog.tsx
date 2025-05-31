@@ -116,7 +116,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
             {/* Campos editáveis usando SolicitacaoFormFields, excluindo os read-only e as datas limite */}
             <SolicitacaoFormFields 
               form={form} 
-              excludeFields={['titulo', 'descricao', 'solicitante_id', 'data_limite_resposta', 'data_limite_resolucao']}
+              excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao']}
             />
 
             <EditRequisicaoDateFields form={form} />
