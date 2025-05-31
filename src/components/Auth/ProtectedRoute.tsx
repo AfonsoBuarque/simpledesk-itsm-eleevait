@@ -1,5 +1,4 @@
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
@@ -9,10 +8,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading, profile } = useAuth();
+  const { user, loading } = useAuth();
   const currentPath = window.location.pathname;
   
-  console.log('ProtectedRoute - Auth state:', {user, loading, profile, currentPath});
+  console.log('ProtectedRoute - Auth state:', {user, loading, currentPath});
 
   // Mostrar indicador de carregamento enquanto os dados de autenticação estão sendo carregados
   if (loading) {
@@ -32,20 +31,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Verificar se o perfil foi carregado
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Carregando perfil...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Não fazemos mais validação de role/permissão
-  console.log(`Permitindo acesso para usuário ${profile.id} na rota ${currentPath}`);
+  // Se chegou aqui, o usuário está autenticado e pode acessar a rota
+  console.log(`Permitindo acesso para usuário na rota ${currentPath}`);
   return <>{children}</>;
 };
 
