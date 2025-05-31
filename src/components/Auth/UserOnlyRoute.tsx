@@ -10,8 +10,9 @@ interface UserOnlyRouteProps {
 
 const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
   const { user, profile, loading } = useAuth();
+  const currentPath = window.location.pathname;
 
-  console.log('UserOnlyRoute - Auth state:', {user, loading});
+  console.log('UserOnlyRoute - Auth state:', {user, loading, profile, currentPath});
 
   if (loading) {
     return (
@@ -40,12 +41,8 @@ const UserOnlyRoute = ({ children }: UserOnlyRouteProps) => {
     );
   }
 
-  // Redirecionar usuários que NÃO são "user" para a área administrativa
-  if (profile.role !== 'user') {
-    return <Navigate to="/" replace />;
-  }
-
-  // Permitir acesso apenas para usuários com role "user"
+  // Não fazemos mais validação de role/permissão
+  console.log(`Permitindo acesso para qualquer usuário na rota ${currentPath}`)
   return <>{children}</>;
 };
 
