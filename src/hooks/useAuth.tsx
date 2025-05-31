@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,11 +16,13 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  
+  // Usar refs para controlar inicializações
+  const initializedRef = useRef(false);
+  const mountedRef = useRef(true);
 
   // Função simplificada para criar um perfil básico a partir do usuário
   const createBasicProfile = useCallback((user: User): Profile => {
-    console.log('Creating basic profile for user:', user.id);
     return {
       id: user.id,
       full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
@@ -31,9 +33,10 @@ export const useAuth = () => {
 
   // Inicializar autenticação apenas uma vez
   useEffect(() => {
-    if (initialized) return;
+    if (initializedRef.current || !mountedRef.current) return;
     
-    let mounted = true;
+    initializedRef.current = true;
+    
     let timeoutId: NodeJS.Timeout;
 
     async function initializeAuth() {
@@ -43,25 +46,16 @@ export const useAuth = () => {
         // Verificar sessão atual
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session?.user && mounted) {
-          console.log('Session found, user:', session.user.id);
+        if (session?.user && mountedRef.current) {
           setUser(session.user);
-          
-          // Criar perfil básico imediatamente
           const basicProfile = createBasicProfile(session.user);
           setProfile(basicProfile);
         }
-        
-        // Finalizar loading independentemente do resultado
-        if (mounted) {
-          setLoading(false);
-          setInitialized(true);
-        }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        if (mounted) {
+      } finally {
+        if (mountedRef.current) {
           setLoading(false);
-          setInitialized(true);
         }
       }
     }
@@ -69,14 +63,12 @@ export const useAuth = () => {
     // Configurar listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        if (!mountedRef.current) return;
         
-        if (!mounted) return;
+        console.log('Auth state changed:', event, session?.user?.id);
         
         if (session?.user) {
           setUser(session.user);
-          
-          // Criar perfil básico imediatamente
           const basicProfile = createBasicProfile(session.user);
           setProfile(basicProfile);
         } else {
@@ -84,31 +76,28 @@ export const useAuth = () => {
           setProfile(null);
         }
         
-        // Finalizar loading após processamento
         setLoading(false);
-        setInitialized(true);
       }
     );
 
-    // Inicializar autenticação apenas se não foi inicializado
+    // Inicializar autenticação
     initializeAuth();
 
-    // Definir um timeout de segurança para garantir que loading não fique preso
+    // Timeout de segurança
     timeoutId = setTimeout(() => {
-      if (mounted && loading && !initialized) {
+      if (mountedRef.current && loading) {
         console.log('Safety timeout reached, forcing loading to false');
         setLoading(false);
-        setInitialized(true);
       }
     }, 3000);
 
     // Cleanup
     return () => {
-      mounted = false;
+      mountedRef.current = false;
       clearTimeout(timeoutId);
       subscription?.unsubscribe();
     };
-  }, [initialized, createBasicProfile, loading]);
+  }, []); // Dependências vazias para executar apenas uma vez
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -126,7 +115,6 @@ export const useAuth = () => {
         return { error };
       }
 
-      // Não precisamos fazer nada aqui, o listener onAuthStateChange vai atualizar o estado
       return { data, error: null };
     } catch (error) {
       console.error('Unexpected error during sign in:', error);
@@ -154,7 +142,6 @@ export const useAuth = () => {
         return { error };
       }
 
-      // Não precisamos fazer nada aqui, o listener onAuthStateChange vai atualizar o estado
       return { data, error: null };
     } catch (error) {
       console.error('Unexpected error during sign up:', error);
@@ -183,6 +170,13 @@ export const useAuth = () => {
       return { error };
     }
   };
+
+  // Cleanup no unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   return {
     user,
