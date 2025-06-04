@@ -1,10 +1,38 @@
-# Welcome to your Lovable project
+# SimpleDesk ITSM
+
+Projeto baseado em React/Vite para gestão de serviços. Este repositório contém
+o código-fonte da aplicação.
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/00eaa334-aaaa-4fe9-af68-3353a7d739b2
 
-## How can I edit this code?
+## Configuração de Ambiente
+
+1. Copie o arquivo `.env.example` para `.env` e defina as variáveis do Supabase.
+2. Instale as dependências:
+   ```sh
+   npm i
+   ```
+3. Rode o servidor de desenvolvimento:
+   ```sh
+   npm run dev
+   ```
+
+## Testes
+
+Os testes unitários utilizam o [Vitest](https://vitest.dev/). Para executá-los:
+
+```sh
+npm test
+```
+
+## Como contribuir
+
+Pull requests são bem-vindos. Abra uma issue para discutir mudanças significativas
+antes de enviar.
+
+## Como editar este código?
 
 There are several ways of editing your application.
 
