@@ -114,36 +114,10 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <EditRequisicaoReadOnlyFields form={form} />
             
-            {/* Campo Status */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="aberta">Aberta</SelectItem>
-                      <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="resolvida">Resolvida</SelectItem>
-                      <SelectItem value="fechada">Fechada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
             {/* Campos editáveis usando SolicitacaoFormFields, excluindo os campos já renderizados */}
             <SolicitacaoFormFields 
               form={form} 
-              excludeFields={['titulo', 'descricao', 'status', 'data_limite_resposta', 'data_limite_resolucao']}
+              excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao']}
             />
 
             <EditRequisicaoDateFields form={form} />
