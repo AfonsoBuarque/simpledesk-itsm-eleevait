@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ import FabricanteManagement from '@/components/Fabricantes/FabricanteManagement'
 import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManagement';
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import SLAManagement from '@/components/SLAs/SLAManagement';
+import { ChatBot } from '@/components/ChatBot/ChatBot';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -107,6 +109,9 @@ const Index = () => {
           {renderContent()}
         </main>
       </div>
+      
+      {/* Chat Bot */}
+      <ChatBot />
     </div>
   );
 };
