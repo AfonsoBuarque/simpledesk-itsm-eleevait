@@ -64,7 +64,7 @@ export const ChatBot = ({ className }: ChatBotProps) => {
       const groupNames = userGroups.map(group => group.name).join(', ');
 
       // Enviar para o webhook
-      const response = await fetch('https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook/simple-ai-chamados', {
+      const response = await fetch('https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/simple-ai-chamados', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
