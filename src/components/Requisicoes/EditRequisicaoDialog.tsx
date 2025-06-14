@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -114,10 +113,9 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <EditRequisicaoReadOnlyFields form={form} />
             
-            {/* Campos editáveis usando SolicitacaoFormFields, excluindo os campos já renderizados */}
             <SolicitacaoFormFields 
               form={form} 
-              excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao']}
+              excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao', 'status']}
             />
 
             <EditRequisicaoDateFields form={form} />
@@ -128,7 +126,37 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
               acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
               maxFileSize={10}
             />
-            
+
+            {/* Campo Status (editável) */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={updateRequisicao.isPending}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="aberta">Aberta</SelectItem>
+                        <SelectItem value="em_andamento">Em andamento</SelectItem>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="resolvida">Resolvida</SelectItem>
+                        <SelectItem value="fechada">Fechada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
