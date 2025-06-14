@@ -75,7 +75,6 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   const { chatMessages, isLoading: loadingChat, error: chatError, sendMessage } = useRequisicaoChat(requisicao.id);
   const { logs, isLoading: loadingLogs, error: logsError } = useRequisicaoLogs(requisicao.id);
   const [mensagem, setMensagem] = useState('');
-  const [mensagemReadOnly, setMensagemReadOnly] = useState(false);
 
   // Adapta o formato do chatMessage pro esperado pelo componente
   const mappedChatMsgs = chatMessages.map(msg => ({
@@ -87,22 +86,27 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
 
   // Envio de mensagem real
   const handleEnviarMensagem = async () => {
-    if (!mensagem.trim() || mensagemReadOnly) return;
+    if (!mensagem.trim()) return;
     if (!user?.id) {
-      alert("É necessário estar autenticado para enviar mensagens.");
+      alert('É necessário estar autenticado para enviar mensagens.');
       return;
     }
-    setMensagemReadOnly(true);
 
-    await sendMessage.mutateAsync({
-      requisicao_id: requisicao.id,
-      criado_por: user.id, // Agora sempre o usuário logado
-      autor_tipo: 'analista', // ajuste conforme seu uso
-      mensagem: mensagem.trim()
-    });
-
-    setMensagem('');
-    setTimeout(() => setMensagemReadOnly(false), 2000);
+    try {
+      await sendMessage.mutateAsync({
+        requisicao_id: requisicao.id,
+        criado_por: user.id,
+        autor_tipo: 'analista',
+        mensagem: mensagem.trim()
+      });
+      setMensagem('');
+    } catch (e: any) {
+      console.error('Erro ao enviar mensagem no chat:', e);
+      // Mostra feedback para o usuário
+      alert(
+        'Erro: Não foi possível enviar mensagem. Você não está autorizado para esse chamado (somente participantes podem enviar mensagens).'
+      );
+    }
   };
 
   // Logs simulados
@@ -263,14 +267,11 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                     <div className="flex flex-col gap-2">
                       {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
                       {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
-                      {mappedChatMsgs.map(msg => (
-                        <div
-                          key={msg.id}
-                          className={`flex ${msg.autor === 'analista' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                            <span className="block">{msg.texto}</span>
-                            <span className="block text-xs opacity-70 mt-1 text-right">{msg.criadoEm} • {msg.autor}</span>
+                      {chatMessages.map(msg => (
+                        <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                            <span className="block">{msg.mensagem}</span>
+                            <span className="block text-xs opacity-70 mt-1 text-right">{new Date(msg.criado_em).toLocaleString()} • {msg.autor_tipo}</span>
                           </div>
                         </div>
                       ))}
@@ -288,18 +289,15 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                       onChange={e => setMensagem(e.target.value)}
                       placeholder="Digite uma mensagem..."
                       className="flex-1"
-                      disabled={mensagemReadOnly || sendMessage.isPending}
+                      disabled={sendMessage.isPending}
                     />
                     <Button
                       type="submit"
-                      disabled={mensagemReadOnly || !mensagem.trim() || sendMessage.isPending}
+                      disabled={!mensagem.trim() || sendMessage.isPending}
                     >
                       {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
                     </Button>
                   </form>
-                  {mensagemReadOnly && (
-                    <div className="text-xs text-gray-500 pt-1">Aguardando resposta do cliente...</div>
-                  )}
                 </div>
               </TabsContent>
               <TabsContent value="logs">
