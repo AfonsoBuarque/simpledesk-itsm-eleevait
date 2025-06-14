@@ -23,6 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { useRequisicaoChat } from '@/hooks/useRequisicaoChat';
 import { useRequisicaoLogs } from '@/hooks/useRequisicaoLogs';
+import { useAuth } from '@/hooks/useAuth';
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -64,6 +65,9 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   const { updateRequisicao } = useRequisicoes();
   const [anexos, setAnexos] = useState<string[]>([]);
 
+  // Novo: obter usuário autenticado
+  const { user } = useAuth();
+
   // Estado para Tabs
   const [tab, setTab] = useState('form');
 
@@ -84,12 +88,16 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   // Envio de mensagem real
   const handleEnviarMensagem = async () => {
     if (!mensagem.trim() || mensagemReadOnly) return;
+    if (!user?.id) {
+      alert("É necessário estar autenticado para enviar mensagens.");
+      return;
+    }
     setMensagemReadOnly(true);
 
     await sendMessage.mutateAsync({
       requisicao_id: requisicao.id,
-      criado_por: requisicao.atendente_id ?? '', // idealmente o usuário logado, ajuste aqui se tiver auth!
-      autor_tipo: 'analista', // você pode ajustar conforme permissão/tipo user
+      criado_por: user.id, // Agora sempre o usuário logado
+      autor_tipo: 'analista', // ajuste conforme seu uso
       mensagem: mensagem.trim()
     });
 
