@@ -19,6 +19,9 @@ import { FileUpload } from '@/components/ui/file-upload';
 import { EditRequisicaoReadOnlyFields } from './EditRequisicaoReadOnlyFields';
 import { EditRequisicaoDateFields } from './EditRequisicaoDateFields';
 import { useEditRequisicaoFormLogic } from './EditRequisicaoFormLogic';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -49,9 +52,31 @@ interface EditRequisicaoDialogProps {
   onClose: () => void;
 }
 
+type ChatMessage = {
+  id: string;
+  autor: 'analista' | 'cliente';
+  texto: string;
+  criadoEm: string;
+};
+
 export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequisicaoDialogProps) => {
   const { updateRequisicao } = useRequisicoes();
   const [anexos, setAnexos] = useState<string[]>([]);
+
+  // Estado para Tabs
+  const [tab, setTab] = useState('form');
+  // Chat de mensagens: inicial como vazio ou mocados
+  const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([
+    { id: '1', autor: 'analista', texto: 'Bem-vindo ao chat da requisição!', criadoEm: new Date().toLocaleString() }
+  ]);
+  const [mensagem, setMensagem] = useState('');
+  const [mensagemReadOnly, setMensagemReadOnly] = useState(false);
+
+  // Logs simulados
+  const [logs] = useState([
+    { id: 'l1', acao: 'Status alterado para "Em andamento"', por: 'Analista João', em: '14/06/2025 09:34' },
+    { id: 'l2', acao: 'Grupo responsavel alterado para "N2 Redes"', por: 'Analista João', em: '14/06/2025 09:33' }
+  ]);
 
   const form = useForm<SolicitacaoFormData>({
     resolver: zodResolver(requisicaoSchema),
@@ -103,81 +128,165 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     onClose();
   };
 
+  // Chat envia mensagem: salva, bloqueia input até novo submit de outro autor
+  const enviarMensagem = (autor: 'analista' | 'cliente') => {
+    if (!mensagem.trim()) return;
+    setChatMsgs(msgs => [
+      ...msgs, 
+      { id: Math.random().toString(36).substring(2), autor, texto: mensagem.trim(), criadoEm: new Date().toLocaleString() }
+    ]);
+    setMensagem('');
+    setMensagemReadOnly(true);
+    // Simular que depois de 2s o outro lado libera para nova mensagem
+    setTimeout(() => setMensagemReadOnly(false), 2000);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          {/* Cabeçalho vazio, movendo conteúdo para o form */}
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Header row with title and status select, in Form context */}
-            <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-              <DialogTitle className="text-center md:text-left flex-1">
+          <div className="flex flex-col items-center justify-center w-full">
+            <div className="flex w-full items-center justify-between mb-4 px-4">
+              <DialogTitle className="text-center md:text-left flex-1 text-lg font-semibold">
                 Editar Requisição - {requisicao.numero}
               </DialogTitle>
-              <div className="flex justify-center md:justify-end items-center min-w-[200px]">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem className="mb-0 w-full">
-                      <FormLabel className="sr-only">Status</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={updateRequisicao.isPending}
-                        >
-                          <SelectTrigger className="w-full min-w-[170px] md:min-w-[200px] max-w-xs">
-                            <SelectValue placeholder="Selecione o status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="aberta">Aberta</SelectItem>
-                            <SelectItem value="em_andamento">Em andamento</SelectItem>
-                            <SelectItem value="pendente">Pendente</SelectItem>
-                            <SelectItem value="resolvida">Resolvida</SelectItem>
-                            <SelectItem value="fechada">Fechada</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="min-w-[180px] flex justify-end">
+                <Form {...form}>
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem className="mb-0 w-full">
+                        <FormLabel className="sr-only">Status</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={updateRequisicao.isPending}
+                          >
+                            <SelectTrigger className="w-full min-w-[130px] md:min-w-[180px] max-w-xs">
+                              <SelectValue placeholder="Selecione o status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="aberta">Aberta</SelectItem>
+                              <SelectItem value="em_andamento">Em andamento</SelectItem>
+                              <SelectItem value="pendente">Pendente</SelectItem>
+                              <SelectItem value="resolvida">Resolvida</SelectItem>
+                              <SelectItem value="fechada">Fechada</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </Form>
               </div>
             </div>
-            {/* Campos principais do formulário */}
-            <EditRequisicaoReadOnlyFields form={form} />
-            <SolicitacaoFormFields 
-              form={form} 
-              excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao', 'status']}
-            />
-            <EditRequisicaoDateFields form={form} />
-            <FileUpload
-              onFilesChange={setAnexos}
-              maxFiles={5}
-              acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
-              maxFileSize={10}
-            />
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={updateRequisicao.isPending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={updateRequisicao.isPending}
-              >
-                {updateRequisicao.isPending ? 'Atualizando...' : 'Atualizar Requisição'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+            <Tabs value={tab} onValueChange={setTab} className="w-full">
+              <TabsList className="w-full justify-center mb-2">
+                <TabsTrigger value="form" className="flex-1">Formulário</TabsTrigger>
+                <TabsTrigger value="chat" className="flex-1">Chat</TabsTrigger>
+                <TabsTrigger value="logs" className="flex-1">Logs de Alteração</TabsTrigger>
+              </TabsList>
+              <TabsContent value="form">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <EditRequisicaoReadOnlyFields form={form} />
+                    <SolicitacaoFormFields 
+                      form={form} 
+                      excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao', 'status']}
+                    />
+                    <EditRequisicaoDateFields form={form} />
+                    <FileUpload
+                      onFilesChange={setAnexos}
+                      maxFiles={5}
+                      acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
+                      maxFileSize={10}
+                    />
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleClose}
+                        disabled={updateRequisicao.isPending}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={updateRequisicao.isPending}
+                      >
+                        {updateRequisicao.isPending ? 'Atualizando...' : 'Atualizar Requisição'}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </TabsContent>
+              <TabsContent value="chat">
+                {/* Chat Style */}
+                <div className="border rounded-lg bg-background p-4 flex flex-col h-[300px] md:h-[350px] w-full max-w-2xl mx-auto">
+                  <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
+                    <div className="flex flex-col gap-2">
+                      {chatMsgs.map(msg => (
+                        <div
+                          key={msg.id}
+                          className={`flex ${msg.autor === 'analista' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                            <span className="block">{msg.texto}</span>
+                            <span className="block text-xs opacity-70 mt-1 text-right">{msg.criadoEm} • {msg.autor}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <form
+                    className="flex gap-2 pt-2"
+                    onSubmit={e => {
+                      e.preventDefault();
+                      if (!mensagemReadOnly && mensagem.trim()) enviarMensagem('analista');
+                    }}
+                  >
+                    <Input 
+                      value={mensagem}
+                      onChange={e => setMensagem(e.target.value)}
+                      placeholder="Digite uma mensagem..."
+                      className="flex-1"
+                      disabled={mensagemReadOnly}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={mensagemReadOnly || !mensagem.trim()}
+                    >
+                      Enviar
+                    </Button>
+                  </form>
+                  {mensagemReadOnly && (
+                    <div className="text-xs text-gray-500 pt-1">Aguardando resposta do cliente...</div>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="logs">
+                <div className="max-w-2xl mx-auto border bg-background rounded-lg p-4 h-[250px] overflow-y-auto">
+                  <h4 className="font-semibold text-base mb-2">Logs de Alteração</h4>
+                  {logs.length === 0 && (
+                    <div className="text-muted-foreground">Nenhum log registrado.</div>
+                  )}
+                  <ul className="space-y-2">
+                    {logs.map(l => (
+                      <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
+                        <span className="font-semibold">{l.por}:</span>
+                        <span>{l.acao}</span>
+                        <span className="ml-auto text-xs opacity-60">{l.em}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </DialogHeader>
       </DialogContent>
     </Dialog>
   );
