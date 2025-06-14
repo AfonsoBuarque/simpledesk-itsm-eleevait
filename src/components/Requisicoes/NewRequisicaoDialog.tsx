@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +16,8 @@ import { useCategorias } from '@/hooks/useCategorias';
 import { useAuth } from '@/hooks/useAuth';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
+import { useSyncCategoriaDependentes } from "@/hooks/useSyncCategoriaDependentes";
+import { NewRequisicaoActions } from "./NewRequisicaoActions";
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -55,79 +56,32 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
   const form = useForm<SolicitacaoFormData>({
     resolver: zodResolver(requisicaoSchema),
     defaultValues: {
-      titulo: '',
-      tipo: 'requisicao',
-      urgencia: 'media',
-      impacto: 'medio',
-      prioridade: 'media',
-      status: 'aberta',
-      canal_origem: 'portal',
-      solicitante_id: user?.id || '',
+      titulo: "",
+      tipo: "requisicao",
+      urgencia: "media",
+      impacto: "medio",
+      prioridade: "media",
+      status: "aberta",
+      canal_origem: "portal",
+      solicitante_id: user?.id || "",
     },
   });
 
   // Preencher solicitante_id quando o usuário estiver disponível
   useEffect(() => {
     if (user?.id) {
-      form.setValue('solicitante_id', user.id);
+      form.setValue("solicitante_id", user.id);
     }
   }, [user?.id, form]);
 
-  // Observar mudanças no campo categoria_id e preencher dependentes automaticamente
-  const categoriaId = form.watch('categoria_id');
-
-  useEffect(() => {
-    if (categoriaId && categorias.length > 0) {
-      // Encontrar a categoria selecionada
-      const categoriaSelecionada = categorias.find(cat => cat.id === categoriaId);
-
-      if (categoriaSelecionada) {
-        // Preencher automaticamente cliente_id
-        if (categoriaSelecionada.cliente_id) {
-          form.setValue('cliente_id', categoriaSelecionada.cliente_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
-        }
-
-        // Preencher automaticamente sla_id (garantido!)
-        if (categoriaSelecionada.sla_id) {
-          form.setValue('sla_id', categoriaSelecionada.sla_id, {
-            shouldValidate: true,
-            shouldDirty: true,
-            shouldTouch: true
-          });
-        } else {
-          // Se não houver sla_id na categoria, limpe o campo
-          form.setValue('sla_id', '', {
-            shouldValidate: true,
-            shouldDirty: true,
-            shouldTouch: true
-          });
-        }
-
-        // Preencher automaticamente grupo_responsavel_id
-        if (categoriaSelecionada.grupo_id) {
-          form.setValue('grupo_responsavel_id', categoriaSelecionada.grupo_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
-        }
-
-        // Forçar validação só dos campos dependentes
-        form.trigger(['cliente_id', 'sla_id', 'grupo_responsavel_id']);
-      }
-    }
-  }, [categoriaId, categorias, form]);
+  // Sincronizar campos dependentes da categoria escolhida
+  useSyncCategoriaDependentes(form, categorias);
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
-      // Adicionar anexos aos dados do formulário
       const dataWithAnexos = {
         ...data,
-        anexos: anexos.length > 0 ? anexos.map(url => ({ url, type: 'file' })) : undefined,
+        anexos: anexos.length > 0 ? anexos.map((url) => ({ url, type: "file" })) : undefined,
       };
 
       await createRequisicao.mutateAsync(dataWithAnexos);
@@ -135,7 +89,7 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
       setAnexos([]);
       onClose();
     } catch (error) {
-      console.error('Error creating requisição:', error);
+      console.error("Error creating requisição:", error);
     }
   };
 
@@ -151,38 +105,25 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
         <DialogHeader>
           <DialogTitle>Nova Requisição</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <SolicitacaoFormFields form={form} />
-            
+
             <FileUpload
               onFilesChange={setAnexos}
               maxFiles={5}
               acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
               maxFileSize={10}
             />
-            
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={createRequisicao.isPending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={createRequisicao.isPending}
-              >
-                {createRequisicao.isPending ? 'Criando...' : 'Criar Requisição'}
-              </Button>
-            </div>
+
+            <NewRequisicaoActions
+              isLoading={createRequisicao.isPending}
+              onCancel={handleClose}
+            />
           </form>
         </Form>
       </DialogContent>
     </Dialog>
   );
 };
-
