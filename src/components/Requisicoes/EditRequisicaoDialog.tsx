@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +21,8 @@ import { useEditRequisicaoFormLogic } from './EditRequisicaoFormLogic';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { useRequisicaoChat } from '@/hooks/useRequisicaoChat';
+import { useRequisicaoLogs } from '@/hooks/useRequisicaoLogs';
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -65,15 +66,39 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
 
   // Estado para Tabs
   const [tab, setTab] = useState('form');
-  // Chat de mensagens: inicial como vazio ou mocados
-  const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([
-    { id: '1', autor: 'analista', texto: 'Bem-vindo ao chat da requisição!', criadoEm: new Date().toLocaleString() }
-  ]);
+
+  // Integração com chat e logs do Supabase
+  const { chatMessages, isLoading: loadingChat, error: chatError, sendMessage } = useRequisicaoChat(requisicao.id);
+  const { logs, isLoading: loadingLogs, error: logsError } = useRequisicaoLogs(requisicao.id);
   const [mensagem, setMensagem] = useState('');
   const [mensagemReadOnly, setMensagemReadOnly] = useState(false);
 
+  // Adapta o formato do chatMessage pro esperado pelo componente
+  const mappedChatMsgs = chatMessages.map(msg => ({
+    id: msg.id,
+    autor: msg.autor_tipo,
+    texto: msg.mensagem,
+    criadoEm: new Date(msg.criado_em).toLocaleString()
+  }));
+
+  // Envio de mensagem real
+  const handleEnviarMensagem = async () => {
+    if (!mensagem.trim() || mensagemReadOnly) return;
+    setMensagemReadOnly(true);
+
+    await sendMessage.mutateAsync({
+      requisicao_id: requisicao.id,
+      criado_por: requisicao.atendente_id ?? '', // idealmente o usuário logado, ajuste aqui se tiver auth!
+      autor_tipo: 'analista', // você pode ajustar conforme permissão/tipo user
+      mensagem: mensagem.trim()
+    });
+
+    setMensagem('');
+    setTimeout(() => setMensagemReadOnly(false), 2000);
+  };
+
   // Logs simulados
-  const [logs] = useState([
+  const [logsMock] = useState([
     { id: 'l1', acao: 'Status alterado para "Em andamento"', por: 'Analista João', em: '14/06/2025 09:34' },
     { id: 'l2', acao: 'Grupo responsavel alterado para "N2 Redes"', por: 'Analista João', em: '14/06/2025 09:33' }
   ]);
@@ -131,10 +156,10 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   // Chat envia mensagem: salva, bloqueia input até novo submit de outro autor
   const enviarMensagem = (autor: 'analista' | 'cliente') => {
     if (!mensagem.trim()) return;
-    setChatMsgs(msgs => [
-      ...msgs, 
-      { id: Math.random().toString(36).substring(2), autor, texto: mensagem.trim(), criadoEm: new Date().toLocaleString() }
-    ]);
+    // setChatMsgs(msgs => [
+    //   ...msgs, 
+    //   { id: Math.random().toString(36).substring(2), autor, texto: mensagem.trim(), criadoEm: new Date().toLocaleString() }
+    // ]);
     setMensagem('');
     setMensagemReadOnly(true);
     // Simular que depois de 2s o outro lado libera para nova mensagem
@@ -228,7 +253,9 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                 <div className="border rounded-lg bg-background p-4 flex flex-col h-[300px] md:h-[350px] w-full max-w-2xl mx-auto">
                   <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
                     <div className="flex flex-col gap-2">
-                      {chatMsgs.map(msg => (
+                      {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
+                      {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
+                      {mappedChatMsgs.map(msg => (
                         <div
                           key={msg.id}
                           className={`flex ${msg.autor === 'analista' ? 'justify-end' : 'justify-start'}`}
@@ -245,7 +272,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                     className="flex gap-2 pt-2"
                     onSubmit={e => {
                       e.preventDefault();
-                      if (!mensagemReadOnly && mensagem.trim()) enviarMensagem('analista');
+                      handleEnviarMensagem();
                     }}
                   >
                     <Input 
@@ -253,13 +280,13 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                       onChange={e => setMensagem(e.target.value)}
                       placeholder="Digite uma mensagem..."
                       className="flex-1"
-                      disabled={mensagemReadOnly}
+                      disabled={mensagemReadOnly || sendMessage.isPending}
                     />
                     <Button
                       type="submit"
-                      disabled={mensagemReadOnly || !mensagem.trim()}
+                      disabled={mensagemReadOnly || !mensagem.trim() || sendMessage.isPending}
                     >
-                      Enviar
+                      {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
                     </Button>
                   </form>
                   {mensagemReadOnly && (
@@ -270,15 +297,19 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
               <TabsContent value="logs">
                 <div className="max-w-2xl mx-auto border bg-background rounded-lg p-4 h-[250px] overflow-y-auto">
                   <h4 className="font-semibold text-base mb-2">Logs de Alteração</h4>
-                  {logs.length === 0 && (
+                  {loadingLogs && <div className="text-muted-foreground">Carregando logs…</div>}
+                  {logsError && <div className="text-destructive">Erro ao carregar logs</div>}
+                  {logs.length === 0 && !loadingLogs && (
                     <div className="text-muted-foreground">Nenhum log registrado.</div>
                   )}
                   <ul className="space-y-2">
                     {logs.map(l => (
                       <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
-                        <span className="font-semibold">{l.por}:</span>
+                        <span className="font-semibold">{l.usuario_id || 'Usuário'}:</span>
                         <span>{l.acao}</span>
-                        <span className="ml-auto text-xs opacity-60">{l.em}</span>
+                        <span className="ml-auto text-xs opacity-60">
+                          {new Date(l.criado_em).toLocaleString()}
+                        </span>
                       </li>
                     ))}
                   </ul>
