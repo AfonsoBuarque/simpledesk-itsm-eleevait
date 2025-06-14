@@ -196,9 +196,8 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     //   { id: Math.random().toString(36).substring(2), autor, texto: mensagem.trim(), criadoEm: new Date().toLocaleString() }
     // ]);
     setMensagem('');
-    setMensagemReadOnly(true);
     // Simular que depois de 2s o outro lado libera para nova mensagem
-    setTimeout(() => setMensagemReadOnly(false), 2000);
+    // setTimeout(() => setMensagemReadOnly(false), 2000);
   };
 
   return (
