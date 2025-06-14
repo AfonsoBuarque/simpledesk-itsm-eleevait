@@ -9,12 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Form } from '@/components/ui/form';
 import { useGroups } from '@/hooks/useGroups';
 import { useClients } from '@/hooks/useClients';
 import { useUsers } from '@/hooks/useUsers';
 import { GroupFormFields } from './GroupFormFields';
 import { EditGroupFormActions } from './EditGroupFormActions';
+import { GroupMembersTab } from './GroupMembersTab';
 
 const groupSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -108,16 +110,26 @@ export const EditGroupDialog = ({ open, onOpenChange, group }: EditGroupDialogPr
         <DialogHeader>
           <DialogTitle>Editar Grupo</DialogTitle>
         </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <GroupFormFields control={form.control} clients={clients} users={users} />
-            <EditGroupFormActions 
-              onCancel={handleCancel}
-              isSubmitting={form.formState.isSubmitting}
-            />
-          </form>
-        </Form>
+        <Tabs defaultValue="details" className="w-full mt-4">
+          <TabsList className="mb-4">
+            <TabsTrigger value="details">Detalhes</TabsTrigger>
+            <TabsTrigger value="members">Membros</TabsTrigger>
+          </TabsList>
+          <TabsContent value="details">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <GroupFormFields control={form.control} clients={clients} users={users} />
+                <EditGroupFormActions 
+                  onCancel={handleCancel}
+                  isSubmitting={form.formState.isSubmitting}
+                />
+              </form>
+            </Form>
+          </TabsContent>
+          <TabsContent value="members">
+            <GroupMembersTab groupId={group.id} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
