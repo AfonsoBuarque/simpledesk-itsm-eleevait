@@ -916,6 +916,96 @@ export type Database = {
         }
         Relationships: []
       }
+      requisicao_chat_mensagens: {
+        Row: {
+          arquivo_url: string | null
+          autor_tipo: string
+          criado_em: string
+          criado_por: string
+          id: string
+          mensagem: string
+          requisicao_id: string
+          tipo_arquivo: string | null
+        }
+        Insert: {
+          arquivo_url?: string | null
+          autor_tipo: string
+          criado_em?: string
+          criado_por: string
+          id?: string
+          mensagem: string
+          requisicao_id: string
+          tipo_arquivo?: string | null
+        }
+        Update: {
+          arquivo_url?: string | null
+          autor_tipo?: string
+          criado_em?: string
+          criado_por?: string
+          id?: string
+          mensagem?: string
+          requisicao_id?: string
+          tipo_arquivo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisicao_chat_mensagens_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisicao_chat_mensagens_requisicao_id_fkey"
+            columns: ["requisicao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisicao_logs: {
+        Row: {
+          acao: string
+          criado_em: string
+          id: string
+          requisicao_id: string
+          tipo: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          acao: string
+          criado_em?: string
+          id?: string
+          requisicao_id: string
+          tipo?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          acao?: string
+          criado_em?: string
+          id?: string
+          requisicao_id?: string
+          tipo?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisicao_logs_requisicao_id_fkey"
+            columns: ["requisicao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisicao_logs_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       slas: {
         Row: {
           ativo: boolean | null
