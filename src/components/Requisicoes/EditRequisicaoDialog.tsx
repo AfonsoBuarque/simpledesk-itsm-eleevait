@@ -92,6 +92,30 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
       return;
     }
 
+    // MOSTRAR IDs RELEVANTES PARA DEBUG
+    console.log('DEBUG: user.id', user.id);
+    console.log('DEBUG: requisicao.solicitante_id', requisicao.solicitante_id);
+    console.log('DEBUG: requisicao.cliente_id', requisicao.cliente_id);
+    console.log('DEBUG: requisicao.grupo_responsavel_id', requisicao.grupo_responsavel_id);
+    console.log('DEBUG: requisicao.atendente_id', requisicao.atendente_id);
+
+    // Avisar visualmente se o usuário não é "participante"
+    const pertenceAoChamado =
+      [requisicao.solicitante_id, requisicao.atendente_id]
+        .filter(Boolean)
+        .includes(user.id);
+
+    // Grupo do usuário para comparação (não implementado lookup aqui, só log)
+    // Você pode buscar via user_groups se necessário e comparar
+
+    if (!pertenceAoChamado) {
+      alert(
+        `Atenção: Seu usuário (${user.id}) NÃO está listado em solicitante_id nem atendente_id deste chamado!\n` +
+        'Isso irá bloquear o envio da mensagem pelo Supabase RLS.\n' +
+        'Verifique se você realmente está vinculado a esse chamado.'
+      );
+    }
+
     try {
       await sendMessage.mutateAsync({
         requisicao_id: requisicao.id,
@@ -102,7 +126,6 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
       setMensagem('');
     } catch (e: any) {
       console.error('Erro ao enviar mensagem no chat:', e);
-      // Mostra feedback para o usuário
       alert(
         'Erro: Não foi possível enviar mensagem. Você não está autorizado para esse chamado (somente participantes podem enviar mensagens).'
       );
