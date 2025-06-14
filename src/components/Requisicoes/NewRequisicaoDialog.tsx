@@ -73,40 +73,42 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
     }
   }, [user?.id, form]);
 
-  // Observar mudanças no campo categoria_id
+  // Observar mudanças no campo categoria_id e preencher dependentes automaticamente
   const categoriaId = form.watch('categoria_id');
 
   useEffect(() => {
     if (categoriaId && categorias.length > 0) {
-      console.log('Categoria selecionada:', categoriaId);
-      
       // Encontrar a categoria selecionada
       const categoriaSelecionada = categorias.find(cat => cat.id === categoriaId);
-      
+
       if (categoriaSelecionada) {
-        console.log('Dados da categoria:', categoriaSelecionada);
-        
-        // Preencher automaticamente os campos baseados na categoria
+        // Preencher automaticamente cliente_id
         if (categoriaSelecionada.cliente_id) {
-          console.log('Preenchendo cliente_id:', categoriaSelecionada.cliente_id);
           form.setValue('cliente_id', categoriaSelecionada.cliente_id, { 
             shouldValidate: true, 
             shouldDirty: true,
             shouldTouch: true 
           });
         }
-        
+
+        // Preencher automaticamente sla_id (garantido!)
         if (categoriaSelecionada.sla_id) {
-          console.log('Preenchendo sla_id:', categoriaSelecionada.sla_id);
-          form.setValue('sla_id', categoriaSelecionada.sla_id, { 
-            shouldValidate: true, 
+          form.setValue('sla_id', categoriaSelecionada.sla_id, {
+            shouldValidate: true,
             shouldDirty: true,
-            shouldTouch: true 
+            shouldTouch: true
+          });
+        } else {
+          // Se não houver sla_id na categoria, limpe o campo
+          form.setValue('sla_id', '', {
+            shouldValidate: true,
+            shouldDirty: true,
+            shouldTouch: true
           });
         }
-        
+
+        // Preencher automaticamente grupo_responsavel_id
         if (categoriaSelecionada.grupo_id) {
-          console.log('Preenchendo grupo_responsavel_id:', categoriaSelecionada.grupo_id);
           form.setValue('grupo_responsavel_id', categoriaSelecionada.grupo_id, { 
             shouldValidate: true, 
             shouldDirty: true,
@@ -114,7 +116,7 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
           });
         }
 
-        // Forçar re-render do formulário
+        // Forçar validação só dos campos dependentes
         form.trigger(['cliente_id', 'sla_id', 'grupo_responsavel_id']);
       }
     }
@@ -183,3 +185,4 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
     </Dialog>
   );
 };
+
