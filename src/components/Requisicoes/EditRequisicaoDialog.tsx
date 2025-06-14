@@ -107,63 +107,59 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          {/* Novo cabeçalho com título à esquerda e status à direita */}
-          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <DialogTitle className="text-center md:text-left flex-1">
-              Editar Requisição - {requisicao.numero}
-            </DialogTitle>
-            <div className="flex justify-center md:justify-end items-center min-w-[200px]">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem className="mb-0 w-full">
-                    <FormLabel className="sr-only">Status</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={updateRequisicao.isPending}
-                      >
-                        <SelectTrigger className="w-full min-w-[170px] md:min-w-[200px] max-w-xs">
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="aberta">Aberta</SelectItem>
-                          <SelectItem value="em_andamento">Em andamento</SelectItem>
-                          <SelectItem value="pendente">Pendente</SelectItem>
-                          <SelectItem value="resolvida">Resolvida</SelectItem>
-                          <SelectItem value="fechada">Fechada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          {/* Cabeçalho vazio, movendo conteúdo para o form */}
         </DialogHeader>
-        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Header row with title and status select, in Form context */}
+            <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+              <DialogTitle className="text-center md:text-left flex-1">
+                Editar Requisição - {requisicao.numero}
+              </DialogTitle>
+              <div className="flex justify-center md:justify-end items-center min-w-[200px]">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="mb-0 w-full">
+                      <FormLabel className="sr-only">Status</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={updateRequisicao.isPending}
+                        >
+                          <SelectTrigger className="w-full min-w-[170px] md:min-w-[200px] max-w-xs">
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="aberta">Aberta</SelectItem>
+                            <SelectItem value="em_andamento">Em andamento</SelectItem>
+                            <SelectItem value="pendente">Pendente</SelectItem>
+                            <SelectItem value="resolvida">Resolvida</SelectItem>
+                            <SelectItem value="fechada">Fechada</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            {/* Campos principais do formulário */}
             <EditRequisicaoReadOnlyFields form={form} />
-            
             <SolicitacaoFormFields 
               form={form} 
               excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao', 'status']}
             />
-
             <EditRequisicaoDateFields form={form} />
-            
             <FileUpload
               onFilesChange={setAnexos}
               maxFiles={5}
               acceptedFileTypes="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls"
               maxFileSize={10}
             />
-
-            {/* O campo Status foi movido para o topo */}
-            
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
