@@ -1,11 +1,10 @@
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserPlus, UserMinus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useUsers } from "@/hooks/useUsers";
 import { useGroups } from "@/hooks/useGroups";
-import { useGroupUserOperations } from "@/hooks/useGroupUserOperations";
 import { AddGroupMembersDialog } from "./AddGroupMembersDialog";
 
 interface GroupMembersTabProps {
@@ -14,13 +13,15 @@ interface GroupMembersTabProps {
 
 export const GroupMembersTab: React.FC<GroupMembersTabProps> = ({ groupId }) => {
   const { users, getUserGroups, refreshUsers } = useUsers();
-  const { removeUserFromGroup, refreshGroups } = useGroups();
+  const { removeUserFromGroup, refreshGroups, addUserToGroup } = useGroups();
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const fetchMembers = useCallback(async () => {
+  // Função para buscar membros do grupo
+  const fetchMembers = async () => {
     setLoading(true);
+    // Busca grupos de todos usuários e filtra para pegar apenas os que estão neste grupo
     const result = await Promise.all(
       users.map(async (user) => {
         const groups = await getUserGroups(user.id);
@@ -31,11 +32,13 @@ export const GroupMembersTab: React.FC<GroupMembersTabProps> = ({ groupId }) => 
     );
     setMembers(result.filter(Boolean));
     setLoading(false);
-  }, [users, groupId, getUserGroups]);
+  };
 
+  // Chamar apenas ao montar ou quando users/groupId/showAddDialog mudarem (não incluir fetchMembers como dependência!)
   useEffect(() => {
     fetchMembers();
-  }, [fetchMembers, showAddDialog]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users, groupId, showAddDialog]);
 
   const handleRemove = async (userId: string) => {
     await removeUserFromGroup(groupId, userId);
@@ -45,7 +48,6 @@ export const GroupMembersTab: React.FC<GroupMembersTabProps> = ({ groupId }) => 
   };
 
   const handleAdd = async (userIds: string[]) => {
-    const { addUserToGroup } = useGroups();
     for (const userId of userIds) {
       await addUserToGroup(groupId, userId);
     }
