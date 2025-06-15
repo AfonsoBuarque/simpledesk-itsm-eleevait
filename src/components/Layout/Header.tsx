@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Bell, User, Search, Menu, PanelLeftClose, PanelLeft, LogOut, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,12 +37,51 @@ const Header = ({
   const { profile, signOut } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userClient, setUserClient] = useState<string>('');
+  const [clientLoading, setClientLoading] = useState<boolean>(false);
+
+  // NOVO: Buscar nome do cliente real do usuário logado
+  useEffect(() => {
+    const fetchAndSetClient = async () => {
+      if (!profile?.id) {
+        setUserClient('');
+        return;
+      }
+      setClientLoading(true);
+      try {
+        // Buscar usuário na tabela users (para pegar o client_id)
+        const { data: userDb } = await supabase
+          .from('users')
+          .select('client_id')
+          .eq('id', profile.id)
+          .maybeSingle();
+        if (userDb?.client_id) {
+          // Buscar nome do cliente na tabela clients
+          const { data: clientDb } = await supabase
+            .from('clients')
+            .select('name')
+            .eq('id', userDb.client_id)
+            .maybeSingle();
+          if (clientDb?.name) {
+            setUserClient(clientDb.name);
+          } else {
+            setUserClient('Cliente não encontrado');
+          }
+        } else {
+          setUserClient('Sem cliente');
+        }
+      } catch (e) {
+        setUserClient('Erro ao buscar cliente');
+      }
+      setClientLoading(false);
+    };
+
+    fetchAndSetClient();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
 
   useEffect(() => {
     if (profile?.id) {
       fetchNotifications();
-      // Simplificar - usar um cliente padrão já que não temos a tabela users configurada
-      setUserClient('Cliente Padrão');
     }
   }, [profile?.id]);
 
@@ -116,7 +154,7 @@ const Header = ({
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-blue-600">SimpleDesk</h1>
           <Badge variant="secondary" className="text-xs">
-            {userClient || 'Carregando...'}
+            {clientLoading ? 'Carregando...' : userClient || 'Sem cliente'}
           </Badge>
         </div>
       </div>
