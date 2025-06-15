@@ -15,6 +15,8 @@ import { FileUpload } from '@/components/ui/file-upload';
 import { IncidenteChat } from './IncidenteChat';
 import { IncidenteLogs } from './IncidenteLogs';
 import { useCategorias } from '@/hooks/useCategorias';
+import { useSLACalculation } from '@/hooks/useSLACalculation';
+import { EditRequisicaoDateFields } from '../Requisicoes/EditRequisicaoDateFields';
 
 const incidenteSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -48,6 +50,7 @@ interface EditIncidenteDialogProps {
 const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialogProps) => {
   const { updateIncidente } = useIncidentes();
   const { categorias } = useCategorias();
+  const { calculateAndSetSLADeadlines } = useSLACalculation();
   const [tab, setTab] = useState('form');
   const [anexos, setAnexos] = useState<string[]>([]);
 
@@ -94,6 +97,30 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
       }
     }
   }, [incidente, form]);
+
+  // Calcular SLA quando categoria ou grupo responsável mudarem
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'categoria_id' || name === 'grupo_responsavel_id') {
+        const categoriaId = value.categoria_id;
+        const grupoId = value.grupo_responsavel_id;
+        
+        if (categoriaId && grupoId) {
+          calculateAndSetSLADeadlines(categoriaId, grupoId, incidente.data_abertura || new Date().toISOString())
+            .then((deadlines) => {
+              if (deadlines.data_limite_resposta) {
+                form.setValue('data_limite_resposta', deadlines.data_limite_resposta.slice(0, 16));
+              }
+              if (deadlines.data_limite_resolucao) {
+                form.setValue('data_limite_resolucao', deadlines.data_limite_resolucao.slice(0, 16));
+              }
+            });
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, calculateAndSetSLADeadlines, incidente.data_abertura]);
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
@@ -175,9 +202,10 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <SolicitacaoFormFields
                       form={form}
-                      excludeFields={["status"]}
+                      excludeFields={["status", "data_limite_resposta", "data_limite_resolucao"]}
                       filteredCategorias={categoriasIncidente}
                     />
+                    <EditRequisicaoDateFields form={form} />
                     <FileUpload
                       onFilesChange={setAnexos}
                       maxFiles={5}
