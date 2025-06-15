@@ -13,37 +13,33 @@ interface Profile {
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null); // NOVO: Guardar sessão!
+  const [session, setSession] = useState<Session | null>(null); 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  
-  // Usar refs para controlar inicializações
+
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
 
-  // Função simplificada para criar um perfil básico a partir do usuário
   const createBasicProfile = useCallback((user: User): Profile => {
     return {
       id: user.id,
       full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
       email: user.email,
-      role: 'admin' // Todos os usuários são admin por padrão
+      role: 'admin'
     };
   }, []);
 
-  // Inicializar autenticação apenas uma vez
   useEffect(() => {
     if (initializedRef.current || !mountedRef.current) return;
-    
+
     initializedRef.current = true;
     let timeoutId: NodeJS.Timeout;
 
-    // Listener de mudanças de sessão: SEMPRE ARMAZENA session e user
+    // Listener de mudanças de sessão
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, sessionArg) => {
         if (!mountedRef.current) return;
-
         setSession(sessionArg);
         setUser(sessionArg?.user ?? null);
 
@@ -53,12 +49,10 @@ export const useAuth = () => {
         } else {
           setProfile(null);
         }
-
         setLoading(false);
       }
     );
 
-    // Pega sessão atual SINCRONIZANDO as duas variáveis
     async function initializeAuth() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -72,22 +66,16 @@ export const useAuth = () => {
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
-        if (mountedRef.current) {
-          setLoading(false);
-        }
+        if (mountedRef.current) setLoading(false);
       }
     }
 
     initializeAuth();
 
-    // Timeout de segurança
     timeoutId = setTimeout(() => {
-      if (mountedRef.current && loading) {
-        setLoading(false);
-      }
+      if (mountedRef.current && loading) setLoading(false);
     }, 3000);
 
-    // Cleanup
     return () => {
       mountedRef.current = false;
       clearTimeout(timeoutId);
@@ -95,7 +83,7 @@ export const useAuth = () => {
     };
   }, [createBasicProfile]);
 
-  // Sign In
+  // Função de login
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -105,7 +93,6 @@ export const useAuth = () => {
         setLoading(false);
         return { error };
       }
-      // Mantém user e session sincronizados
       setSession(data.session);
       setUser(data.user ?? null);
       return { data, error: null };
@@ -115,7 +102,7 @@ export const useAuth = () => {
     }
   };
 
-  // Sign Up
+  // Função de cadastro
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setLoading(true);
@@ -138,27 +125,30 @@ export const useAuth = () => {
     }
   };
 
-  // Sign Out
+  // Função de logout robusta
   const signOut = async () => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Sign out error:', error.message);
-      } else {
-        setUser(null);
-        setSession(null);
-        setProfile(null);
-      }
+      // Independente do erro, limpar estado local:
+      setUser(null);
+      setSession(null);
+      setProfile(null);
       setLoading(false);
-      return { error };
+      if (error) {
+        // Era "console.error" – agora retorna o erro para ser exibido por quem chama:
+        return { error };
+      }
+      return { error: null };
     } catch (error) {
+      setUser(null);
+      setSession(null);
+      setProfile(null);
       setLoading(false);
       return { error };
     }
   };
 
-  // Cleanup no unmount
   useEffect(() => {
     return () => {
       mountedRef.current = false;
@@ -167,7 +157,7 @@ export const useAuth = () => {
 
   return {
     user,
-    session, // Disponível para consumo externo, se necessário.
+    session,
     profile,
     loading,
     profileLoading,
