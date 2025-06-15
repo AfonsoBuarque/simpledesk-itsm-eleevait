@@ -15,10 +15,10 @@ const UserPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
 
-  // Log de role do usuário logado (apenas este!)
-  if (profile) {
-    console.log('[UserPortal] Usuário logado:', profile);
-  }
+  // Removido: Log de role do usuário logado (apenas este!)
+  // if (profile) {
+  //   console.log('[UserPortal] Usuário logado:', profile);
+  // }
 
   // Atualizar: garantir redirecionamento para /auth após logout
   const handleSignOut = async () => {
