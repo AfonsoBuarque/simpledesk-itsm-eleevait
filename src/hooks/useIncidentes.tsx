@@ -36,6 +36,14 @@ export const useIncidentes = () => {
       // Transformar os dados para garantir compatibilidade com o tipo Solicitacao
       const transformedData: Solicitacao[] = (data || []).map(item => ({
         ...item,
+        // Garantir que tipo seja do tipo correto
+        tipo: (item.tipo as 'incidente' | 'solicitacao' | 'problema' | 'requisicao' | 'mudanca') || 'incidente',
+        // Garantir que campos obrigatórios tenham valores padrão
+        urgencia: (item.urgencia as 'baixa' | 'media' | 'alta' | 'critica') || 'media',
+        impacto: (item.impacto as 'baixo' | 'medio' | 'alto') || 'medio',
+        prioridade: (item.prioridade as 'baixa' | 'media' | 'alta' | 'critica') || 'media',
+        status: (item.status as 'aberta' | 'em_andamento' | 'pendente' | 'resolvida' | 'fechada') || 'aberta',
+        canal_origem: (item.canal_origem as 'portal' | 'email' | 'telefone' | 'chat' | 'presencial') || 'portal',
         // Definir relacionamentos como null por enquanto, pois não há foreign keys configuradas
         categoria: null,
         sla: null,
@@ -58,8 +66,13 @@ export const useIncidentes = () => {
 
       console.log('Criando incidente com dados:', formData);
       
+      // Gerar número do incidente temporariamente até termos o trigger
+      const timestamp = Date.now();
+      const numeroIncidente = `INC${timestamp.toString().slice(-6)}`;
+      
       // Preparar dados para inserção, removendo campos que não existem na tabela
       const insertData = {
+        numero: numeroIncidente, // Incluir número temporário
         titulo: formData.titulo,
         descricao: formData.descricao,
         tipo: 'incidente' as const,
@@ -82,7 +95,6 @@ export const useIncidentes = () => {
         tags: formData.tags,
         // Converter anexos para o formato JSON esperado pela tabela
         anexos: formData.anexos ? JSON.stringify(formData.anexos) : null,
-        // Não incluir numero - será gerado automaticamente pelo trigger se existir
       };
 
       const { data, error } = await supabase
