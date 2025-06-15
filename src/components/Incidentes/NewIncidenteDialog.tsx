@@ -18,6 +18,7 @@ import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useSyncCategoriaDependentes } from "@/hooks/useSyncCategoriaDependentes";
 import { NewRequisicaoActions } from "../Requisicoes/NewRequisicaoActions";
+import { useSLACalculation } from '@/hooks/useSLACalculation';
 
 const incidenteSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -51,6 +52,7 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
   const { createIncidente } = useIncidentes();
   const { categorias } = useCategorias();
   const { user } = useAuth();
+  const { calculateAndSetSLADeadlines } = useSLACalculation();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -77,6 +79,43 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
 
   // Sincronizar campos dependentes da categoria escolhida
   useSyncCategoriaDependentes(form, categorias);
+
+  // Calcular SLA quando categoria ou grupo responsável mudarem (IGUAL À EDIÇÃO)
+  useEffect(() => {
+    const subscription = form.watch(async (value, { name }) => {
+      if (name === "categoria_id" || name === "grupo_responsavel_id") {
+        const categoriaId = value.categoria_id;
+        const grupoId = value.grupo_responsavel_id;
+        // Só faz o cálculo se ambos estiverem setados
+        if (categoriaId && grupoId) {
+          console.log("SLA calculation triggered for NEW incidente:", { categoriaId, grupoId });
+          try {
+            const deadlines = await calculateAndSetSLADeadlines(
+              categoriaId,
+              grupoId,
+              new Date().toISOString()
+            );
+            console.log("NEW Incident SLA deadlines received:", deadlines);
+            // Formatar para datetime-local
+            if (deadlines.data_limite_resposta) {
+              const formattedResposta = deadlines.data_limite_resposta.slice(0, 16);
+              form.setValue('data_limite_resposta', formattedResposta);
+              console.log('Setting data_limite_resposta:', formattedResposta);
+            }
+            if (deadlines.data_limite_resolucao) {
+              const formattedResolucao = deadlines.data_limite_resolucao.slice(0, 16);
+              form.setValue('data_limite_resolucao', formattedResolucao);
+              console.log('Setting data_limite_resolucao:', formattedResolucao);
+            }
+          } catch (error) {
+            console.error("Error calculating SLA for NEW incident:", error);
+          }
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, calculateAndSetSLADeadlines]);
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
@@ -147,3 +186,4 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
     </Dialog>
   );
 };
+
