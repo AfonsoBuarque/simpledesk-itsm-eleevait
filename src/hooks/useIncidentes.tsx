@@ -7,45 +7,28 @@ export const useIncidentes = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Helper para tratar relacionamentos potencialmente inválidos
+  // Helper para tratar relacionamentos potencialmente inválidos, se necessário no futuro
   function normalizeRelacionamento<T>(value: any): T | null {
     if (!value || value.error === true) return null;
-    // No Supabase, arrays vazios podem aparecer se a referência não existe (ex: [])
     if (Array.isArray(value)) return value[0] ?? null;
     return value;
   }
 
-  // fetch incidentes
+  // fetch incidentes SEM JOIN (apenas flat data)
   const { data: incidentes = [], isLoading, error } = useQuery({
     queryKey: ['incidentes'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('incidentes')
-        .select(`
-          *,
-          categoria:categorias_servico(nome),
-          sla:slas(nome),
-          solicitante:users!incidentes_solicitante_id_fkey(name),
-          cliente:clients(name),
-          grupo_responsavel:groups(name),
-          atendente:users!incidentes_atendente_id_fkey(name)
-        `)
+        .select('*')
         .order('criado_em', { ascending: false });
 
       if (error) {
         throw error;
       }
 
-      // Map and cast to expected structure (nome or name as appropriate)
-      return (data || []).map((inc: any) => ({
-        ...inc,
-        categoria: normalizeRelacionamento<{ nome: string }>(inc.categoria),
-        sla: normalizeRelacionamento<{ nome: string }>(inc.sla),
-        solicitante: normalizeRelacionamento<{ name: string }>(inc.solicitante),
-        cliente: normalizeRelacionamento<{ name: string }>(inc.cliente),
-        grupo_responsavel: normalizeRelacionamento<{ name: string }>(inc.grupo_responsavel),
-        atendente: normalizeRelacionamento<{ name: string }>(inc.atendente),
-      })) as Solicitacao[];
+      // Apenas retorne o data como está, você pode tratar o id depois no front
+      return (data || []) as Solicitacao[];
     },
   });
 
