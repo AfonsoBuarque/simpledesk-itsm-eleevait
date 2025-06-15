@@ -322,25 +322,27 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                   </form>
                 </div>
               </TabsContent>
-              <TabsContent value="logs">
-                <div className="max-w-2xl mx-auto border bg-background rounded-lg p-4 flex-1 min-h-0 overflow-y-auto">
-                  <h4 className="font-semibold text-base mb-2">Logs de Alteração</h4>
+              <TabsContent value="logs" className="flex flex-col flex-1 min-h-0 h-full">
+                <div className="max-w-2xl mx-auto border bg-background rounded-lg p-4 flex flex-col flex-1 min-h-0 h-full">
+                  <h4 className="font-semibold text-base mb-2 flex-shrink-0">Logs de Alteração</h4>
                   {loadingLogs && <div className="text-muted-foreground">Carregando logs…</div>}
                   {logsError && <div className="text-destructive">Erro ao carregar logs</div>}
                   {logs.length === 0 && !loadingLogs && (
                     <div className="text-muted-foreground">Nenhum log registrado.</div>
                   )}
-                  <ul className="space-y-2">
-                    {logs.map(l => (
-                      <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
-                        <span className="font-semibold">{l.usuario_id || 'Usuário'}:</span>
-                        <span>{l.acao}</span>
-                        <span className="ml-auto text-xs opacity-60">
-                          {new Date(l.criado_em).toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex-1 min-h-0 overflow-y-auto">
+                    <ul className="space-y-2">
+                      {logs.map(l => (
+                        <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
+                          <span className="font-semibold">Usuário:</span>
+                          <span>{l.acao}</span>
+                          <span className="ml-auto text-xs opacity-60 whitespace-nowrap">
+                            {new Date(l.criado_em).toLocaleString()}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
