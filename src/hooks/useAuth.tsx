@@ -20,14 +20,35 @@ export const useAuth = () => {
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
 
-  const createBasicProfile = useCallback((user: User): Profile => {
-    return {
-      id: user.id,
-      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-      email: user.email,
-      role: 'admin'
-    };
-  }, []);
+  // Nova função auxiliar para buscar o perfil no banco Supabase
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    setProfileLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, role')
+        .eq('id', userId)
+        .maybeSingle();
+      if (!error && data) {
+        setProfile({
+          id: data.id,
+          full_name: data.full_name,
+          email: data.email,
+          role: data.role || 'user',
+        });
+      } else {
+        // Se não encontrarmos no banco, criar perfil básico como fallback
+        setProfile({
+          id: userId,
+          full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
+          email: user?.email || null,
+          role: 'user'
+        });
+      }
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [user?.email, user?.user_metadata?.full_name]);
 
   useEffect(() => {
     if (initializedRef.current || !mountedRef.current) return;
@@ -43,8 +64,7 @@ export const useAuth = () => {
         setSession(sessionArg);
         setUser(sessionArg?.user ?? null);
         if (sessionArg?.user) {
-          const basicProfile = createBasicProfile(sessionArg.user);
-          setProfile(basicProfile);
+          fetchUserProfile(sessionArg.user.id);
         } else {
           setProfile(null);
         }
@@ -58,10 +78,8 @@ export const useAuth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user && mountedRef.current) {
-          const basicProfile = createBasicProfile(session.user);
-          setProfile(basicProfile);
+          await fetchUserProfile(session.user.id);
         }
-      } catch (error) {
       } finally {
         if (mountedRef.current) setLoading(false);
       }
@@ -78,7 +96,7 @@ export const useAuth = () => {
       clearTimeout(timeoutId);
       subscription?.unsubscribe();
     };
-  }, [createBasicProfile]);
+  }, [fetchUserProfile]);
 
   // Função de login
   const signIn = async (email: string, password: string) => {
@@ -91,6 +109,9 @@ export const useAuth = () => {
       }
       setSession(data.session);
       setUser(data.user ?? null);
+      if (data.user) {
+        await fetchUserProfile(data.user.id);
+      }
       return { data, error: null };
     } catch (error) {
       setLoading(false);
@@ -113,6 +134,9 @@ export const useAuth = () => {
       }
       setSession(data.session);
       setUser(data.user ?? null);
+      if (data.user) {
+        await fetchUserProfile(data.user.id);
+      }
       return { data, error: null };
     } catch (error) {
       setLoading(false);
