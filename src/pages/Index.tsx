@@ -22,6 +22,7 @@ import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManage
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import SLAManagement from '@/components/SLAs/SLAManagement';
 import { ChatBot } from '@/components/ChatBot/ChatBot';
+import IncidentesManagement from '@/components/Incidentes/IncidentesManagement';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -47,7 +48,7 @@ const Index = () => {
       case 'dashboard':
         return <DashboardOverview />;
       case 'incidents':
-        return <TicketList ticketType="incidents" />;
+        return <IncidentesManagement />;
       case 'requests':
         return <RequisicoesManagement />;
       case 'problems':
@@ -117,3 +118,4 @@ const Index = () => {
 };
 
 export default Index;
+
