@@ -102,6 +102,13 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     return msg.autor_tipo === 'analista' ? 'Analista' : 'Cliente';
   };
 
+  // Novo: Função auxiliar para obter nome do solicitante e analista
+  const getSolicitanteNome = () => requisicao.solicitante?.name || requisicao.solicitante_id || 'Solicitante';
+  const getAnalistaId = () => requisicao.atendente_id || null;
+  const getAnalistaNome = () => requisicao.atendente?.name || requisicao.atendente_id || 'Analista';
+  const getGrupoNome = () => requisicao.grupo_responsavel?.name || requisicao.grupo_responsavel_id || '';
+  const getGrupoId = () => requisicao.grupo_responsavel_id || '';
+
   // Envio de mensagem real
   const handleEnviarMensagem = async () => {
     if (!mensagem.trim()) return;
@@ -141,6 +148,36 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
         autor_tipo: 'analista',
         mensagem: mensagem.trim()
       });
+      // Após salvar no banco, disparar webhook:
+      try {
+        // Determinar solicitante e analista
+        const solicitanteId = requisicao.solicitante_id || '';
+        const solicitanteNome = getSolicitanteNome();
+        const analistaId = getAnalistaId() || user.id;
+        const analistaNome = getAnalistaNome();
+        const grupoNome = getGrupoNome();
+        const grupoId = getGrupoId();
+
+        // Montar payload do webhook conforme solicitado
+        await fetch('https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            solicitante_id: solicitanteId,
+            solicitante_nome: solicitanteNome,
+            analista_id: analistaId,
+            analista_nome: analistaNome,
+            grupo_nome: grupoNome,
+            grupo_id: grupoId,
+            mensagem: mensagem.trim()
+          })
+        });
+      } catch (wberr) {
+        console.error('Falha ao enviar webhook de notificação de chat:', wberr);
+      }
+
       setMensagem('');
     } catch (e: any) {
       console.error('Erro ao enviar mensagem no chat:', e);
