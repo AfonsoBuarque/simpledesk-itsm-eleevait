@@ -29,7 +29,7 @@ export const menuItems = [
     icon: Ticket,
     badge: '15',
     children: [
-      { id: 'incidents', label: 'Incidentes', icon: AlertCircle, badge: '8' },
+      { id: 'incidents', label: 'Incidentes', icon: AlertCircle, badge: '8' }, // já existe, mantido!
       { id: 'requests', label: 'Requisições', icon: HelpCircle, badge: '5' },
       { id: 'problems', label: 'Problemas', icon: Bug, badge: '2' },
       { id: 'changes', label: 'Mudanças', icon: ArrowUpDown }
