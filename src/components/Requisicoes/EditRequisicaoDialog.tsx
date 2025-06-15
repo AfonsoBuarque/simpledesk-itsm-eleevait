@@ -24,6 +24,9 @@ import { Input } from '@/components/ui/input';
 import { useRequisicaoChat } from '@/hooks/useRequisicaoChat';
 import { useRequisicaoLogs } from '@/hooks/useRequisicaoLogs';
 import { useAuth } from '@/hooks/useAuth';
+import { RequisicaoLogs } from "./RequisicaoLogs";
+import { RequisicaoChat } from "./RequisicaoChat";
+import { useRequisicaoParticipants } from "./useRequisicaoParticipants";
 
 const requisicaoSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -69,7 +72,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   const { user } = useAuth();
 
   // Estado para Tabs
-  const [tab, setTab] = useState('form');
+  const [tab, setTab] = useState("form");
 
   // Integração com chat e logs do Supabase
   const { chatMessages, isLoading: loadingChat, error: chatError, sendMessage } = useRequisicaoChat(requisicao.id);
@@ -212,7 +215,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   // Set anexos if they exist
   React.useEffect(() => {
     if (requisicao.anexos && Array.isArray(requisicao.anexos)) {
-      const anexosUrls = requisicao.anexos.map(anexo => anexo.url || anexo).filter(Boolean);
+      const anexosUrls = requisicao.anexos.map((anexo) => anexo.url || anexo).filter(Boolean);
       setAnexos(anexosUrls);
     }
   }, [requisicao]);
@@ -299,17 +302,29 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
             </div>
             <Tabs value={tab} onValueChange={setTab} className="w-full">
               <TabsList className="w-full justify-center mb-2">
-                <TabsTrigger value="form" className="flex-1">Formulário</TabsTrigger>
-                <TabsTrigger value="chat" className="flex-1">Chat</TabsTrigger>
-                <TabsTrigger value="logs" className="flex-1">Logs de Alteração</TabsTrigger>
+                <TabsTrigger value="form" className="flex-1">
+                  Formulário
+                </TabsTrigger>
+                <TabsTrigger value="chat" className="flex-1">
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value="logs" className="flex-1">
+                  Logs de Alteração
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="form">
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <EditRequisicaoReadOnlyFields form={form} />
-                    <SolicitacaoFormFields 
-                      form={form} 
-                      excludeFields={['titulo', 'descricao', 'data_limite_resposta', 'data_limite_resolucao', 'status']}
+                    <SolicitacaoFormFields
+                      form={form}
+                      excludeFields={[
+                        "titulo",
+                        "descricao",
+                        "data_limite_resposta",
+                        "data_limite_resolucao",
+                        "status",
+                      ]}
                     />
                     <EditRequisicaoDateFields form={form} />
                     <FileUpload
@@ -327,79 +342,20 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                       >
                         Cancelar
                       </Button>
-                      <Button
-                        type="submit"
-                        disabled={updateRequisicao.isPending}
-                      >
-                        {updateRequisicao.isPending ? 'Atualizando...' : 'Atualizar Requisição'}
+                      <Button type="submit" disabled={updateRequisicao.isPending}>
+                        {updateRequisicao.isPending
+                          ? "Atualizando..."
+                          : "Atualizar Requisição"}
                       </Button>
                     </div>
                   </form>
                 </Form>
               </TabsContent>
               <TabsContent value="chat">
-                {/* Chat Style */}
-                <div className="border rounded-lg bg-background p-4 flex flex-col h-[300px] md:h-[350px] w-full">
-                  <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
-                    <div className="flex flex-col gap-2">
-                      {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
-                      {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
-                      {chatMessages.map(msg => (
-                        <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                            <span className="block">{msg.mensagem}</span>
-                            <span className="block text-xs opacity-70 mt-1 text-right">
-                              {/* DATA E AUTOR */}
-                              {new Date(msg.criado_em).toLocaleString()} • {getRemetenteLabel(msg)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                  <form
-                    className="flex gap-2 pt-2"
-                    onSubmit={e => {
-                      e.preventDefault();
-                      handleEnviarMensagem();
-                    }}
-                  >
-                    <Input 
-                      value={mensagem}
-                      onChange={e => setMensagem(e.target.value)}
-                      placeholder="Digite uma mensagem..."
-                      className="flex-1"
-                      disabled={sendMessage.isPending}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={!mensagem.trim() || sendMessage.isPending}
-                    >
-                      {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
-                    </Button>
-                  </form>
-                </div>
+                <RequisicaoChat requisicao={requisicao} />
               </TabsContent>
               <TabsContent value="logs">
-                <div className="border bg-background rounded-lg p-4 flex-1 min-h-0 overflow-y-auto">
-                  <h4 className="font-semibold text-base mb-2">Logs de Alteração</h4>
-                  {loadingLogs && <div className="text-muted-foreground">Carregando logs…</div>}
-                  {logsError && <div className="text-destructive">Erro ao carregar logs</div>}
-                  {logs.length === 0 && !loadingLogs && (
-                    <div className="text-muted-foreground">Nenhum log registrado.</div>
-                  )}
-                  <ul className="space-y-2">
-                    {logs.map(l => (
-                      <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
-                        <span className="font-semibold">{l.usuario_id || 'Usuário'}:</span>
-                        <span>{l.acao}</span>
-                        <span className="ml-auto text-xs opacity-60">
-                          {new Date(l.criado_em).toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <RequisicaoLogs requisicao={requisicao} />
               </TabsContent>
             </Tabs>
           </div>
