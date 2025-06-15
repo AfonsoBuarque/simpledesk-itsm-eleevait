@@ -16,8 +16,10 @@ const UserPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
 
+  // Atualizar: garantir redirecionamento para /auth após logout
   const handleSignOut = async () => {
     await signOut();
+    navigate("/auth", { replace: true });
   };
 
   const handleNovaRequisicaoClick = () => {
@@ -129,3 +131,4 @@ const UserPortal = () => {
 };
 
 export default UserPortal;
+
