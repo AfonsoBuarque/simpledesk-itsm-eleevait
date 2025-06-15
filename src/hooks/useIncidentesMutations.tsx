@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SolicitacaoFormData } from '@/types/solicitacao';
@@ -102,9 +103,9 @@ export const useIncidentesMutations = () => {
   const updateIncidente = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Atualizando incidente:', id, data);
-      
+
       // Tratar campos UUID vazios que causam erro
-      const updateData = {
+      const updateData: Record<string, any> = {
         titulo: data.titulo,
         descricao: data.descricao,
         categoria_id: data.categoria_id || null,
@@ -127,6 +128,22 @@ export const useIncidentesMutations = () => {
         atualizado_em: new Date().toISOString(),
         atualizado_por: user?.id,
       };
+
+      // Se categoria_id ou grupo_responsavel_id mudou, recalcule o SLA!
+      if (data.categoria_id && data.grupo_responsavel_id) {
+        const slaDeadlines = await calculateAndSetSLADeadlines(
+          data.categoria_id,
+          data.grupo_responsavel_id,
+          new Date().toISOString()
+        );
+        if (slaDeadlines.data_limite_resposta) {
+          updateData.data_limite_resposta = slaDeadlines.data_limite_resposta;
+        }
+        if (slaDeadlines.data_limite_resolucao) {
+          updateData.data_limite_resolucao = slaDeadlines.data_limite_resolucao;
+        }
+        console.log('SLA deadlines recalculados ao atualizar:', slaDeadlines);
+      }
 
       // Remover campos que são undefined ou string vazia para evitar erro de UUID
       Object.keys(updateData).forEach(key => {
