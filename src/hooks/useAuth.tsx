@@ -49,7 +49,6 @@ export const useAuth = () => {
           setProfile(null);
         }
         setLoading(false);
-        console.log('[useAuth] onAuthStateChange → user:', sessionArg?.user, '| session:', sessionArg);
       }
     );
 
@@ -62,9 +61,7 @@ export const useAuth = () => {
           const basicProfile = createBasicProfile(session.user);
           setProfile(basicProfile);
         }
-        console.log('[useAuth] initializeAuth → user:', session?.user, '| session:', session);
       } catch (error) {
-        console.error('[useAuth] Error initializing auth:', error);
       } finally {
         if (mountedRef.current) setLoading(false);
       }
@@ -130,20 +127,15 @@ export const useAuth = () => {
     try {
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) {
-        console.warn('[useAuth] Supabase signOut error:', signOutError.message);
         error = signOutError;
       }
     } catch (err) {
-      console.error('[useAuth] Exception during signOut:', err);
       error = err;
     } finally {
-      // Sempre zera o estado local
       setUser(null);
       setSession(null);
       setProfile(null);
       setLoading(false);
-      console.log('[useAuth] signOut: resetando estados locais de usuário.');
-      // Forçar re-render para garantir UI consistente:
       setTimeout(() => {
         setUser(null);
         setSession(null);

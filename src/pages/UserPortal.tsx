@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +15,7 @@ const UserPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
 
-  // Adicionado: log do profile para qualquer usuário logado (admin ou user)
+  // Log de role do usuário logado (apenas este!)
   if (profile) {
     console.log('[UserPortal] Usuário logado:', profile);
   }
