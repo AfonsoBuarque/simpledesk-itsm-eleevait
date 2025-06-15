@@ -283,43 +283,41 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                 </Form>
               </TabsContent>
               <TabsContent value="chat" className="flex flex-col flex-1 min-h-[150px] h-full w-full">
-                <div className="border rounded-lg bg-background p-4 flex flex-col flex-1 min-h-[150px] h-full w-full">
-                  <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
-                    <div className="flex flex-col gap-2">
-                      {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
-                      {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
-                      {chatMessages.map(msg => (
-                        <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                            <span className="block">{msg.mensagem}</span>
-                            <span className="block text-xs opacity-70 mt-1 text-right">{new Date(msg.criado_em).toLocaleString()} • {msg.autor_tipo}</span>
-                          </div>
+                <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
+                  <div className="flex flex-col gap-2">
+                    {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
+                    {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
+                    {chatMessages.map(msg => (
+                      <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                          <span className="block">{msg.mensagem}</span>
+                          <span className="block text-xs opacity-70 mt-1 text-right">{new Date(msg.criado_em).toLocaleString()} • {msg.autor_tipo}</span>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                  <form
-                    className="flex gap-2 pt-2"
-                    onSubmit={e => {
-                      e.preventDefault();
-                      handleEnviarMensagem();
-                    }}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+                <form
+                  className="flex gap-2 pt-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    handleEnviarMensagem();
+                  }}
+                >
+                  <Input 
+                    value={mensagem}
+                    onChange={e => setMensagem(e.target.value)}
+                    placeholder="Digite uma mensagem..."
+                    className="flex-1"
+                    disabled={sendMessage.isPending}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!mensagem.trim() || sendMessage.isPending}
                   >
-                    <Input 
-                      value={mensagem}
-                      onChange={e => setMensagem(e.target.value)}
-                      placeholder="Digite uma mensagem..."
-                      className="flex-1"
-                      disabled={sendMessage.isPending}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={!mensagem.trim() || sendMessage.isPending}
-                    >
-                      {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
-                    </Button>
-                  </form>
-                </div>
+                    {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
+                  </Button>
+                </form>
               </TabsContent>
               <TabsContent value="logs" className="flex flex-col flex-1 min-h-0 h-full">
                 <div className="border bg-background rounded-lg p-4 flex flex-col flex-1 min-h-0 h-full w-full">
