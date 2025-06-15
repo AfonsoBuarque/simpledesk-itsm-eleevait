@@ -282,64 +282,65 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                   </form>
                 </Form>
               </TabsContent>
-              <TabsContent value="chat" className="flex flex-col flex-1 min-h-[150px] h-full w-full">
-                <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
-                  <div className="flex flex-col gap-2">
-                    {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
-                    {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
-                    {chatMessages.map(msg => (
-                      <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                          <span className="block">{msg.mensagem}</span>
-                          <span className="block text-xs opacity-70 mt-1 text-right">{new Date(msg.criado_em).toLocaleString()} • {msg.autor_tipo}</span>
+              <TabsContent value="chat">
+                {/* Chat Style */}
+                <div className="border rounded-lg bg-background p-4 flex flex-col h-[300px] md:h-[350px] w-full max-w-2xl mx-auto">
+                  <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
+                    <div className="flex flex-col gap-2">
+                      {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
+                      {chatError && <div className="text-destructive">Erro ao carregar chat</div>}
+                      {chatMessages.map(msg => (
+                        <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                            <span className="block">{msg.mensagem}</span>
+                            <span className="block text-xs opacity-70 mt-1 text-right">{new Date(msg.criado_em).toLocaleString()} • {msg.autor_tipo}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-                <form
-                  className="flex gap-2 pt-2"
-                  onSubmit={e => {
-                    e.preventDefault();
-                    handleEnviarMensagem();
-                  }}
-                >
-                  <Input 
-                    value={mensagem}
-                    onChange={e => setMensagem(e.target.value)}
-                    placeholder="Digite uma mensagem..."
-                    className="flex-1"
-                    disabled={sendMessage.isPending}
-                  />
-                  <Button
-                    type="submit"
-                    disabled={!mensagem.trim() || sendMessage.isPending}
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <form
+                    className="flex gap-2 pt-2"
+                    onSubmit={e => {
+                      e.preventDefault();
+                      handleEnviarMensagem();
+                    }}
                   >
-                    {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
-                  </Button>
-                </form>
+                    <Input 
+                      value={mensagem}
+                      onChange={e => setMensagem(e.target.value)}
+                      placeholder="Digite uma mensagem..."
+                      className="flex-1"
+                      disabled={sendMessage.isPending}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={!mensagem.trim() || sendMessage.isPending}
+                    >
+                      {sendMessage.isPending ? 'Enviando...' : 'Enviar'}
+                    </Button>
+                  </form>
+                </div>
               </TabsContent>
-              <TabsContent value="logs" className="flex flex-col flex-1 min-h-0 h-full">
-                <div className="border bg-background rounded-lg p-4 flex flex-col flex-1 min-h-0 h-full w-full">
-                  <h4 className="font-semibold text-base mb-2 flex-shrink-0">Logs de Alteração</h4>
+              <TabsContent value="logs">
+                <div className="max-w-2xl mx-auto border bg-background rounded-lg p-4 flex-1 min-h-0 overflow-y-auto">
+                  <h4 className="font-semibold text-base mb-2">Logs de Alteração</h4>
                   {loadingLogs && <div className="text-muted-foreground">Carregando logs…</div>}
                   {logsError && <div className="text-destructive">Erro ao carregar logs</div>}
                   {logs.length === 0 && !loadingLogs && (
                     <div className="text-muted-foreground">Nenhum log registrado.</div>
                   )}
-                  <div className="flex-1 min-h-0 overflow-y-auto">
-                    <ul className="space-y-2">
-                      {logs.map(l => (
-                        <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
-                          <span className="font-semibold">Usuário:</span>
-                          <span>{l.acao}</span>
-                          <span className="ml-auto text-xs opacity-60 whitespace-nowrap">
-                            {new Date(l.criado_em).toLocaleString()}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <ul className="space-y-2">
+                    {logs.map(l => (
+                      <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
+                        <span className="font-semibold">{l.usuario_id || 'Usuário'}:</span>
+                        <span>{l.acao}</span>
+                        <span className="ml-auto text-xs opacity-60">
+                          {new Date(l.criado_em).toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </TabsContent>
             </Tabs>
