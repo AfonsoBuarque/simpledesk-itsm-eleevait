@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
 
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
@@ -124,6 +125,9 @@ const Auth = () => {
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">SimpleDesk ITSM</h2>
           <p className="mt-2 text-sm text-gray-600">Faça login ou crie sua conta</p>
+          <p className="mt-2 text-xs text-blue-700">
+            Recebeu convite? <Link to="/set-password" className="underline hover:text-blue-800">Clique aqui para cadastrar sua senha</Link>
+          </p>
         </div>
         
         {authError && (
