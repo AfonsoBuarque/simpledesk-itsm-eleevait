@@ -21,7 +21,8 @@ export const NewRequisicaoActions = ({
       Cancelar
     </Button>
     <Button type="submit" disabled={isLoading}>
-      {isLoading ? "Criando..." : "Criar Requisição"}
+      {isLoading ? "Criando..." : "Criar Incidente"}
     </Button>
   </div>
 );
+
