@@ -84,6 +84,24 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     criadoEm: new Date(msg.criado_em).toLocaleString()
   }));
 
+  // Função utilitária para determinar o papel do autor na mensagem de chat
+  const getRemetenteLabel = (msg: { criado_por: string }) => {
+    // Se for o solicitante: Solicitante
+    if (!!requisicao.solicitante_id && msg.criado_por === requisicao.solicitante_id) {
+      return 'Solicitante';
+    }
+    // Se for o atendente: Analista
+    if (!!requisicao.atendente_id && msg.criado_por === requisicao.atendente_id) {
+      return 'Analista';
+    }
+    // Se for parte do grupo responsável: Analista (ajuste futuro: buscar membros do grupo)
+    if (!!requisicao.grupo_responsavel_id && msg.criado_por === requisicao.grupo_responsavel_id) {
+      return 'Analista';
+    }
+    // Caso padrão: manter "Analista" se for o user atual
+    return msg.autor_tipo === 'analista' ? 'Analista' : 'Cliente';
+  };
+
   // Envio de mensagem real
   const handleEnviarMensagem = async () => {
     if (!mensagem.trim()) return;
@@ -293,7 +311,10 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                         <div key={msg.id} className={`flex ${msg.autor_tipo === 'analista' ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[75%] px-3 py-2 rounded-lg text-sm ${msg.autor_tipo === 'analista' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
                             <span className="block">{msg.mensagem}</span>
-                            <span className="block text-xs opacity-70 mt-1 text-right">{new Date(msg.criado_em).toLocaleString()} • {msg.autor_tipo}</span>
+                            <span className="block text-xs opacity-70 mt-1 text-right">
+                              {/* DATA E AUTOR */}
+                              {new Date(msg.criado_em).toLocaleString()} • {getRemetenteLabel(msg)}
+                            </span>
                           </div>
                         </div>
                       ))}
