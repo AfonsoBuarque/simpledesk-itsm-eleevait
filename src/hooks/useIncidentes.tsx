@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Solicitacao, SolicitacaoFormData } from '@/types/solicitacao';
@@ -9,9 +8,7 @@ export const useIncidentes = () => {
   const { toast } = useToast();
 
   // Helper para tratar relacionamentos potencialmente inválidos
-  function normalizeRelacionamento<T extends { nome?: string | null }>(
-    value: any
-  ): T | null {
+  function normalizeRelacionamento<T>(value: any): T | null {
     if (!value || value.error === true) return null;
     // No Supabase, arrays vazios podem aparecer se a referência não existe (ex: [])
     if (Array.isArray(value)) return value[0] ?? null;
@@ -39,7 +36,7 @@ export const useIncidentes = () => {
         throw error;
       }
 
-      // Mapeia para garantir que as propriedades relacionadas estejam corretas
+      // Map and cast to expected structure (nome or name as appropriate)
       return (data || []).map((inc: any) => ({
         ...inc,
         categoria: normalizeRelacionamento<{ nome: string }>(inc.categoria),
