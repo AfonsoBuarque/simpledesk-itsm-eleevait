@@ -46,7 +46,19 @@ const getStatusLabel = (status: string) => {
   }
 };
 
+const getUrgenciaLabel = (urgencia: string) => {
+  switch (urgencia) {
+    case 'critica': return 'Crítica';
+    case 'alta': return 'Alta';
+    case 'media': return 'Média';
+    case 'baixa': return 'Baixa';
+    default: return urgencia;
+  }
+};
+
 const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: IncidentesTableProps) => {
+  console.log('Renderizando tabela com incidentes:', incidentes.length);
+
   if (incidentes.length === 0) {
     return (
       <Card>
@@ -73,7 +85,7 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Incidentes</CardTitle>
+        <CardTitle>Meus Incidentes ({incidentes.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -83,9 +95,7 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
               <TableHead>Título</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Urgência</TableHead>
-              <TableHead>Solicitante</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Grupo</TableHead>
+              <TableHead>Categoria</TableHead>
               <TableHead>Data Abertura</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -94,8 +104,10 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
             {incidentes.map((incidente) => (
               <TableRow key={incidente.id}>
                 <TableCell className="font-medium">{incidente.numero}</TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {incidente.titulo}
+                <TableCell className="max-w-xs">
+                  <div className="truncate" title={incidente.titulo}>
+                    {incidente.titulo}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(incidente.status)}>
@@ -104,22 +116,16 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
                 </TableCell>
                 <TableCell>
                   <Badge className={getUrgenciaColor(incidente.urgencia)}>
-                    {incidente.urgencia}
+                    {getUrgenciaLabel(incidente.urgencia)}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {incidente.solicitante?.name || '-'}
-                </TableCell>
-                <TableCell>
-                  {incidente.cliente?.name || '-'}
-                </TableCell>
-                <TableCell>
-                  {incidente.grupo_responsavel?.name || '-'}
+                  {incidente.categoria?.nome || '-'}
                 </TableCell>
                 <TableCell>
                   {incidente.data_abertura
                     ? format(new Date(incidente.data_abertura), 'dd/MM/yyyy HH:mm', { locale: ptBR })
-                    : '-'
+                    : format(new Date(incidente.criado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })
                   }
                 </TableCell>
                 <TableCell className="text-right">

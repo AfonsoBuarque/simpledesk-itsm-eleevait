@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useIncidentes } from '@/hooks/useIncidentes';
@@ -30,7 +29,7 @@ const incidenteSchema = z.object({
   impacto: z.enum(['baixo', 'medio', 'alto']),
   prioridade: z.enum(['baixa', 'media', 'alta', 'critica']),
   status: z.enum(['aberta', 'em_andamento', 'pendente', 'resolvida', 'fechada']),
-  solicitante_id: z.string().optional(),
+  solicitante_id: z.string().min(1, 'Solicitante é obrigatório'),
   cliente_id: z.string().optional(),
   grupo_responsavel_id: z.string().optional(),
   atendente_id: z.string().optional(),
@@ -64,13 +63,14 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
       prioridade: "media",
       status: "aberta",
       canal_origem: "portal",
-      solicitante_id: user?.id || "",
+      solicitante_id: "",
     },
   });
 
-  // Preencher solicitante_id quando o usuário estiver disponível
+  // Garantir que o solicitante_id seja sempre do usuário logado
   useEffect(() => {
     if (user?.id) {
+      console.log('Definindo solicitante_id para:', user.id);
       form.setValue("solicitante_id", user.id);
     }
   }, [user?.id, form]);
@@ -80,17 +80,25 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
-      const dataWithAnexos = {
+      console.log('Submetendo formulário de incidente:', data);
+      
+      if (!user?.id) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      // Garantir que o solicitante_id está correto
+      const dataWithCorrectUser = {
         ...data,
+        solicitante_id: user.id,
         anexos: anexos.length > 0 ? anexos.map((url) => ({ url, type: "file" })) : undefined,
       };
 
-      await createIncidente.mutateAsync(dataWithAnexos);
+      await createIncidente.mutateAsync(dataWithCorrectUser);
       form.reset();
       setAnexos([]);
       onClose();
     } catch (error) {
-      console.error("Error creating incidente:", error);
+      console.error("Erro ao criar incidente:", error);
     }
   };
 
@@ -99,6 +107,20 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
     setAnexos([]);
     onClose();
   };
+
+  // Verificar se o usuário está autenticado
+  if (!user?.id) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Erro de Autenticação</DialogTitle>
+          </DialogHeader>
+          <p>Você precisa estar logado para criar um incidente.</p>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
