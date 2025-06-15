@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -98,23 +97,38 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
     }
   }, [incidente, form]);
 
-  // Calcular SLA quando categoria ou grupo responsável mudarem
+  // Calcular SLA quando categoria ou grupo responsável mudarem - usando a mesma lógica do modal de requisição
   React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
+    const subscription = form.watch(async (value, { name }) => {
       if (name === 'categoria_id' || name === 'grupo_responsavel_id') {
         const categoriaId = value.categoria_id;
         const grupoId = value.grupo_responsavel_id;
         
+        console.log('SLA calculation triggered for incidente:', { categoriaId, grupoId });
+        
         if (categoriaId && grupoId) {
-          calculateAndSetSLADeadlines(categoriaId, grupoId, incidente.data_abertura || new Date().toISOString())
-            .then((deadlines) => {
-              if (deadlines.data_limite_resposta) {
-                form.setValue('data_limite_resposta', deadlines.data_limite_resposta.slice(0, 16));
-              }
-              if (deadlines.data_limite_resolucao) {
-                form.setValue('data_limite_resolucao', deadlines.data_limite_resolucao.slice(0, 16));
-              }
-            });
+          try {
+            const deadlines = await calculateAndSetSLADeadlines(
+              categoriaId, 
+              grupoId, 
+              incidente.data_abertura || new Date().toISOString()
+            );
+            
+            console.log('Incident SLA deadlines received:', deadlines);
+            
+            if (deadlines.data_limite_resposta) {
+              const formattedResposta = deadlines.data_limite_resposta.slice(0, 16);
+              form.setValue('data_limite_resposta', formattedResposta);
+              console.log('Setting data_limite_resposta:', formattedResposta);
+            }
+            if (deadlines.data_limite_resolucao) {
+              const formattedResolucao = deadlines.data_limite_resolucao.slice(0, 16);
+              form.setValue('data_limite_resolucao', formattedResolucao);
+              console.log('Setting data_limite_resolucao:', formattedResolucao);
+            }
+          } catch (error) {
+            console.error('Error calculating SLA for incident:', error);
+          }
         }
       }
     });
