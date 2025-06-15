@@ -87,24 +87,27 @@ export const useDashboardData = () => {
       // Buscar métricas de SLA por tipo
       const tipos = [
         { key: 'incidente', label: 'Incidentes' },
-        { key: 'solicitacao', label: 'Solicitações' },
+        { key: 'solicitacao', synonyms: ['solicitacao', 'requisicao'], label: 'Solicitações' },
         { key: 'mudanca', label: 'Mudanças' },
         { key: 'problema', label: 'Problemas' },
       ];
       const metrics = [];
 
       for (const tipoConfig of tipos) {
-        // DEBUG LOG para visualizar os dados
-        console.log(`Querying tickets for tipo: ${tipoConfig.key}`);
+        // Corrigir chave de busca para Solicitações (aceitar solicitacao e requisicao)
+        let tipoKeys = tipoConfig.synonyms || [tipoConfig.key];
+
+        // LOG para debug (remover quando estiver OK)
+        console.log(`Querying tickets for tipo(s): ${tipoKeys.join(', ')}`);
 
         const { data: total, error: totalError } = await supabase
           .from('solicitacoes')
           .select('id, data_limite_resolucao, data_resolucao, status, tipo')
-          .eq('tipo', tipoConfig.key)
+          .in('tipo', tipoKeys)
           .not('data_limite_resolucao', 'is', null);
 
         if (totalError) {
-          console.error(`Erro ao buscar tickets de tipo '${tipoConfig.key}':`, totalError);
+          console.error(`Erro ao buscar tickets de tipo(s) '${tipoKeys.join(', ')}':`, totalError);
           metrics.push({
             category: tipoConfig.label,
             target: 95,
@@ -114,7 +117,6 @@ export const useDashboardData = () => {
           continue;
         }
 
-        // O filtro estava correto, mas vamos garantir que só tickets existentes e corretamente classificados são computados.
         const totalTickets = total?.length || 0;
         if (totalTickets === 0) {
           metrics.push({
@@ -138,7 +140,6 @@ export const useDashboardData = () => {
 
         const currentPercentage = totalTickets > 0 ? Math.round((onTime / totalTickets) * 100) : 0;
 
-        // LOG para validação
         console.log(
           `[${tipoConfig.label}] Tickets total:`,
           totalTickets,
