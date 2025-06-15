@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,9 +39,9 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, sessionArg) => {
         if (!mountedRef.current) return;
+
         setSession(sessionArg);
         setUser(sessionArg?.user ?? null);
-
         if (sessionArg?.user) {
           const basicProfile = createBasicProfile(sessionArg.user);
           setProfile(basicProfile);
@@ -50,6 +49,7 @@ export const useAuth = () => {
           setProfile(null);
         }
         setLoading(false);
+        console.log('[useAuth] onAuthStateChange → user:', sessionArg?.user, '| session:', sessionArg);
       }
     );
 
@@ -58,13 +58,13 @@ export const useAuth = () => {
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
-
         if (session?.user && mountedRef.current) {
           const basicProfile = createBasicProfile(session.user);
           setProfile(basicProfile);
         }
+        console.log('[useAuth] initializeAuth → user:', session?.user, '| session:', session);
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('[useAuth] Error initializing auth:', error);
       } finally {
         if (mountedRef.current) setLoading(false);
       }
@@ -88,7 +88,6 @@ export const useAuth = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
       if (error) {
         setLoading(false);
         return { error };
@@ -111,7 +110,6 @@ export const useAuth = () => {
         password,
         options: { data: { full_name: fullName } }
       });
-
       if (error) {
         setLoading(false);
         return { error };
@@ -125,28 +123,33 @@ export const useAuth = () => {
     }
   };
 
-  // Função de logout robusta
+  // Função de logout robusta e sincronização total
   const signOut = async () => {
+    setLoading(true);
+    let error = null;
     try {
-      setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      // Independente do erro, limpar estado local:
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setLoading(false);
-      if (error) {
-        // Era "console.error" – agora retorna o erro para ser exibido por quem chama:
-        return { error };
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.warn('[useAuth] Supabase signOut error:', signOutError.message);
+        error = signOutError;
       }
-      return { error: null };
-    } catch (error) {
+    } catch (err) {
+      console.error('[useAuth] Exception during signOut:', err);
+      error = err;
+    } finally {
+      // Sempre zera o estado local
       setUser(null);
       setSession(null);
       setProfile(null);
       setLoading(false);
-      return { error };
+      console.log('[useAuth] signOut: resetando estados locais de usuário.');
+      // Forçar re-render para garantir UI consistente:
+      setTimeout(() => {
+        setUser(null);
+        setSession(null);
+      }, 0);
     }
+    return { error };
   };
 
   useEffect(() => {
