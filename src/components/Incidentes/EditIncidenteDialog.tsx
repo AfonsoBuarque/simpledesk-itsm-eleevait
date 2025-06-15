@@ -16,6 +16,7 @@ import { IncidenteLogs } from './IncidenteLogs';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useSLACalculation } from '@/hooks/useSLACalculation';
 import { EditRequisicaoDateFields } from '../Requisicoes/EditRequisicaoDateFields';
+import { format } from 'date-fns';
 
 const incidenteSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -71,6 +72,19 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
 
   React.useEffect(() => {
     if (incidente) {
+      // Função para converter a data ISO para o formato yyyy-MM-ddTHH:mm
+      const toInputValue = (dateString?: string | null) => {
+        if (!dateString) return '';
+        try {
+          // Remover frações de segundo, se existirem
+          // dateString pode vir como: "2025-06-16T15:00:00+00:00"
+          const d = new Date(dateString);
+          return format(d, "yyyy-MM-dd'T'HH:mm");
+        } catch {
+          return '';
+        }
+      };
+
       form.reset({
         titulo: incidente.titulo,
         descricao: incidente.descricao || '',
@@ -86,8 +100,8 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
         grupo_responsavel_id: incidente.grupo_responsavel_id || '',
         atendente_id: incidente.atendente_id || '',
         canal_origem: incidente.canal_origem,
-        data_limite_resposta: incidente.data_limite_resposta || '',
-        data_limite_resolucao: incidente.data_limite_resolucao || '',
+        data_limite_resposta: toInputValue(incidente.data_limite_resposta),
+        data_limite_resolucao: toInputValue(incidente.data_limite_resolucao),
         notas_internas: incidente.notas_internas || '',
       });
       if (incidente.anexos && Array.isArray(incidente.anexos)) {
