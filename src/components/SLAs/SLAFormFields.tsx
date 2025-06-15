@@ -13,12 +13,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SLAFormData } from '@/types/sla';
+import { useGroups } from '@/hooks/useGroups';
+import { useClients } from '@/hooks/useClients';
 
 interface SLAFormFieldsProps {
   form: UseFormReturn<SLAFormData>;
 }
 
 const SLAFormFields = ({ form }: SLAFormFieldsProps) => {
+  const { groups } = useGroups();
+  const { clients } = useClients();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-4">
@@ -81,6 +86,66 @@ const SLAFormFields = ({ form }: SLAFormFieldsProps) => {
 
         <FormField
           control={form.control}
+          name="grupo_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grupo</FormLabel>
+              <Select 
+                onValueChange={(value) => field.onChange(value === 'none' ? undefined : value)} 
+                value={field.value || 'none'}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um grupo (opcional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum grupo específico</SelectItem>
+                  {groups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cliente_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cliente</FormLabel>
+              <Select 
+                onValueChange={(value) => field.onChange(value === 'none' ? undefined : value)} 
+                value={field.value || 'none'}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente (opcional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum cliente específico</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <FormField
+          control={form.control}
           name="prioridade"
           render={({ field }) => (
             <FormItem>
@@ -102,9 +167,7 @@ const SLAFormFields = ({ form }: SLAFormFieldsProps) => {
             </FormItem>
           )}
         />
-      </div>
 
-      <div className="space-y-4">
         <FormField
           control={form.control}
           name="tempo_resposta_min"

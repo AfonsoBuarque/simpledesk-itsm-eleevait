@@ -42,6 +42,8 @@ export const NewSLADialog = ({ isOpen, onClose }: NewSLADialogProps) => {
       nome: '',
       descricao: '',
       tipo_aplicacao: 'global',
+      grupo_id: undefined,
+      cliente_id: undefined,
       prioridade: '',
       tempo_resposta_min: 15,
       tempo_resolucao_min: 240,
