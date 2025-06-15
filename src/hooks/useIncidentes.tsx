@@ -40,7 +40,19 @@ export const useIncidentes = () => {
       }
 
       console.log('Incidentes encontrados:', data?.length || 0);
-      return (data || []) as Solicitacao[];
+      
+      // Transformar os dados para garantir compatibilidade com o tipo Solicitacao
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        categoria: item.categoria || null,
+        sla: item.sla || null,
+        solicitante: item.solicitante || null,
+        cliente: item.cliente || null,
+        grupo_responsavel: item.grupo_responsavel || null,
+        atendente: item.atendente || null,
+      })) as Solicitacao[];
+
+      return transformedData;
     },
     enabled: !!user?.id,
   });
@@ -62,7 +74,7 @@ export const useIncidentes = () => {
 
       const { data, error } = await supabase
         .from('incidentes')
-        .insert(insertData as any)
+        .insert(insertData)
         .select()
         .single();
 
@@ -104,7 +116,7 @@ export const useIncidentes = () => {
 
       const { data: updated, error } = await supabase
         .from('incidentes')
-        .update(updateData as any)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
