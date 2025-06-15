@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -31,7 +30,7 @@ export const NovaRequisicaoActions = ({ isLoading, onCancel }: NovaRequisicaoAct
             Criando...
           </>
         ) : (
-          'Criar Requisição'
+          'Criar Incidente'
         )}
       </Button>
     </div>
