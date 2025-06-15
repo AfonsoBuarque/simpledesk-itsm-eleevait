@@ -13,17 +13,16 @@ export const useIncidentes = () => {
     queryKey: ['incidentes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('solicitacoes')
+        .from('incidentes')
         .select(`
           *,
           categoria:categorias_servico(nome),
           sla:slas(nome),
-          solicitante:users!solicitacoes_solicitante_id_fkey(name),
+          solicitante:users!incidentes_solicitante_id_fkey(name),
           cliente:clients(name),
           grupo_responsavel:groups(name),
-          atendente:users!solicitacoes_atendente_id_fkey(name)
+          atendente:users!incidentes_atendente_id_fkey(name)
         `)
-        .eq('tipo', 'incidente')
         .order('criado_em', { ascending: false });
 
       if (error) {
@@ -40,7 +39,7 @@ export const useIncidentes = () => {
         tipo: 'incidente'
       };
       const { data, error } = await supabase
-        .from('solicitacoes')
+        .from('incidentes')
         .insert(insertData as any)
         .select()
         .single();
@@ -72,7 +71,7 @@ export const useIncidentes = () => {
         tipo: 'incidente'
       };
       const { data: updated, error } = await supabase
-        .from('solicitacoes')
+        .from('incidentes')
         .update(updateData as any)
         .eq('id', id)
         .select()
@@ -102,5 +101,5 @@ export const useIncidentes = () => {
     error,
     createIncidente,
     updateIncidente,
-  }
+  };
 }
