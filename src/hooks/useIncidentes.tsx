@@ -10,7 +10,7 @@ export const useIncidentes = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Buscar incidentes com JOINs para exibir dados relacionados
+  // Buscar incidentes sem JOINs por enquanto (devido à falta de foreign keys)
   const { data: incidentes = [], isLoading, error } = useQuery({
     queryKey: ['incidentes'],
     queryFn: async () => {
@@ -23,15 +23,7 @@ export const useIncidentes = () => {
       
       const { data, error } = await supabase
         .from('incidentes')
-        .select(`
-          *,
-          categoria:categorias_servico(nome),
-          sla:slas(nome),
-          solicitante:users!incidentes_solicitante_id_fkey(name),
-          cliente:clients(name),
-          grupo_responsavel:groups(name),
-          atendente:users!incidentes_atendente_id_fkey(name)
-        `)
+        .select('*')
         .order('criado_em', { ascending: false });
 
       if (error) {
@@ -42,15 +34,16 @@ export const useIncidentes = () => {
       console.log('Incidentes encontrados:', data?.length || 0);
       
       // Transformar os dados para garantir compatibilidade com o tipo Solicitacao
-      const transformedData = (data || []).map(item => ({
+      const transformedData: Solicitacao[] = (data || []).map(item => ({
         ...item,
-        categoria: item.categoria || null,
-        sla: item.sla || null,
-        solicitante: item.solicitante || null,
-        cliente: item.cliente || null,
-        grupo_responsavel: item.grupo_responsavel || null,
-        atendente: item.atendente || null,
-      })) as Solicitacao[];
+        // Definir relacionamentos como null por enquanto, pois não há foreign keys configuradas
+        categoria: null,
+        sla: null,
+        solicitante: null,
+        cliente: null,
+        grupo_responsavel: null,
+        atendente: null,
+      }));
 
       return transformedData;
     },
@@ -65,11 +58,31 @@ export const useIncidentes = () => {
 
       console.log('Criando incidente com dados:', formData);
       
-      // Garantir que o solicitante_id está definido
+      // Preparar dados para inserção, removendo campos que não existem na tabela
       const insertData = {
-        ...formData,
+        titulo: formData.titulo,
+        descricao: formData.descricao,
         tipo: 'incidente' as const,
+        categoria_id: formData.categoria_id,
+        sla_id: formData.sla_id,
+        urgencia: formData.urgencia,
+        impacto: formData.impacto,
+        prioridade: formData.prioridade,
+        status: formData.status,
         solicitante_id: user.id, // Garantir que sempre será o usuário logado
+        cliente_id: formData.cliente_id,
+        grupo_responsavel_id: formData.grupo_responsavel_id,
+        atendente_id: formData.atendente_id,
+        canal_origem: formData.canal_origem,
+        data_limite_resposta: formData.data_limite_resposta,
+        data_limite_resolucao: formData.data_limite_resolucao,
+        origem_id: formData.origem_id,
+        ativos_envolvidos: formData.ativos_envolvidos,
+        notas_internas: formData.notas_internas,
+        tags: formData.tags,
+        // Converter anexos para o formato JSON esperado pela tabela
+        anexos: formData.anexos ? JSON.stringify(formData.anexos) : null,
+        // Não incluir numero - será gerado automaticamente pelo trigger se existir
       };
 
       const { data, error } = await supabase
@@ -90,7 +103,7 @@ export const useIncidentes = () => {
       queryClient.invalidateQueries({ queryKey: ['incidentes'] });
       toast({
         title: "Sucesso",
-        description: `Incidente ${data.numero} criado com sucesso!`,
+        description: `Incidente ${data.numero || data.id} criado com sucesso!`,
       });
     },
     onError: (error) => {
@@ -108,8 +121,25 @@ export const useIncidentes = () => {
       console.log('Atualizando incidente:', id, data);
       
       const updateData = {
-        ...data,
-        tipo: 'incidente' as const,
+        titulo: data.titulo,
+        descricao: data.descricao,
+        categoria_id: data.categoria_id,
+        sla_id: data.sla_id,
+        urgencia: data.urgencia,
+        impacto: data.impacto,
+        prioridade: data.prioridade,
+        status: data.status,
+        cliente_id: data.cliente_id,
+        grupo_responsavel_id: data.grupo_responsavel_id,
+        atendente_id: data.atendente_id,
+        canal_origem: data.canal_origem,
+        data_limite_resposta: data.data_limite_resposta,
+        data_limite_resolucao: data.data_limite_resolucao,
+        origem_id: data.origem_id,
+        ativos_envolvidos: data.ativos_envolvidos,
+        notas_internas: data.notas_internas,
+        tags: data.tags,
+        anexos: data.anexos ? JSON.stringify(data.anexos) : null,
         atualizado_em: new Date().toISOString(),
         atualizado_por: user?.id,
       };
