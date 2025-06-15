@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +13,7 @@ import { ptBR } from 'date-fns/locale';
 import NewTicketForm from './NewTicketForm';
 import EditTicketDialog from './EditTicketDialog';
 import type { Database } from '@/integrations/supabase/types';
+import { NewIncidenteDialog } from '@/components/Incidentes/NewIncidenteDialog';
 
 type Ticket = Database['public']['Tables']['tickets']['Row'] & { 
   assigned_profile?: { id: string; full_name: string | null; email: string | null } 
@@ -30,7 +30,7 @@ const TicketList = ({ ticketType = 'all' }: TicketListProps) => {
   const [priorityFilter, setPriorityFilter] = React.useState('all');
   const [editingTicket, setEditingTicket] = React.useState<Ticket | null>(null);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-  const [newTicketDialogOpen, setNewTicketDialogOpen] = React.useState(false);
+  const [newIncidenteDialogOpen, setNewIncidenteDialogOpen] = React.useState(false);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -138,20 +138,19 @@ const TicketList = ({ ticketType = 'all' }: TicketListProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
-        <Dialog open={newTicketDialogOpen} onOpenChange={setNewTicketDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Ticket
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Criar Novo Ticket</DialogTitle>
-            </DialogHeader>
-            <NewTicketForm onSuccess={() => setNewTicketDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <React.Fragment>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setNewIncidenteDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Incidente
+          </Button>
+          <NewIncidenteDialog
+            isOpen={newIncidenteDialogOpen}
+            onClose={() => setNewIncidenteDialogOpen(false)}
+          />
+        </React.Fragment>
       </div>
 
       <Card>
