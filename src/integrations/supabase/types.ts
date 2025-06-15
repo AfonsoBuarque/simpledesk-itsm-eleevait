@@ -649,6 +649,175 @@ export type Database = {
           },
         ]
       }
+      incidentes: {
+        Row: {
+          anexos: Json | null
+          atendente_id: string | null
+          ativos_envolvidos: Json | null
+          atualizado_em: string | null
+          atualizado_por: string | null
+          canal_origem: string | null
+          categoria_id: string | null
+          cliente_id: string | null
+          criado_em: string | null
+          criado_por: string | null
+          data_abertura: string | null
+          data_limite_resolucao: string | null
+          data_limite_resposta: string | null
+          descricao: string | null
+          grupo_responsavel_id: string | null
+          id: string
+          impacto: string | null
+          notas_internas: string | null
+          numero: string
+          origem_id: string | null
+          prioridade: string | null
+          sla_id: string | null
+          solicitante_id: string | null
+          status: string
+          tags: Json | null
+          tipo: string
+          titulo: string
+          urgencia: string | null
+        }
+        Insert: {
+          anexos?: Json | null
+          atendente_id?: string | null
+          ativos_envolvidos?: Json | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          canal_origem?: string | null
+          categoria_id?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          data_abertura?: string | null
+          data_limite_resolucao?: string | null
+          data_limite_resposta?: string | null
+          descricao?: string | null
+          grupo_responsavel_id?: string | null
+          id?: string
+          impacto?: string | null
+          notas_internas?: string | null
+          numero: string
+          origem_id?: string | null
+          prioridade?: string | null
+          sla_id?: string | null
+          solicitante_id?: string | null
+          status?: string
+          tags?: Json | null
+          tipo?: string
+          titulo: string
+          urgencia?: string | null
+        }
+        Update: {
+          anexos?: Json | null
+          atendente_id?: string | null
+          ativos_envolvidos?: Json | null
+          atualizado_em?: string | null
+          atualizado_por?: string | null
+          canal_origem?: string | null
+          categoria_id?: string | null
+          cliente_id?: string | null
+          criado_em?: string | null
+          criado_por?: string | null
+          data_abertura?: string | null
+          data_limite_resolucao?: string | null
+          data_limite_resposta?: string | null
+          descricao?: string | null
+          grupo_responsavel_id?: string | null
+          id?: string
+          impacto?: string | null
+          notas_internas?: string | null
+          numero?: string
+          origem_id?: string | null
+          prioridade?: string | null
+          sla_id?: string | null
+          solicitante_id?: string | null
+          status?: string
+          tags?: Json | null
+          tipo?: string
+          titulo?: string
+          urgencia?: string | null
+        }
+        Relationships: []
+      }
+      incidentes_chat_mensagens: {
+        Row: {
+          arquivo_url: string | null
+          autor_tipo: string
+          criado_em: string
+          criado_por: string
+          id: string
+          incidente_id: string
+          mensagem: string
+          tipo_arquivo: string | null
+        }
+        Insert: {
+          arquivo_url?: string | null
+          autor_tipo: string
+          criado_em?: string
+          criado_por: string
+          id?: string
+          incidente_id: string
+          mensagem: string
+          tipo_arquivo?: string | null
+        }
+        Update: {
+          arquivo_url?: string | null
+          autor_tipo?: string
+          criado_em?: string
+          criado_por?: string
+          id?: string
+          incidente_id?: string
+          mensagem?: string
+          tipo_arquivo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidentes_chat_mensagens_incidente_id_fkey"
+            columns: ["incidente_id"]
+            isOneToOne: false
+            referencedRelation: "incidentes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidentes_logs: {
+        Row: {
+          acao: string
+          criado_em: string
+          id: string
+          incidente_id: string
+          tipo: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          acao: string
+          criado_em?: string
+          id?: string
+          incidente_id: string
+          tipo?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          acao?: string
+          criado_em?: string
+          id?: string
+          incidente_id?: string
+          tipo?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidentes_logs_incidente_id_fkey"
+            columns: ["incidente_id"]
+            isOneToOne: false
+            referencedRelation: "incidentes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_artigos: {
         Row: {
           anexos: Json | null
