@@ -18,18 +18,23 @@ import { useClients } from '@/hooks/useClients';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useSLAs } from '@/hooks/useSLAs';
 import { useGroups } from '@/hooks/useGroups';
+import { Categoria } from '@/types/categoria';
 
 interface SolicitacaoFormFieldsProps {
   form: UseFormReturn<SolicitacaoFormData>;
   excludeFields?: string[];
+  filteredCategorias?: Categoria[];
 }
 
-const SolicitacaoFormFields = ({ form, excludeFields = [] }: SolicitacaoFormFieldsProps) => {
+const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias }: SolicitacaoFormFieldsProps) => {
   const { users } = useUsers();
   const { clients } = useClients();
   const { categorias } = useCategorias();
   const { slas } = useSLAs();
   const { groups } = useGroups();
+
+  // Use filtered categories if provided, otherwise use all categories
+  const categoriasToShow = filteredCategorias || categorias;
 
   const shouldRenderField = (fieldName: string) => {
     return !excludeFields.includes(fieldName);
@@ -140,7 +145,7 @@ const SolicitacaoFormFields = ({ form, excludeFields = [] }: SolicitacaoFormFiel
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {categorias.map((categoria) => (
+                  {categoriasToShow.map((categoria) => (
                     <SelectItem key={categoria.id} value={categoria.id}>
                       {categoria.nome}
                     </SelectItem>

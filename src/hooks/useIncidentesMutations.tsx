@@ -84,22 +84,23 @@ export const useIncidentesMutations = () => {
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Atualizando incidente:', id, data);
       
+      // Tratar campos UUID vazios que causam erro
       const updateData = {
         titulo: data.titulo,
         descricao: data.descricao,
-        categoria_id: data.categoria_id,
-        sla_id: data.sla_id,
+        categoria_id: data.categoria_id || null,
+        sla_id: data.sla_id || null,
         urgencia: data.urgencia,
         impacto: data.impacto,
         prioridade: data.prioridade,
         status: data.status,
-        cliente_id: data.cliente_id,
-        grupo_responsavel_id: data.grupo_responsavel_id,
-        atendente_id: data.atendente_id,
+        cliente_id: data.cliente_id || null,
+        grupo_responsavel_id: data.grupo_responsavel_id || null,
+        atendente_id: data.atendente_id || null,
         canal_origem: data.canal_origem,
-        data_limite_resposta: data.data_limite_resposta,
-        data_limite_resolucao: data.data_limite_resolucao,
-        origem_id: data.origem_id,
+        data_limite_resposta: data.data_limite_resposta || null,
+        data_limite_resolucao: data.data_limite_resolucao || null,
+        origem_id: data.origem_id || null,
         ativos_envolvidos: data.ativos_envolvidos,
         notas_internas: data.notas_internas,
         tags: data.tags,
@@ -107,6 +108,14 @@ export const useIncidentesMutations = () => {
         atualizado_em: new Date().toISOString(),
         atualizado_por: user?.id,
       };
+
+      // Remover campos que são undefined ou string vazia para evitar erro de UUID
+      Object.keys(updateData).forEach(key => {
+        const value = updateData[key as keyof typeof updateData];
+        if (value === undefined || value === '') {
+          delete updateData[key as keyof typeof updateData];
+        }
+      });
 
       const { data: updated, error } = await supabase
         .from('incidentes')

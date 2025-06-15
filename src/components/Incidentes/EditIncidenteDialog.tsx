@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { FileUpload } from '@/components/ui/file-upload';
 import { IncidenteChat } from './IncidenteChat';
 import { IncidenteLogs } from './IncidenteLogs';
+import { useCategorias } from '@/hooks/useCategorias';
 
 const incidenteSchema = z.object({
   titulo: z.string().min(1, 'Título é obrigatório'),
@@ -46,8 +47,12 @@ interface EditIncidenteDialogProps {
 
 const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialogProps) => {
   const { updateIncidente } = useIncidentes();
+  const { categorias } = useCategorias();
   const [tab, setTab] = useState('form');
   const [anexos, setAnexos] = useState<string[]>([]);
+
+  // Filtrar categorias para mostrar apenas as do tipo 'incidente'
+  const categoriasIncidente = categorias.filter(categoria => categoria.tipo === 'incidente');
 
   const form = useForm<SolicitacaoFormData>({
     resolver: zodResolver(incidenteSchema),
@@ -92,14 +97,22 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
 
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
-      const dataWithAnexos = {
+      // Tratar campos vazios que causam erro de UUID
+      const cleanData = {
         ...data,
+        categoria_id: data.categoria_id && data.categoria_id !== '' ? data.categoria_id : null,
+        sla_id: data.sla_id && data.sla_id !== '' ? data.sla_id : null,
+        solicitante_id: data.solicitante_id && data.solicitante_id !== '' ? data.solicitante_id : null,
+        cliente_id: data.cliente_id && data.cliente_id !== '' ? data.cliente_id : null,
+        grupo_responsavel_id: data.grupo_responsavel_id && data.grupo_responsavel_id !== '' ? data.grupo_responsavel_id : null,
+        atendente_id: data.atendente_id && data.atendente_id !== '' ? data.atendente_id : null,
+        origem_id: data.origem_id && data.origem_id !== '' ? data.origem_id : null,
         anexos: anexos.length > 0 ? anexos.map((url) => ({ url, type: 'file' })) : undefined,
       };
 
       await updateIncidente.mutateAsync({
         id: incidente.id,
-        data: dataWithAnexos,
+        data: cleanData,
       });
       form.reset();
       setAnexos([]);
@@ -163,6 +176,7 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
                     <SolicitacaoFormFields
                       form={form}
                       excludeFields={["status"]}
+                      filteredCategorias={categoriasIncidente}
                     />
                     <FileUpload
                       onFilesChange={setAnexos}
