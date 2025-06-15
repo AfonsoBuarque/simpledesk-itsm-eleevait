@@ -108,6 +108,8 @@ const SLAManagement = () => {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Tipo</TableHead>
+                  <TableHead>Grupo</TableHead>
+                  <TableHead>Cliente</TableHead>
                   <TableHead>Prioridade</TableHead>
                   <TableHead>Tempo Resposta</TableHead>
                   <TableHead>Tempo Resolução</TableHead>
@@ -131,6 +133,12 @@ const SLAManagement = () => {
                         {getTypeIcon(sla.tipo_aplicacao)}
                         {getTypeLabel(sla.tipo_aplicacao)}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {sla.group?.name || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {sla.client?.name || '-'}
                     </TableCell>
                     <TableCell>
                       {sla.prioridade && (

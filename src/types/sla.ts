@@ -15,6 +15,12 @@ export interface SLA {
   criado_por?: string;
   atualizado_em?: string;
   atualizado_por?: string;
+  client?: {
+    name: string;
+  };
+  group?: {
+    name: string;
+  };
 }
 
 export interface SLAFormData {
