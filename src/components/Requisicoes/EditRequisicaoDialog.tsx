@@ -323,7 +323,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                 </div>
               </TabsContent>
               <TabsContent value="logs" className="flex flex-col flex-1 min-h-0 h-full">
-                <div className="max-w-2xl mx-auto border bg-background rounded-lg p-4 flex flex-col flex-1 min-h-0 h-full">
+                <div className="border bg-background rounded-lg p-4 flex flex-col flex-1 min-h-0 h-full w-full">
                   <h4 className="font-semibold text-base mb-2 flex-shrink-0">Logs de Alteração</h4>
                   {loadingLogs && <div className="text-muted-foreground">Carregando logs…</div>}
                   {logsError && <div className="text-destructive">Erro ao carregar logs</div>}
