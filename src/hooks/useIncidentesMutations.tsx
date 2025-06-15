@@ -1,15 +1,16 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { generateIncidenteNumber } from '@/utils/incidenteDataTransform';
+import { useSLACalculation } from '@/hooks/useSLACalculation';
 
 export const useIncidentesMutations = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { calculateAndSetSLADeadlines } = useSLACalculation();
 
   const createIncidente = useMutation({
     mutationFn: async (formData: SolicitacaoFormData) => {
@@ -18,13 +19,32 @@ export const useIncidentesMutations = () => {
       }
 
       console.log('Criando incidente com dados:', formData);
-      
+
       // Gerar número do incidente temporariamente até termos o trigger
       const numeroIncidente = generateIncidenteNumber();
-      
+
+      // Cálculo de SLA (igual padrão de requisição)
+      let data_limite_resposta = formData.data_limite_resposta;
+      let data_limite_resolucao = formData.data_limite_resolucao;
+
+      if (
+        (!data_limite_resposta || !data_limite_resolucao) &&
+        formData.categoria_id &&
+        formData.grupo_responsavel_id
+      ) {
+        const slaDeadlines = await calculateAndSetSLADeadlines(
+          formData.categoria_id,
+          formData.grupo_responsavel_id,
+          new Date().toISOString()
+        );
+        data_limite_resposta = slaDeadlines.data_limite_resposta || data_limite_resposta || null;
+        data_limite_resolucao = slaDeadlines.data_limite_resolucao || data_limite_resolucao || null;
+        console.log('SLA deadlines calculados:', slaDeadlines);
+      }
+
       // Preparar dados para inserção, removendo campos que não existem na tabela
       const insertData = {
-        numero: numeroIncidente, // Incluir número temporário
+        numero: numeroIncidente,
         titulo: formData.titulo,
         descricao: formData.descricao,
         tipo: 'incidente' as const,
@@ -34,18 +54,17 @@ export const useIncidentesMutations = () => {
         impacto: formData.impacto,
         prioridade: formData.prioridade,
         status: formData.status,
-        solicitante_id: user.id, // Garantir que sempre será o usuário logado
+        solicitante_id: user.id,
         cliente_id: formData.cliente_id,
         grupo_responsavel_id: formData.grupo_responsavel_id,
         atendente_id: formData.atendente_id,
         canal_origem: formData.canal_origem,
-        data_limite_resposta: formData.data_limite_resposta,
-        data_limite_resolucao: formData.data_limite_resolucao,
+        data_limite_resposta,
+        data_limite_resolucao,
         origem_id: formData.origem_id,
         ativos_envolvidos: formData.ativos_envolvidos,
         notas_internas: formData.notas_internas,
         tags: formData.tags,
-        // Converter anexos para o formato JSON esperado pela tabela
         anexos: formData.anexos ? JSON.stringify(formData.anexos) : null,
       };
 
