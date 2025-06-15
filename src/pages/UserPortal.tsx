@@ -16,6 +16,11 @@ const UserPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
 
+  // Adicionado: log do profile para qualquer usuário logado (admin ou user)
+  if (profile) {
+    console.log('[UserPortal] Usuário logado:', profile);
+  }
+
   // Atualizar: garantir redirecionamento para /auth após logout
   const handleSignOut = async () => {
     await signOut();
@@ -131,4 +136,3 @@ const UserPortal = () => {
 };
 
 export default UserPortal;
-
