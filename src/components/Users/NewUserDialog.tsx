@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +15,7 @@ import { useClients } from '@/hooks/useClients';
 import { useGroups } from '@/hooks/useGroups';
 import { UserFormFields } from './UserFormFields';
 import { UserFormActions } from './UserFormActions';
+import { useToast } from '@/components/ui/use-toast'; // Corrigido para import
 
 const userSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -52,7 +54,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
     },
   });
 
-  const { toast } = require('@/components/ui/use-toast');
+  const { toast } = useToast(); // Corrigido para uso normal
 
   const onSubmit = async (data: UserFormData) => {
     try {
@@ -83,7 +85,7 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
           description: err.error || "Falha ao enviar convite.",
         });
       }
-    } catch (e) {
+    } catch (e: any) {
       toast({
         variant: "destructive",
         title: "Erro ao cadastrar",
