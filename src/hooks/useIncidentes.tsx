@@ -8,6 +8,16 @@ export const useIncidentes = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  // Helper para tratar relacionamentos potencialmente inválidos
+  function normalizeRelacionamento<T extends { nome?: string | null }>(
+    value: any
+  ): T | null {
+    if (!value || value.error === true) return null;
+    // No Supabase, arrays vazios podem aparecer se a referência não existe (ex: [])
+    if (Array.isArray(value)) return value[0] ?? null;
+    return value;
+  }
+
   // fetch incidentes
   const { data: incidentes = [], isLoading, error } = useQuery({
     queryKey: ['incidentes'],
@@ -28,7 +38,17 @@ export const useIncidentes = () => {
       if (error) {
         throw error;
       }
-      return data as Solicitacao[];
+
+      // Mapeia para garantir que as propriedades relacionadas estejam corretas
+      return (data || []).map((inc: any) => ({
+        ...inc,
+        categoria: normalizeRelacionamento<{ nome: string }>(inc.categoria),
+        sla: normalizeRelacionamento<{ nome: string }>(inc.sla),
+        solicitante: normalizeRelacionamento<{ name: string }>(inc.solicitante),
+        cliente: normalizeRelacionamento<{ name: string }>(inc.cliente),
+        grupo_responsavel: normalizeRelacionamento<{ name: string }>(inc.grupo_responsavel),
+        atendente: normalizeRelacionamento<{ name: string }>(inc.atendente),
+      })) as Solicitacao[];
     },
   });
 
@@ -55,7 +75,7 @@ export const useIncidentes = () => {
         description: "Incidente criado com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erro",
         description: "Erro ao criar incidente.",
@@ -86,7 +106,7 @@ export const useIncidentes = () => {
         description: "Incidente atualizado com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erro",
         description: "Erro ao atualizar incidente.",
