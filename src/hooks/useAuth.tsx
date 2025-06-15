@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 // Perfil simplificado
@@ -13,6 +13,7 @@ interface Profile {
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null); // NOVO: Guardar sessão!
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -36,18 +37,35 @@ export const useAuth = () => {
     if (initializedRef.current || !mountedRef.current) return;
     
     initializedRef.current = true;
-    
     let timeoutId: NodeJS.Timeout;
 
+    // Listener de mudanças de sessão: SEMPRE ARMAZENA session e user
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, sessionArg) => {
+        if (!mountedRef.current) return;
+
+        setSession(sessionArg);
+        setUser(sessionArg?.user ?? null);
+
+        if (sessionArg?.user) {
+          const basicProfile = createBasicProfile(sessionArg.user);
+          setProfile(basicProfile);
+        } else {
+          setProfile(null);
+        }
+
+        setLoading(false);
+      }
+    );
+
+    // Pega sessão atual SINCRONIZANDO as duas variáveis
     async function initializeAuth() {
       try {
-        console.log('Initializing auth...');
-        
-        // Verificar sessão atual
         const { data: { session } } = await supabase.auth.getSession();
-        
+        setSession(session);
+        setUser(session?.user ?? null);
+
         if (session?.user && mountedRef.current) {
-          setUser(session.user);
           const basicProfile = createBasicProfile(session.user);
           setProfile(basicProfile);
         }
@@ -60,33 +78,11 @@ export const useAuth = () => {
       }
     }
 
-    // Configurar listener para mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mountedRef.current) return;
-        
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (session?.user) {
-          setUser(session.user);
-          const basicProfile = createBasicProfile(session.user);
-          setProfile(basicProfile);
-        } else {
-          setUser(null);
-          setProfile(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Inicializar autenticação
     initializeAuth();
 
     // Timeout de segurança
     timeoutId = setTimeout(() => {
       if (mountedRef.current && loading) {
-        console.log('Safety timeout reached, forcing loading to false');
         setLoading(false);
       }
     }, 3000);
@@ -97,75 +93,66 @@ export const useAuth = () => {
       clearTimeout(timeoutId);
       subscription?.unsubscribe();
     };
-  }, []); // Dependências vazias para executar apenas uma vez
+  }, [createBasicProfile]);
 
+  // Sign In
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('Attempting sign in');
       setLoading(true);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        console.error('Sign in error:', error.message);
         setLoading(false);
         return { error };
       }
-
+      // Mantém user e session sincronizados
+      setSession(data.session);
+      setUser(data.user ?? null);
       return { data, error: null };
     } catch (error) {
-      console.error('Unexpected error during sign in:', error);
       setLoading(false);
       return { error };
     }
   };
 
+  // Sign Up
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      console.log('Attempting sign up');
       setLoading(true);
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: { full_name: fullName }
-        }
+        options: { data: { full_name: fullName } }
       });
 
       if (error) {
-        console.error('Sign up error:', error.message);
         setLoading(false);
         return { error };
       }
-
+      setSession(data.session);
+      setUser(data.user ?? null);
       return { data, error: null };
     } catch (error) {
-      console.error('Unexpected error during sign up:', error);
       setLoading(false);
       return { error };
     }
   };
 
+  // Sign Out
   const signOut = async () => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
-      
       if (error) {
         console.error('Sign out error:', error.message);
       } else {
         setUser(null);
+        setSession(null);
         setProfile(null);
       }
-      
       setLoading(false);
       return { error };
     } catch (error) {
-      console.error('Unexpected error during sign out:', error);
       setLoading(false);
       return { error };
     }
@@ -180,6 +167,7 @@ export const useAuth = () => {
 
   return {
     user,
+    session, // Disponível para consumo externo, se necessário.
     profile,
     loading,
     profileLoading,
