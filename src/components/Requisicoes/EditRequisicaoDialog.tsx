@@ -85,7 +85,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
   }));
 
   // Função utilitária para determinar o papel do autor na mensagem de chat
-  const getRemetenteLabel = (msg: { criado_por: string }) => {
+  const getRemetenteLabel = (msg: { criado_por: string; autor_tipo: 'analista' | 'cliente' }) => {
     // Se for o solicitante: Solicitante
     if (!!requisicao.solicitante_id && msg.criado_por === requisicao.solicitante_id) {
       return 'Solicitante';
