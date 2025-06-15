@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,7 +51,6 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
   const { createIncidente } = useIncidentes();
   const { categorias } = useCategorias();
   const { user } = useAuth();
-  const { calculateAndSetSLADeadlines } = useSLACalculation();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -72,7 +70,6 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
   // Garantir que o solicitante_id seja sempre do usuário logado
   useEffect(() => {
     if (user?.id) {
-      console.log('Definindo solicitante_id para:', user.id);
       form.setValue("solicitante_id", user.id);
     }
   }, [user?.id, form]);
@@ -80,84 +77,11 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
   // Sincronizar campos dependentes da categoria escolhida
   useSyncCategoriaDependentes(form, categorias);
 
-  // Novo: Garantir cálculo do SLA também logo após categoria_id/grupo_responsavel_id serem preenchidos (inclusive auto!)
-  useEffect(() => {
-    const categoriaId = form.watch("categoria_id");
-    const grupoId = form.watch("grupo_responsavel_id");
-    // Verifica se ambos existem e se pelo menos um mudou
-    if (categoriaId && grupoId) {
-      // Para evitar loop infinito: calcula apenas se não há valores preenchidos ainda
-      if (!form.getValues("data_limite_resposta") && !form.getValues("data_limite_resolucao")) {
-        (async () => {
-          try {
-            console.log("SLA calculation (first fill) for NEW incidente:", { categoriaId, grupoId });
-            const deadlines = await calculateAndSetSLADeadlines(
-              categoriaId,
-              grupoId,
-              new Date().toISOString()
-            );
-            if (deadlines.data_limite_resposta) {
-              const formattedResposta = deadlines.data_limite_resposta.slice(0, 16);
-              form.setValue('data_limite_resposta', formattedResposta);
-              console.log('Setting data_limite_resposta (initial):', formattedResposta);
-            }
-            if (deadlines.data_limite_resolucao) {
-              const formattedResolucao = deadlines.data_limite_resolucao.slice(0, 16);
-              form.setValue('data_limite_resolucao', formattedResolucao);
-              console.log('Setting data_limite_resolucao (initial):', formattedResolucao);
-            }
-          } catch (error) {
-            console.error("Error calculating SLA for NEW incident (initial):", error);
-          }
-        })();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.watch("categoria_id"), form.watch("grupo_responsavel_id")]);
-
-  // Calcular SLA quando categoria ou grupo responsável mudarem manualmente
-  useEffect(() => {
-    const subscription = form.watch(async (value, { name }) => {
-      if (name === "categoria_id" || name === "grupo_responsavel_id") {
-        const categoriaId = value.categoria_id;
-        const grupoId = value.grupo_responsavel_id;
-        if (categoriaId && grupoId) {
-          console.log("SLA calculation triggered for NEW incidente (user change):", { categoriaId, grupoId });
-          try {
-            const deadlines = await calculateAndSetSLADeadlines(
-              categoriaId,
-              grupoId,
-              new Date().toISOString()
-            );
-            if (deadlines.data_limite_resposta) {
-              const formattedResposta = deadlines.data_limite_resposta.slice(0, 16);
-              form.setValue('data_limite_resposta', formattedResposta);
-              console.log('Setting data_limite_resposta (user change):', formattedResposta);
-            }
-            if (deadlines.data_limite_resolucao) {
-              const formattedResolucao = deadlines.data_limite_resolucao.slice(0, 16);
-              form.setValue('data_limite_resolucao', formattedResolucao);
-              console.log('Setting data_limite_resolucao (user change):', formattedResolucao);
-            }
-          } catch (error) {
-            console.error("Error calculating SLA for NEW incident (user change):", error);
-          }
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [form, calculateAndSetSLADeadlines]);
-
   const onSubmit = async (data: SolicitacaoFormData) => {
     try {
-      console.log('Submetendo formulário de incidente:', data);
-      
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado');
-      }
+      // O cálculo de SLA será feito APENAS dentro da mutation de criação!
+      if (!user?.id) throw new Error('Usuário não autenticado');
 
-      // Garantir que o solicitante_id está correto
       const dataWithCorrectUser = {
         ...data,
         solicitante_id: user.id,
