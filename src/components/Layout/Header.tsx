@@ -126,6 +126,8 @@ const Header = ({
         description: "Você foi desconectado com sucesso."
       });
     }
+    // Redirecionamento forçado para tela de login (login) após logout
+    window.location.replace("/auth");
   };
 
   const getNotificationText = (notification: Notification) => {
