@@ -282,8 +282,8 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                   </form>
                 </Form>
               </TabsContent>
-              <TabsContent value="chat">
-                <div className="border rounded-lg bg-background p-4 flex flex-col h-[300px] md:h-[350px] w-full">
+              <TabsContent value="chat" className="flex flex-col flex-1 min-h-[150px] h-full w-full">
+                <div className="border rounded-lg bg-background p-4 flex flex-col flex-1 min-h-[150px] h-full w-full">
                   <ScrollArea className="flex-1 px-1 overflow-y-auto mb-2">
                     <div className="flex flex-col gap-2">
                       {loadingChat && <div className="text-muted-foreground">Carregando mensagens…</div>}
