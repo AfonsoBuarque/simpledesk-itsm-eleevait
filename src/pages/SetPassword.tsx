@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Lock } from "lucide-react";
 import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import AuthLeftPanel from "@/components/Auth/AuthLeftPanel";
 
 const SetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -82,74 +83,77 @@ const SetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full p-8 bg-white shadow-md rounded-lg space-y-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-1">Defina sua senha</h2>
-          <p className="text-gray-600 text-sm">Por favor, crie uma senha para acessar o sistema.</p>
+    <div className="min-h-screen w-full flex flex-col md:flex-row">
+      <AuthLeftPanel />
+      <div className="flex-1 flex items-center justify-center bg-white min-h-screen md:min-h-0">
+        <div className="w-full max-w-md p-8 md:py-16 md:px-8 shadow-none md:shadow-xl md:rounded-xl border-none bg-white animate-fade-in">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-1 text-zinc-900">Defina sua senha</h2>
+            <p className="text-gray-600 text-sm">Por favor, crie uma senha para acessar o sistema.</p>
+          </div>
+          {success && (
+            <Alert className="mb-2">
+              <AlertTitle>Sucesso!</AlertTitle>
+              <AlertDescription>
+                Senha definida. Redirecionando...
+              </AlertDescription>
+            </Alert>
+          )}
+          {errorMsg && (
+            <Alert variant="destructive" className="mb-2">
+              <AlertTitle>Erro</AlertTitle>
+              <AlertDescription>{errorMsg}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="password">Nova senha</Label>
+              <div className="relative mt-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <Input
+                  name="password"
+                  id="password"
+                  type="password"
+                  placeholder="Digite a nova senha"
+                  className="pl-10"
+                  value={form.password}
+                  onChange={handleInput}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
+              <div className="relative mt-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <Input
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirme a nova senha"
+                  className="pl-10"
+                  value={form.confirmPassword}
+                  onChange={handleInput}
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition disabled:opacity-60" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Definir senha"
+              )}
+            </Button>
+          </form>
         </div>
-        {success && (
-          <Alert className="mb-2">
-            <AlertTitle>Sucesso!</AlertTitle>
-            <AlertDescription>
-              Senha definida. Redirecionando...
-            </AlertDescription>
-          </Alert>
-        )}
-        {errorMsg && (
-          <Alert variant="destructive" className="mb-2">
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{errorMsg}</AlertDescription>
-          </Alert>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="password">Nova senha</Label>
-            <div className="relative mt-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
-              </div>
-              <Input
-                name="password"
-                id="password"
-                type="password"
-                placeholder="Digite a nova senha"
-                className="pl-10"
-                value={form.password}
-                onChange={handleInput}
-                required
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-            <div className="relative mt-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
-              </div>
-              <Input
-                name="confirmPassword"
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirme a nova senha"
-                className="pl-10"
-                value={form.confirmPassword}
-                onChange={handleInput}
-                required
-              />
-            </div>
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              "Definir senha"
-            )}
-          </Button>
-        </form>
       </div>
     </div>
   );
