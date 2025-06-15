@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Solicitacao, SolicitacaoFormData } from '@/types/solicitacao';
@@ -43,13 +44,16 @@ export const useIncidentes = () => {
         prioridade: (item.prioridade as 'baixa' | 'media' | 'alta' | 'critica') || 'media',
         status: (item.status as 'aberta' | 'em_andamento' | 'pendente' | 'resolvida' | 'fechada') || 'aberta',
         canal_origem: (item.canal_origem as 'portal' | 'email' | 'telefone' | 'chat' | 'presencial') || 'portal',
-        // Converter campos JSON para arrays
+        // Converter campos JSON para arrays com tipos corretos
         ativos_envolvidos: Array.isArray(item.ativos_envolvidos) ? item.ativos_envolvidos : 
                           item.ativos_envolvidos ? [item.ativos_envolvidos] : [],
         anexos: Array.isArray(item.anexos) ? item.anexos : 
                item.anexos ? [item.anexos] : [],
-        tags: Array.isArray(item.tags) ? item.tags : 
-             item.tags ? [item.tags] : [],
+        tags: Array.isArray(item.tags) 
+          ? item.tags.map(tag => String(tag)) 
+          : item.tags 
+            ? [String(item.tags)] 
+            : [],
         // Definir relacionamentos como null por enquanto, pois não há foreign keys configuradas
         categoria: null,
         sla: null,
