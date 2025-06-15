@@ -18,7 +18,8 @@ import {
   ArrowUpDown,
   Bug,
   Tags,
-  UserCheck
+  UserCheck,
+  Clock
 } from 'lucide-react';
 
 export const menuItems = [
@@ -64,7 +65,8 @@ export const menuItems = [
     icon: Settings,
     children: [
       { id: 'clients', label: 'Clientes', icon: Users },
-      { id: 'categoria', label: 'Categoria', icon: Tags }
+      { id: 'categoria', label: 'Categoria', icon: Tags },
+      { id: 'sla', label: 'SLA', icon: Clock }
     ]
   }
 ];

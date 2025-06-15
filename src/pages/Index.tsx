@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
@@ -67,6 +66,8 @@ const Index = () => {
         return <ClientManagement />;
       case 'categoria':
         return <CategoriaManagement />;
+      case 'sla':
+        return <SLAManagement />;
       case 'solicitacoes':
         return <SolicitacaoManagement />;
       case 'cmdb':
@@ -118,4 +119,3 @@ const Index = () => {
 };
 
 export default Index;
-
