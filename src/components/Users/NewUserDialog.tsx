@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,22 +52,43 @@ export const NewUserDialog = ({ open, onOpenChange }: NewUserDialogProps) => {
     },
   });
 
-  const onSubmit = async (data: UserFormData) => {
-    const formData = {
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      status: data.status,
-      phone: data.phone || undefined,
-      department: data.department || undefined,
-      client_id: data.client_id === 'none' ? undefined : data.client_id,
-      groups: data.groups || [],
-    };
+  const { toast } = require('@/components/ui/use-toast');
 
-    const success = await addUser(formData);
-    if (success) {
-      form.reset();
-      onOpenChange(false);
+  const onSubmit = async (data: UserFormData) => {
+    try {
+      const body = {
+        name: data.name,
+        email: data.email,
+        role: data.role || 'user'
+      };
+
+      const res = await fetch('/functions/v1/invite-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Convite enviado!",
+          description: "O usuário receberá instruções por e-mail.",
+        });
+        form.reset();
+        onOpenChange(false);
+      } else {
+        const err = await res.json();
+        toast({
+          variant: "destructive",
+          title: "Erro ao cadastrar",
+          description: err.error || "Falha ao enviar convite.",
+        });
+      }
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao cadastrar",
+        description: e.message || "Erro inesperado.",
+      });
     }
   };
 
