@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Solicitacao } from '@/types/solicitacao';
@@ -86,22 +85,40 @@ export const useDashboardData = () => {
     queryKey: ['dashboard-sla-metrics'],
     queryFn: async () => {
       // Buscar métricas de SLA por tipo
-      const tipos = ['incidente', 'solicitacao', 'mudanca', 'problema'];
+      const tipos = [
+        { key: 'incidente', label: 'Incidentes' },
+        { key: 'solicitacao', label: 'Solicitações' },
+        { key: 'mudanca', label: 'Mudanças' },
+        { key: 'problema', label: 'Problemas' },
+      ];
       const metrics = [];
 
-      for (const tipo of tipos) {
+      for (const tipoConfig of tipos) {
+        // DEBUG LOG para visualizar os dados
+        console.log(`Querying tickets for tipo: ${tipoConfig.key}`);
+
         const { data: total, error: totalError } = await supabase
           .from('solicitacoes')
-          .select('id, data_limite_resolucao, data_resolucao, status')
-          .eq('tipo', tipo)
+          .select('id, data_limite_resolucao, data_resolucao, status, tipo')
+          .eq('tipo', tipoConfig.key)
           .not('data_limite_resolucao', 'is', null);
 
-        if (totalError) continue;
+        if (totalError) {
+          console.error(`Erro ao buscar tickets de tipo '${tipoConfig.key}':`, totalError);
+          metrics.push({
+            category: tipoConfig.label,
+            target: 95,
+            current: 0,
+            total: 0,
+          });
+          continue;
+        }
 
+        // O filtro estava correto, mas vamos garantir que só tickets existentes e corretamente classificados são computados.
         const totalTickets = total?.length || 0;
         if (totalTickets === 0) {
           metrics.push({
-            category: tipo.charAt(0).toUpperCase() + tipo.slice(1) + 's',
+            category: tipoConfig.label,
             target: 95,
             current: 0,
             total: 0,
@@ -121,8 +138,16 @@ export const useDashboardData = () => {
 
         const currentPercentage = totalTickets > 0 ? Math.round((onTime / totalTickets) * 100) : 0;
 
+        // LOG para validação
+        console.log(
+          `[${tipoConfig.label}] Tickets total:`,
+          totalTickets,
+          '- SLA OK:', onTime,
+          '- SLA %:', currentPercentage
+        );
+
         metrics.push({
-          category: tipo.charAt(0).toUpperCase() + tipo.slice(1) + 's',
+          category: tipoConfig.label,
           target: 95,
           current: currentPercentage,
           total: totalTickets,
