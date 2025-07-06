@@ -146,17 +146,19 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
   return (
     <div className="space-y-6">
       {/* Cards de Estatísticas Gerais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-blue-200 hover:translate-y-[-2px]"
           onClick={() => handleCardClick()}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Ativos</CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-full bg-blue-50">
+              <Server className="h-4 w-4 text-blue-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalAtivos}</div>
+            <div className="text-2xl font-bold text-blue-600">{totalAtivos}</div>
             <p className="text-xs text-muted-foreground">
               Todos os ativos cadastrados
             </p>
@@ -164,12 +166,14 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-green-200 hover:translate-y-[-2px]"
           onClick={() => handleCardClick(ativo => ativo.status_operacional?.toLowerCase() === 'ativo')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ativos Ativos</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <div className="p-2 rounded-full bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{ativosAtivos}</div>
@@ -180,12 +184,14 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-gray-200 hover:translate-y-[-2px]"
           onClick={() => handleCardClick(ativo => ativo.status_operacional?.toLowerCase() === 'inativo')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ativos Inativos</CardTitle>
-            <Clock className="h-4 w-4 text-gray-600" />
+            <div className="p-2 rounded-full bg-gray-50">
+              <Clock className="h-4 w-4 text-gray-600" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">{ativosInativos}</div>
@@ -196,12 +202,14 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-red-200 hover:translate-y-[-2px]"
           onClick={() => handleCardClick(ativo => ativo.status_operacional?.toLowerCase() === 'manutencao')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Em Manutenção</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <div className="p-2 rounded-full bg-red-50">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{ativosManutencao}</div>
@@ -214,20 +222,25 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
 
       {/* Cards por Tipo de Ativo */}
       {tiposComAtivos.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Ativos por Tipo</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="animate-fade-in" style={{ '--tw-animation-delay': '0.1s' } as React.CSSProperties}>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Layers className="h-5 w-5 text-blue-600" />
+            Ativos por Tipo
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-2">
             {tiposComAtivos.map(([tipo, quantidade]) => {
               const IconComponent = getTypeIcon(tipo);
               return (
                 <Card 
                   key={tipo}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-blue-200 hover:translate-y-[-2px]"
                   onClick={() => handleCardClick(ativo => (ativo.tipo_id || 'Não especificado') === tipo)}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{tipo}</CardTitle>
-                    <IconComponent className="h-4 w-4 text-blue-600" />
+                    <div className="p-2 rounded-full bg-blue-50">
+                      <IconComponent className="h-4 w-4 text-blue-600" />
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">{quantidade}</div>
@@ -243,11 +256,14 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
       )}
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in" style={{ '--tw-animation-delay': '0.2s' } as React.CSSProperties}>
         {/* Gráfico de Status */}
-        <Card>
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle>Status dos Ativos</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-600" />
+              Status dos Ativos
+            </CardTitle>
             <CardDescription>Distribuição por status operacional</CardDescription>
           </CardHeader>
           <CardContent>
@@ -284,9 +300,12 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         </Card>
 
         {/* Gráfico por Fabricante */}
-        <Card>
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle>Top 5 Fabricantes</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Factory className="h-5 w-5 text-blue-600" />
+              Top 5 Fabricantes
+            </CardTitle>
             <CardDescription>Ativos por fabricante</CardDescription>
           </CardHeader>
           <CardContent>
@@ -309,9 +328,12 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         </Card>
 
         {/* Gráfico por Cliente */}
-        <Card>
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle>Top 5 Clientes</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5 text-blue-600" />
+              Top 5 Clientes
+            </CardTitle>
             <CardDescription>Ativos por cliente</CardDescription>
           </CardHeader>
           <CardContent>

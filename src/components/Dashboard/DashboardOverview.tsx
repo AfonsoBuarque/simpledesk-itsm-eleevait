@@ -33,14 +33,13 @@ const DashboardOverview = () => {
 
   return (
     <div className="space-y-10 max-w-screen-2xl mx-auto px-2 sm:px-4 md:px-8">
-
       {/* Page Title */}
-      <section className="flex flex-col md:flex-row md:items-end md:justify-between mb-2 md:mb-6">
+      <section className="flex flex-col md:flex-row md:items-end md:justify-between mb-2 md:mb-6 animate-fade-in">
         <div className="flex items-center gap-3">
-          <span className="rounded-full bg-blue-100 p-2 shadow border border-blue-200">
-            <TrendingUp className="h-6 w-6 text-blue-600" />
+          <span className="rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-2 shadow-lg">
+            <TrendingUp className="h-6 w-6 text-white" />
           </span>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight gradient-heading">
             Visão Geral do Dashboard
           </h1>
         </div>
@@ -50,7 +49,7 @@ const DashboardOverview = () => {
       </section>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-in" style={{ '--tw-animation-delay': '0.1s' } as React.CSSProperties}>
         <MetricsCard
           title="Tickets Abertos"
           value={stats?.totalOpen || 0}
@@ -80,9 +79,9 @@ const DashboardOverview = () => {
       </div>
 
       {/* Section: Cards Side by Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style={{ '--tw-animation-delay': '0.2s' } as React.CSSProperties}>
         {/* Recent Tickets */}
-        <Card className="rounded-xl shadow-md hover:shadow-xl border-0 transition-shadow duration-150 bg-gradient-to-br from-white via-blue-50 to-blue-100">
+        <Card className="rounded-xl shadow-md hover:shadow-xl border border-gray-100 transition-all duration-300 hover:translate-y-[-2px]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-blue-600 text-lg md:text-xl font-bold">
               <Ticket className="h-6 w-6" />
@@ -101,7 +100,7 @@ const DashboardOverview = () => {
                   return (
                     <div 
                       key={ticket.id} 
-                      className="flex items-center justify-between p-4 rounded-lg bg-white/70 border border-gray-100 shadow-sm hover:shadow-md transition cursor-pointer group"
+                      className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer group"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
@@ -138,7 +137,7 @@ const DashboardOverview = () => {
         </Card>
 
         {/* SLA Performance */}
-        <Card className="rounded-xl shadow-md hover:shadow-xl border-0 transition-shadow duration-150 bg-gradient-to-br from-white via-green-50 to-green-100">
+        <Card className="rounded-xl shadow-md hover:shadow-xl border border-gray-100 transition-all duration-300 hover:translate-y-[-2px]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-600 text-lg md:text-xl font-bold">
               <TrendingUp className="h-6 w-6" />
@@ -153,7 +152,7 @@ const DashboardOverview = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-base font-semibold text-gray-700">{metric.category}</span>
                       <div className="flex items-center gap-2">
-                        <span className={`text-lg font-bold ${metric.current >= metric.target ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={`text-lg font-bold ${metric.current >= metric.target ? 'text-green-600' : 'text-red-600'} transition-all duration-300 hover:scale-110`}>
                           {metric.current}%
                         </span>
                         <span className="text-xs text-gray-400">({metric.total} tickets)</span>
@@ -161,12 +160,12 @@ const DashboardOverview = () => {
                     </div>
                     <Progress 
                       value={metric.current} 
-                      className={`h-2 rounded-xl shadow-inner transition-colors duration-200 ${metric.current >= metric.target ? 'bg-gradient-to-r from-green-300 via-green-200 to-green-100' : 'bg-orange-200'}`}
+                      className={`h-3 rounded-xl shadow-inner transition-all duration-300 ${metric.current >= metric.target ? 'bg-gradient-to-r from-green-500 to-green-300' : 'bg-gradient-to-r from-orange-500 to-orange-300'}`}
                     />
                     <div className="flex justify-between items-center text-xs text-gray-500">
                       <span>Meta: {metric.target}%</span>
-                      <span className={metric.current >= metric.target ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>
-                        {metric.current >= metric.target ? '✓ Meta atingida' : '⚠ Abaixo da meta'}
+                      <span className={`${metric.current >= metric.target ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} font-bold px-2 py-0.5 rounded-full text-xs`}>
+                        {metric.current >= metric.target ? '✓ Meta atingida' : '⚠️ Abaixo da meta'}
                       </span>
                     </div>
                   </div>

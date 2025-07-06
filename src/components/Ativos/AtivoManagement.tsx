@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, List } from 'lucide-react';
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, List, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -108,9 +108,14 @@ const AtivoManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ativos</h1>
-          <p className="text-gray-600">Gerencie os ativos do CMDB</p>
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-blue-100 shadow-sm">
+            <Package className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold gradient-heading">Ativos</h1>
+            <p className="text-gray-600">Gerencie os ativos do CMDB</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <div className="flex rounded-md border">
@@ -124,7 +129,7 @@ const AtivoManagement = () => {
               Dashboard
             </Button>
             <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              variant={viewMode === 'list' ? 'default' : 'ghost'} 
               size="sm"
               onClick={() => setViewMode('list')}
               className="rounded-l-none"
@@ -133,7 +138,7 @@ const AtivoManagement = () => {
               Lista
             </Button>
           </div>
-          <Button onClick={() => setShowNewDialog(true)}>
+          <Button onClick={() => setShowNewDialog(true)} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 mr-2" />
             Novo Ativo
           </Button>

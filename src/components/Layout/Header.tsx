@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -141,7 +142,7 @@ const Header = ({
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
       <div className="flex items-center gap-4">
         {/* Mobile menu toggle - shows X when sidebar is open, Menu when closed */}
         <Button variant="ghost" size="sm" onClick={isSidebarOpen && onCloseSidebar ? onCloseSidebar : onMenuClick} className="lg:hidden">
@@ -161,10 +162,10 @@ const Header = ({
         </div>
       </div>
 
-      <div className="flex-1 max-w-md mx-4">
+      <div className="flex-1 max-w-md mx-4 hidden md:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input placeholder="Buscar tickets, artigos, CIs..." className="pl-10" />
+          <Input placeholder="Buscar tickets, artigos, CIs..." className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
         </div>
       </div>
 
@@ -205,7 +206,10 @@ const Header = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm">
-              <User className="h-5 w-5" />
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=random`} />
+                <AvatarFallback>{profile?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -215,7 +219,7 @@ const Header = ({
             <DropdownMenuLabel className="text-xs text-gray-600 font-normal">
               {profile?.role === 'admin' && 'Administrador'}
               {profile?.role === 'manager' && 'Gerente'}
-              {profile?.role === 'technician' && 'Técnico'}
+              {profile?.role === 'technician' && <Badge variant="outline" className="ml-1">Técnico</Badge>}
               {profile?.role === 'user' && 'Usuário'}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

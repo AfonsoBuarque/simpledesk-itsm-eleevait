@@ -58,14 +58,14 @@ export const NovaRequisicaoModal = ({ isOpen, onClose }: NovaRequisicaoModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-blue-100">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-gray-900">
+          <DialogTitle className="text-xl font-bold gradient-heading">
             Nova Requisição de Serviço
           </DialogTitle>
         </DialogHeader>
         
-        <Card className="border-0 shadow-none">
+        <Card className="border-0 shadow-none bg-transparent">
           <CardContent className="p-0">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

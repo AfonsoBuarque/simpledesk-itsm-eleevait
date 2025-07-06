@@ -51,9 +51,9 @@ const RecentTickets = ({ tickets }: RecentTicketsProps) => {
 
   if (tickets.length === 0) {
     return (
-      <Card>
+      <Card className="card-hover">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2 text-blue-600">
             <Clock className="h-5 w-5" />
             Tickets Recentes
           </CardTitle>
@@ -68,10 +68,10 @@ const RecentTickets = ({ tickets }: RecentTicketsProps) => {
   }
 
   return (
-    <Card>
+    <Card className="card-hover border border-gray-100 shadow-md hover:shadow-lg">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <Clock className="h-5 w-5" />
+        <CardTitle className="text-lg font-semibold flex items-center gap-2 text-blue-600">
+          <Clock className="h-5 w-5 text-blue-600" />
           Tickets Recentes
         </CardTitle>
       </CardHeader>
@@ -80,11 +80,11 @@ const RecentTickets = ({ tickets }: RecentTicketsProps) => {
           {tickets.slice(0, 10).map((ticket) => (
             <div 
               key={ticket.id} 
-              className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+              className="p-4 border rounded-lg hover:bg-white hover:border-blue-200 transition-all duration-200 hover:shadow-sm"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-blue-600">{ticket.numero}</span>
+                  <span className="font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded shadow-sm">{ticket.numero}</span>
                   <Badge className={getUrgencyColor(ticket.urgencia)}>
                     {ticket.urgencia}
                   </Badge>
@@ -94,11 +94,11 @@ const RecentTickets = ({ tickets }: RecentTicketsProps) => {
                 </Badge>
               </div>
               
-              <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">
+              <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 hover:text-blue-700 transition-colors group-hover:text-blue-700">
                 {ticket.titulo}
               </h4>
               
-              <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   {format(new Date(ticket.criado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })}

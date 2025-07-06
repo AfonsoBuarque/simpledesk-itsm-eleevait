@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -43,17 +42,24 @@ const SidebarMenuItem = ({
   return (
     <div>
       <Button
-        variant={activeModule === item.id ? "secondary" : "ghost"}
+        variant={activeModule === item.id ? "secondary" : "ghost"} 
         className={cn(
-          "w-full justify-start text-left relative group",
+          "w-full justify-start text-left relative group overflow-hidden",
           activeModule === item.id 
-            ? "bg-blue-600 text-white hover:bg-blue-700" 
-            : "text-gray-300 hover:text-white hover:bg-gray-800",
-          isCollapsed && "justify-center p-2"
+            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md" 
+            : "text-gray-300 hover:text-white hover:bg-gray-800/70",
+          isCollapsed && "justify-center p-2",
+          "transition-all duration-200"
         )}
         onClick={handleClick}
       >
-        <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+        <div className={cn(
+          "flex items-center justify-center rounded-md transition-all",
+          activeModule === item.id ? "text-white" : "text-gray-400 group-hover:text-white",
+          !isCollapsed && "mr-3"
+        )}>
+          <item.icon className="h-4 w-4" />
+        </div>
         {!isCollapsed && (
           <>
             <span className="flex-1">{item.label}</span>
@@ -67,7 +73,7 @@ const SidebarMenuItem = ({
         
         {isCollapsed && (
           <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
-            {item.label}
+            <span className="font-medium">{item.label}</span>
           </div>
         )}
       </Button>
@@ -78,15 +84,22 @@ const SidebarMenuItem = ({
             <Button
               key={child.id}
               variant={activeModule === child.id ? "secondary" : "ghost"}
-              className={cn(
-                "w-full justify-start text-left text-sm",
+              className={cn( 
+                "w-full justify-start text-left text-sm transition-all duration-200",
                 activeModule === child.id 
-                  ? "bg-blue-600 text-white hover:bg-blue-700" 
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+                  ? "bg-gradient-to-r from-blue-500/80 to-indigo-500/80 text-white hover:from-blue-600/80 hover:to-indigo-600/80" 
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
               )}
               onClick={() => onItemClick(child.id)}
             >
-              {child.icon && <child.icon className="h-4 w-4 mr-3" />}
+              {child.icon && (
+                <div className={cn(
+                  "flex items-center justify-center rounded-md transition-all mr-3",
+                  activeModule === child.id ? "text-white" : "text-gray-400 group-hover:text-white"
+                )}>
+                  <child.icon className="h-4 w-4" />
+                </div>
+              )}
               <span className="flex-1">{child.label}</span>
             </Button>
           ))}

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategorias } from '@/hooks/useCategorias';
+import { FileText, AlignLeft, FolderOpen, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { NovaRequisicaoFormData } from './schemas/novaRequisicaoSchema';
 
@@ -26,15 +27,16 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
       <FormField
         control={form.control}
         name="titulo"
-        render={({ field }) => (
+        render={({ field }) => ( 
           <FormItem>
-            <FormLabel className="text-sm font-medium text-gray-700">
+            <FormLabel className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-blue-600" />
               Título da Requisição *
             </FormLabel>
             <FormControl>
               <Input 
                 placeholder="Descreva brevemente sua solicitação" 
-                className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                 {...field} 
               />
             </FormControl>
@@ -46,15 +48,16 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
       <FormField
         control={form.control}
         name="descricao"
-        render={({ field }) => (
+        render={({ field }) => ( 
           <FormItem>
-            <FormLabel className="text-sm font-medium text-gray-700">
+            <FormLabel className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <AlignLeft className="h-4 w-4 text-blue-600" />
               Descrição Detalhada
             </FormLabel>
             <FormControl>
               <Textarea 
                 placeholder="Descreva detalhadamente sua solicitação, incluindo informações relevantes que possam ajudar no atendimento"
-                className="min-h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="min-h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                 {...field} 
               />
             </FormControl>
@@ -66,14 +69,15 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
       <FormField
         control={form.control}
         name="categoria_id"
-        render={({ field }) => (
+        render={({ field }) => ( 
           <FormItem>
-            <FormLabel className="text-sm font-medium text-gray-700">
+            <FormLabel className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <FolderOpen className="h-4 w-4 text-blue-600" />
               Categoria do Serviço
             </FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <SelectTrigger className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <SelectTrigger className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                   <SelectValue placeholder="Selecione uma categoria (opcional)" />
                 </SelectTrigger>
               </FormControl>
@@ -93,14 +97,15 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
       <FormField
         control={form.control}
         name="urgencia"
-        render={({ field }) => (
+        render={({ field }) => ( 
           <FormItem>
-            <FormLabel className="text-sm font-medium text-gray-700">
+            <FormLabel className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
               Nível de Urgência *
             </FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <SelectTrigger className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <SelectTrigger className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                   <SelectValue placeholder="Selecione o nível de urgência" />
                 </SelectTrigger>
               </FormControl>

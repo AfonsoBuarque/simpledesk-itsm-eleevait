@@ -16,9 +16,12 @@ const StatusChart = ({ data }: StatusChartProps) => {
 
   if (!hasData) {
     return (
-      <Card>
+      <Card className="card-hover">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Status dos Tickets</CardTitle>
+          <CardTitle className="text-lg font-semibold flex items-center gap-2 text-blue-600">
+            <Activity className="h-5 w-5 text-blue-600" />
+            Status dos Tickets
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-gray-500">
@@ -30,9 +33,12 @@ const StatusChart = ({ data }: StatusChartProps) => {
   }
 
   return (
-    <Card>
+    <Card className="card-hover border border-gray-100 shadow-md hover:shadow-lg">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Status dos Tickets</CardTitle>
+        <CardTitle className="text-lg font-semibold flex items-center gap-2 text-blue-600">
+          <Activity className="h-5 w-5 text-blue-600" />
+          Status dos Tickets
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -42,7 +48,18 @@ const StatusChart = ({ data }: StatusChartProps) => {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+              label={({ name, percent }) => (
+                <text 
+                  x="50%" 
+                  y="50%" 
+                  fill="#333" 
+                  textAnchor="middle" 
+                  dominantBaseline="middle"
+                  className="font-medium"
+                >
+                  {`${name} (${(percent * 100).toFixed(0)}%)`}
+                </text>
+              )}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
