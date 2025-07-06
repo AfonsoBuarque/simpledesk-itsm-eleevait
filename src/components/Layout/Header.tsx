@@ -116,6 +116,7 @@ const Header = ({
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
+      // Para erros reais de logout, mostrar mensagem de erro
       toast({
         title: "Erro",
         description: "Erro ao fazer logout.",

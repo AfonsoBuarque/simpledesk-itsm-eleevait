@@ -147,14 +147,56 @@ export const useAuth = () => {
   // Função de logout robusta e sincronização total
   const signOut = async () => {
     setLoading(true);
+    
+    // Verificar se há uma sessão válida no servidor antes de tentar fazer logout
+    try {
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      
+      // Se não há sessão válida no servidor ou houve erro ao verificar, apenas limpar estado local
+      if (sessionError || !currentSession) {
+        setUser(null);
+        setSession(null);
+        setProfile(null);
+        setLoading(false);
+        return { error: null };
+      }
+    } catch (err) {
+      // Se houve erro ao verificar a sessão, apenas limpar estado local
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setLoading(false);
+      return { error: null };
+    }
+
+    // Se chegou até aqui, há uma sessão válida - prosseguir com logout normal
     let error = null;
     try {
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) {
-        error = signOutError;
+        // Verificar se o erro é de sessão não encontrada - isso é esperado e deve ser tratado como sucesso
+        if (signOutError.message?.includes('Session from session_id claim in JWT does not exist') || 
+            signOutError.message?.includes('session_not_found')) {
+          // Tratar como logout bem-sucedido
+          error = null;
+        } else {
+          // Para outros erros, manter o erro original
+          error = signOutError;
+        }
       }
     } catch (err) {
-      error = err;
+      // Verificar se o erro capturado também é de sessão não encontrada
+      if (err && typeof err === 'object' && 'message' in err) {
+        const errMessage = (err as any).message;
+        if (errMessage?.includes('Session from session_id claim in JWT does not exist') || 
+            errMessage?.includes('session_not_found')) {
+          error = null;
+        } else {
+          error = err;
+        }
+      } else {
+        error = signOutError;
+      }
     } finally {
       setUser(null);
       setSession(null);
