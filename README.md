@@ -1,4 +1,4 @@
-# SimpleDesk ITSM
+# Vertice Aruan ITSM
 
 Projeto baseado em React/Vite para gestão de serviços. Este repositório contém
 o código-fonte da aplicação.

@@ -13,7 +13,7 @@ const SidebarHeader = ({ isCollapsed }: SidebarHeaderProps) => {
       </div>
       {!isCollapsed && (
         <div>
-          <h2 className="text-lg font-bold text-white">SimpleDesk</h2>
+          <h2 className="text-lg font-bold text-white">Vertice Aruan</h2>
           <p className="text-xs text-blue-400">ITSM Platform</p>
         </div>
       )}

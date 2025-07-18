@@ -156,7 +156,7 @@ const Header = ({
         </Button>
         
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-blue-600">SimpleDesk</h1>
+          <h1 className="text-xl font-bold text-blue-600">Vertice Aruan</h1>
           <Badge variant="secondary" className="text-xs">
             {clientLoading ? 'Carregando...' : userClient || 'Sem cliente'}
           </Badge>
