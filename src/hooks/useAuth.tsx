@@ -195,7 +195,7 @@ export const useAuth = () => {
           error = err;
         }
       } else {
-        error = signOutError;
+        error = err;
       }
     } finally {
       setUser(null);

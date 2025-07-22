@@ -17,7 +17,8 @@ import {
 import { 
   Server, 
   Monitor, 
-  Smartphone, 
+  Smartphone,
+  Building2,
   HardDrive, 
   Wifi,
   Activity,
@@ -303,7 +304,7 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         <Card className="card-hover">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Factory className="h-5 w-5 text-blue-600" />
+              <Building2 className="h-5 w-5 text-blue-600" />
               Top 5 Fabricantes
             </CardTitle>
             <CardDescription>Ativos por fabricante</CardDescription>
@@ -331,7 +332,7 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         <Card className="card-hover">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building className="h-5 w-5 text-blue-600" />
+              <Building2 className="h-5 w-5 text-blue-600" />
               Top 5 Clientes
             </CardTitle>
             <CardDescription>Ativos por cliente</CardDescription>

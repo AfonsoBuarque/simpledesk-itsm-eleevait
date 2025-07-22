@@ -22,6 +22,7 @@ import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoMana
 import SLAManagement from '@/components/SLAs/SLAManagement';
 import { ChatBot } from '@/components/ChatBot/ChatBot';
 import IncidentesManagement from '@/components/Incidentes/IncidentesManagement';
+import ProblemasManagement from '@/components/Problemas/ProblemasManagement';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -51,7 +52,7 @@ const Index = () => {
       case 'requests':
         return <RequisicoesManagement />;
       case 'problems':
-        return <TicketList ticketType="problems" />;
+        return <ProblemasManagement />;
       case 'changes':
         return <TicketList ticketType="changes" />;
       case 'knowledge':
