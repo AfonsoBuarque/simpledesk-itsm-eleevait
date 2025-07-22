@@ -52,9 +52,9 @@ interface NewProblemaDialogProps {
 
 export const NewProblemaDialog = ({ open, onOpenChange }: NewProblemaDialogProps) => {
   const { createProblema } = useProblemasMutations();
-  const { data: categorias = [] } = useCategorias();
-  const { data: slas = [] } = useSLAs();
-  const { data: groups = [] } = useGroups();
+  const { categorias = [] } = useCategorias();
+  const { slas = [] } = useSLAs();
+  const { groups = [] } = useGroups();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,7 +69,20 @@ export const NewProblemaDialog = ({ open, onOpenChange }: NewProblemaDialogProps
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await createProblema.mutateAsync(values);
+      await createProblema.mutateAsync({
+        titulo: values.titulo || '',
+        descricao: values.descricao,
+        urgencia: values.urgencia,
+        impacto: values.impacto,
+        prioridade: values.prioridade,
+        categoria_id: values.categoria_id,
+        sla_id: values.sla_id,
+        grupo_responsavel_id: values.grupo_responsavel_id,
+        causa_raiz: values.causa_raiz,
+        solucao_temporaria: values.solucao_temporaria,
+        tipo: 'problema',
+        status: 'aberto'
+      } as any);
       form.reset();
       onOpenChange(false);
     } catch (error) {

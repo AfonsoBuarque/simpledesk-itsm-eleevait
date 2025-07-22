@@ -17,7 +17,9 @@ import {
 import { 
   Server, 
   Monitor, 
-  Smartphone, 
+  Smartphone,
+  Factory,
+  Building,
   HardDrive, 
   Wifi,
   Activity,
