@@ -60,44 +60,25 @@ function App() {
 
           <Route path="/*" element={
             <ProtectedRoute>
-              <div className="flex h-screen bg-gray-50">
-                <Sidebar 
-                  isOpen={true}
-                  onClose={() => {}}
-                  activeModule=""
-                  onModuleChange={() => {}}
-                  isCollapsed={false}
-                  onToggleCollapse={() => {}}
-                />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <Header 
-                    onMenuClick={() => {}}
-                    isCollapsed={false}
-                    onToggleCollapse={() => {}}
-                  />
-                  <main className="flex-1 overflow-auto">
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/solicitacoes" element={<RequisicoesManagement />} />
-                      <Route path="/incidentes" element={<IncidentesManagement />} />
-                      <Route path="/problemas" element={<ProblemasManagement />} />
-                      <Route path="/users" element={<UserManagement />} />
-                      <Route path="/groups" element={<GroupManagement />} />
-                      <Route path="/clients" element={<ClientManagement />} />
-                      <Route path="/slas" element={<SLAManagement />} />
-                      <Route path="/categorias" element={<CategoriaManagement />} />
-                      <Route path="/cmdb" element={<CMDBDashboard />} />
-                      <Route path="/ativos" element={<AtivoManagement />} />
-                      <Route path="/localizacoes" element={<LocalizacaoManagement />} />
-                      <Route path="/fabricantes" element={<FabricanteManagement />} />
-                      <Route path="/fornecedores" element={<FornecedorManagement />} />
-                      <Route path="/contratos" element={<ContratoManagement />} />
-                      <Route path="/knowledge" element={<KnowledgeBase />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
-                </div>
-              </div>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/solicitacoes" element={<RequisicoesManagement />} />
+                <Route path="/incidentes" element={<IncidentesManagement />} />
+                <Route path="/problemas" element={<ProblemasManagement />} />
+                <Route path="/users" element={<UserManagement />} />
+                <Route path="/groups" element={<GroupManagement />} />
+                <Route path="/clients" element={<ClientManagement />} />
+                <Route path="/slas" element={<SLAManagement />} />
+                <Route path="/categorias" element={<CategoriaManagement />} />
+                <Route path="/cmdb" element={<CMDBDashboard />} />
+                <Route path="/ativos" element={<AtivoManagement />} />
+                <Route path="/localizacoes" element={<LocalizacaoManagement />} />
+                <Route path="/fabricantes" element={<FabricanteManagement />} />
+                <Route path="/fornecedores" element={<FornecedorManagement />} />
+                <Route path="/contratos" element={<ContratoManagement />} />
+                <Route path="/knowledge" element={<KnowledgeBase />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </ProtectedRoute>
           } />
         </Routes>
