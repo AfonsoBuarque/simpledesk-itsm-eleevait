@@ -21,19 +21,14 @@ export const adminMenuItems = [
     href: "/",
   },
   {
-    title: "Solicitações",
+    title: "Chamados",
     icon: Ticket,
-    href: "/solicitacoes",
-  },
-  {
-    title: "Incidentes",
-    icon: AlertTriangle,
-    href: "/incidentes",
-  },
-  {
-    title: "Problemas",
-    icon: HelpCircle,
-    href: "/problemas",
+    href: "/chamados",
+    subItems: [
+      { title: "Solicitações", href: "/solicitacoes" },
+      { title: "Incidentes", href: "/incidentes" },
+      { title: "Problemas", href: "/problemas" },
+    ],
   },
   {
     title: "Usuários",
@@ -94,19 +89,14 @@ export const technicianMenuItems = [
     href: "/",
   },
   {
-    title: "Solicitações",
+    title: "Chamados",
     icon: Ticket,
-    href: "/solicitacoes",
-  },
-  {
-    title: "Incidentes",
-    icon: AlertTriangle,
-    href: "/incidentes",
-  },
-  {
-    title: "Problemas",
-    icon: HelpCircle,
-    href: "/problemas",
+    href: "/chamados",
+    subItems: [
+      { title: "Solicitações", href: "/solicitacoes" },
+      { title: "Incidentes", href: "/incidentes" },
+      { title: "Problemas", href: "/problemas" },
+    ],
   },
   {
     title: "Base de Conhecimento",
