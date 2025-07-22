@@ -61,10 +61,10 @@ interface EditProblemaDialogProps {
 
 export const EditProblemaDialog = ({ problema, open, onOpenChange }: EditProblemaDialogProps) => {
   const { updateProblema } = useProblemasMutations();
-  const { categorias = [] } = useCategorias();
-  const { slas = [] } = useSLAs();
-  const { groups = [] } = useGroups();
-  const { users = [] } = useUsers();
+  const { data: categorias = [] } = useCategorias();
+  const { data: slas = [] } = useSLAs();
+  const { data: groups = [] } = useGroups();
+  const { data: users = [] } = useUsers();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

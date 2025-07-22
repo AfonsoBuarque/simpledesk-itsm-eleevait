@@ -35,7 +35,7 @@ export const ProblemasTable = ({
     const statusConfig = {
       aberto: { label: 'Aberto', variant: 'default' as const },
       em_andamento: { label: 'Em Andamento', variant: 'secondary' as const },
-      resolvido: { label: 'Resolvido', variant: 'secondary' as const },
+      resolvido: { label: 'Resolvido', variant: 'success' as const },
       fechado: { label: 'Fechado', variant: 'outline' as const },
     };
 
