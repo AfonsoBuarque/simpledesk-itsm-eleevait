@@ -1,7 +1,7 @@
 
 import React from 'react';
 import SidebarMenuItem from './SidebarMenuItem';
-import { adminMenuItems } from './menuItems';
+import { menuItems } from './menuItems';
 
 interface SidebarNavigationProps {
   activeModule: string;
@@ -20,22 +20,13 @@ const SidebarNavigation = ({
 }: SidebarNavigationProps) => {
   return (
     <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-hide">
-      {adminMenuItems.map((item, index) => (
+      {menuItems.map((item) => (
         <SidebarMenuItem
-          key={item.title + index}
-          item={{
-            id: item.title,
-            label: item.title,
-            icon: item.icon,
-            children: item.subItems?.map(sub => ({
-              id: sub.title,
-              label: sub.title,
-              icon: item.icon
-            }))
-          }}
+          key={item.id}
+          item={item}
           activeModule={activeModule}
           isCollapsed={isCollapsed}
-          isExpanded={expandedItems.includes(item.title)}
+          isExpanded={expandedItems.includes(item.id)}
           onItemClick={onModuleChange}
           onToggleExpanded={onToggleExpanded}
         />

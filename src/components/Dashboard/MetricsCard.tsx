@@ -7,7 +7,7 @@ import { DivideIcon as LucideIcon } from 'lucide-react';
 interface MetricsCardProps {
   title: string;
   value: string | number;
-  icon: typeof LucideIcon;
+  icon: LucideIcon;
   trend?: {
     value: string;
     direction: 'up' | 'down' | 'neutral';

@@ -1,106 +1,72 @@
-import {
-  LayoutDashboard,
-  Ticket,
+
+import { 
+  Home, 
+  Ticket, 
+  AlertTriangle, 
+  FileText, 
+  Settings, 
+  Database,
+  BookOpen,
   Users,
-  Building2,
-  Settings,
-  UserCheck,
-  FolderOpen,
-  Layers3,
-  Book,
-  AlertTriangle,
-  Clock,
+  Truck,
+  MapPin,
+  Package,
+  Factory,
+  User,
+  AlertCircle,
   HelpCircle,
-  Zap
-} from "lucide-react";
+  ArrowUpDown,
+  Bug,
+  Tags,
+  UserCheck,
+  Clock
+} from 'lucide-react';
 
-export const adminMenuItems = [
-  {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/",
-  },
-  {
-    title: "Chamados",
+export const menuItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { 
+    id: 'tickets', 
+    label: 'Gestão de Tickets', 
     icon: Ticket,
-    href: "/chamados",
-    subItems: [
-      { title: "Solicitações", href: "/solicitacoes" },
-      { title: "Incidentes", href: "/incidentes" },
-      { title: "Problemas", href: "/problemas" },
-    ],
+    badge: '15',
+    children: [
+      { id: 'incidents', label: 'Incidentes', icon: AlertCircle, badge: '8' }, // já existe, mantido!
+      { id: 'requests', label: 'Requisições', icon: HelpCircle, badge: '5' },
+      { id: 'problems', label: 'Problemas', icon: Bug, badge: '2' },
+      { id: 'changes', label: 'Mudanças', icon: ArrowUpDown }
+    ]
   },
-  {
-    title: "Usuários",
+  { id: 'knowledge', label: 'Base de Conhecimento', icon: BookOpen },
+  { 
+    id: 'cmdb', 
+    label: 'CMDB', 
+    icon: Database,
+    children: [
+      { id: 'ativos', label: 'Ativos', icon: Package },
+      { id: 'contratos', label: 'Contratos', icon: FileText },
+      { id: 'fabricantes', label: 'Fabricantes', icon: Factory },
+      { id: 'fornecedores', label: 'Fornecedores', icon: Truck },
+      { id: 'localizacao', label: 'Localização', icon: MapPin }
+    ]
+  },
+  { 
+    id: 'contacts', 
+    label: 'Contatos', 
     icon: Users,
-    href: "/users",
+    children: [
+      { id: 'users', label: 'Usuários', icon: User },
+      { id: 'groups', label: 'Grupos', icon: Users },
+      { id: 'profiles', label: 'Perfis', icon: UserCheck }
+    ]
   },
-  {
-    title: "Grupos",
-    icon: UserCheck,
-    href: "/groups",
-  },
-  {
-    title: "Clientes",
-    icon: Building2,
-    href: "/clients",
-  },
-  {
-    title: "SLAs",
-    icon: Clock,
-    href: "/slas",
-  },
-  {
-    title: "Categorias",
-    icon: FolderOpen,
-    href: "/categorias",
-  },
-  {
-    title: "CMDB",
-    icon: Layers3,
-    href: "/cmdb",
-    subItems: [
-      { title: "Ativos", href: "/ativos" },
-      { title: "Localizações", href: "/localizacoes" },
-      { title: "Fabricantes", href: "/fabricantes" },
-      { title: "Fornecedores", href: "/fornecedores" },
-      { title: "Contratos", href: "/contratos" },
-    ],
-  },
-  {
-    title: "Base de Conhecimento",
-    icon: Book,
-    href: "/knowledge",
-  },
-];
-
-export const userMenuItems = [
-  {
-    title: "Portal do Usuário",
-    icon: LayoutDashboard,
-    href: "/user-portal",
-  },
-];
-
-export const technicianMenuItems = [
-  {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/",
-  },
-  {
-    title: "Chamados",
-    icon: Ticket,
-    href: "/chamados",
-    subItems: [
-      { title: "Solicitações", href: "/solicitacoes" },
-      { title: "Incidentes", href: "/incidentes" },
-      { title: "Problemas", href: "/problemas" },
-    ],
-  },
-  {
-    title: "Base de Conhecimento",
-    icon: Book,
-    href: "/knowledge",
-  },
+  { 
+    id: 'settings', 
+    label: 'Configurações', 
+    icon: Settings,
+    children: [
+      { id: 'clients', label: 'Clientes', icon: Users },
+      { id: 'categoria', label: 'Categoria', icon: Tags },
+      { id: 'sla', label: 'SLA', icon: Clock }
+    ]
+  }
 ];
