@@ -5,12 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 
 // Layout components
-import { Header } from "@/components/Layout/Header";
-import { Sidebar } from "@/components/Layout/Sidebar";
+import AppLayout from "@/components/Layout/AppLayout";
 
 // Auth components
-import { ProtectedRoute } from "@/components/Auth/ProtectedRoute";
-import { UserOnlyRoute } from "@/components/Auth/UserOnlyRoute";
+import ProtectedRoute from "@/components/Auth/ProtectedRoute";
+import UserOnlyRoute from "@/components/Auth/UserOnlyRoute";
 
 // Page components
 import Index from "@/pages/Index";
@@ -20,21 +19,21 @@ import NotFound from "@/pages/NotFound";
 import UserPortal from "@/pages/UserPortal";
 
 // Management components
-import { RequisicoesManagement } from "@/components/Requisicoes/RequisicoesManagement";
-import { IncidentesManagement } from "@/components/Incidentes/IncidentesManagement";
+import RequisicoesManagement from "@/components/Requisicoes/RequisicoesManagement";
+import IncidentesManagement from "@/components/Incidentes/IncidentesManagement";
 import { ProblemasManagement } from "@/components/Problemas/ProblemasManagement";
-import { UserManagement } from "@/components/Users/UserManagement";
-import { GroupManagement } from "@/components/Groups/GroupManagement";
-import { ClientManagement } from "@/components/Clients/ClientManagement";
-import { SLAManagement } from "@/components/SLAs/SLAManagement";
-import { CategoriaManagement } from "@/components/Categorias/CategoriaManagement";
-import { CMDBDashboard } from "@/components/CMDB/CMDBDashboard";
-import { AtivoManagement } from "@/components/Ativos/AtivoManagement";
+import UserManagement from "@/components/Users/UserManagement";
+import GroupManagement from "@/components/Groups/GroupManagement";
+import ClientManagement from "@/components/Clients/ClientManagement";
+import SLAManagement from "@/components/SLAs/SLAManagement";
+import CategoriaManagement from "@/components/Categorias/CategoriaManagement";
+import CMDBDashboard from "@/components/CMDB/CMDBDashboard";
+import AtivoManagement from "@/components/Ativos/AtivoManagement";
 import { LocalizacaoManagement } from "@/components/Localizacoes/LocalizacaoManagement";
-import { FabricanteManagement } from "@/components/Fabricantes/FabricanteManagement";
+import FabricanteManagement from "@/components/Fabricantes/FabricanteManagement";
 import { FornecedorManagement } from "@/components/Fornecedores/FornecedorManagement";
 import { ContratoManagement } from "@/components/Contratos/ContratoManagement";
-import { KnowledgeBase } from "@/components/Knowledge/KnowledgeBase";
+import KnowledgeBase from "@/components/Knowledge/KnowledgeBase";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,11 +59,7 @@ function App() {
 
           <Route path="/*" element={
             <ProtectedRoute>
-              <div className="flex h-screen bg-gray-50">
-                <Sidebar />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <Header />
-                  <main className="flex-1 overflow-auto">
+              <AppLayout>
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/solicitacoes" element={<RequisicoesManagement />} />
@@ -84,9 +79,7 @@ function App() {
                       <Route path="/knowledge" element={<KnowledgeBase />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
-                  </main>
-                </div>
-              </div>
+              </AppLayout>
             </ProtectedRoute>
           } />
         </Routes>

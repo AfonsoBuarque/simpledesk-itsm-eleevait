@@ -24,7 +24,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Layers
+  Layers,
+  Building
 } from 'lucide-react';
 import { useAtivos } from '@/hooks/useAtivos';
 import { Ativo } from '@/types/ativo';
@@ -303,7 +304,7 @@ const AtivoDashboard = ({ onShowList }: AtivoDashboardProps) => {
         <Card className="card-hover">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Factory className="h-5 w-5 text-blue-600" />
+              <Building className="h-5 w-5 text-blue-600" />
               Top 5 Fabricantes
             </CardTitle>
             <CardDescription>Ativos por fabricante</CardDescription>
