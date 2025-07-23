@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMudancas } from '@/hooks/useMudancas';
+import MudancaFormFields from './MudancaFormFields';
+import { MUDANCA_TIPOS, CLASSIFICACAO_RISCO } from '@/types/mudanca';
 
 interface NewMudancaDialogProps {
   open: boolean;
@@ -19,9 +18,15 @@ const NewMudancaDialog = ({ open, onOpenChange }: NewMudancaDialogProps) => {
     urgencia: 'media',
     impacto: 'medio',
     prioridade: 'media',
-    tipo_mudanca: 'normal',
-    aprovacao_necessaria: false,
+    tipo_mudanca: MUDANCA_TIPOS.NORMAL,
+    classificacao_risco: CLASSIFICACAO_RISCO.MEDIO,
+    justificativa_tecnica: '',
+    justificativa_negocio: '',
+    responsavel_tecnico_id: '',
+    aprovador_id: '',
+    data_execucao_planejada: '',
     plano_implementacao: '',
+    plano_testes: '',
     plano_rollback: '',
     impacto_estimado: '',
     riscos_identificados: '',
@@ -31,6 +36,21 @@ const NewMudancaDialog = ({ open, onOpenChange }: NewMudancaDialogProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar campos obrigatórios
+    const requiredFields = [
+      'titulo', 'descricao', 'justificativa_tecnica', 'justificativa_negocio',
+      'responsavel_tecnico_id', 'data_execucao_planejada', 'plano_implementacao',
+      'plano_testes', 'plano_rollback', 'impacto_estimado'
+    ];
+    
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    
+    if (missingFields.length > 0) {
+      alert(`Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`);
+      return;
+    }
+
     createMudanca.mutate(formData, {
       onSuccess: () => {
         onOpenChange(false);
@@ -40,9 +60,15 @@ const NewMudancaDialog = ({ open, onOpenChange }: NewMudancaDialogProps) => {
           urgencia: 'media',
           impacto: 'medio',
           prioridade: 'media',
-          tipo_mudanca: 'normal',
-          aprovacao_necessaria: false,
+          tipo_mudanca: MUDANCA_TIPOS.NORMAL,
+          classificacao_risco: CLASSIFICACAO_RISCO.MEDIO,
+          justificativa_tecnica: '',
+          justificativa_negocio: '',
+          responsavel_tecnico_id: '',
+          aprovador_id: '',
+          data_execucao_planejada: '',
           plano_implementacao: '',
+          plano_testes: '',
           plano_rollback: '',
           impacto_estimado: '',
           riscos_identificados: '',
@@ -53,158 +79,29 @@ const NewMudancaDialog = ({ open, onOpenChange }: NewMudancaDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Nova Mudança</DialogTitle>
+          <DialogTitle>Nova Solicitação de Mudança</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="titulo">Título *</Label>
-              <Input
-                id="titulo"
-                value={formData.titulo}
-                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                required
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="tipo_mudanca">Tipo de Mudança</Label>
-              <Select 
-                value={formData.tipo_mudanca} 
-                onValueChange={(value) => setFormData({ ...formData, tipo_mudanca: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="emergencia">Emergência</SelectItem>
-                  <SelectItem value="padrao">Padrão</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="descricao">Descrição</Label>
-            <Textarea
-              id="descricao"
-              value={formData.descricao}
-              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              rows={3}
+        <ScrollArea className="h-[calc(90vh-8rem)] pr-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <MudancaFormFields 
+              formData={formData}
+              setFormData={setFormData}
+              isEdit={false}
             />
-          </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="urgencia">Urgência</Label>
-              <Select 
-                value={formData.urgencia} 
-                onValueChange={(value) => setFormData({ ...formData, urgencia: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="baixa">Baixa</SelectItem>
-                  <SelectItem value="media">Média</SelectItem>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="critica">Crítica</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-end space-x-2 pt-6 border-t">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createMudanca.isPending}>
+                {createMudanca.isPending ? 'Criando...' : 'Criar Solicitação de Mudança'}
+              </Button>
             </div>
-            
-            <div>
-              <Label htmlFor="impacto">Impacto</Label>
-              <Select 
-                value={formData.impacto} 
-                onValueChange={(value) => setFormData({ ...formData, impacto: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="baixo">Baixo</SelectItem>
-                  <SelectItem value="medio">Médio</SelectItem>
-                  <SelectItem value="alto">Alto</SelectItem>
-                  <SelectItem value="critico">Crítico</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="prioridade">Prioridade</Label>
-              <Select 
-                value={formData.prioridade} 
-                onValueChange={(value) => setFormData({ ...formData, prioridade: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="baixa">Baixa</SelectItem>
-                  <SelectItem value="media">Média</SelectItem>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="critica">Crítica</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="plano_implementacao">Plano de Implementação</Label>
-            <Textarea
-              id="plano_implementacao"
-              value={formData.plano_implementacao}
-              onChange={(e) => setFormData({ ...formData, plano_implementacao: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="plano_rollback">Plano de Rollback</Label>
-            <Textarea
-              id="plano_rollback"
-              value={formData.plano_rollback}
-              onChange={(e) => setFormData({ ...formData, plano_rollback: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="impacto_estimado">Impacto Estimado</Label>
-              <Textarea
-                id="impacto_estimado"
-                value={formData.impacto_estimado}
-                onChange={(e) => setFormData({ ...formData, impacto_estimado: e.target.value })}
-                rows={2}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="riscos_identificados">Riscos Identificados</Label>
-              <Textarea
-                id="riscos_identificados"
-                value={formData.riscos_identificados}
-                onChange={(e) => setFormData({ ...formData, riscos_identificados: e.target.value })}
-                rows={2}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createMudanca.isPending}>
-              {createMudanca.isPending ? 'Criando...' : 'Criar Mudança'}
-            </Button>
-          </div>
-        </form>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

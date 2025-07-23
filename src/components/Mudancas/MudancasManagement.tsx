@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, BarChart3, Settings } from 'lucide-react';
 import { useMudancas } from '@/hooks/useMudancas';
 import MudancasTable from './MudancasTable';
 import NewMudancaDialog from './NewMudancaDialog';
 import EditMudancaDialog from './EditMudancaDialog';
+import MudancaStatsCards from './MudancaStatsCards';
+import MudancaWorkflowTracker from './MudancaWorkflowTracker';
 import type { Mudanca } from '@/types/mudanca';
 
 const MudancasManagement = () => {
@@ -26,15 +29,43 @@ const MudancasManagement = () => {
         <h1 className="text-2xl font-bold">Gerenciamento de Mudanças</h1>
         <Button onClick={() => setShowNewDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Nova Mudança
+          Nova Solicitação de Mudança
         </Button>
       </div>
 
-      <MudancasTable
-        mudancas={mudancas}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-      />
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="dashboard">
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="mudancas">
+            <Settings className="w-4 h-4 mr-2" />
+            Mudanças
+          </TabsTrigger>
+          <TabsTrigger value="workflow" disabled={!editingMudanca}>
+            Workflow
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-6">
+          <MudancaStatsCards />
+        </TabsContent>
+
+        <TabsContent value="mudancas" className="space-y-6">
+          <MudancasTable
+            mudancas={mudancas}
+            isLoading={isLoading}
+            onEdit={handleEdit}
+          />
+        </TabsContent>
+
+        <TabsContent value="workflow" className="space-y-6">
+          {editingMudanca && (
+            <MudancaWorkflowTracker mudancaId={editingMudanca.id} />
+          )}
+        </TabsContent>
+      </Tabs>
 
       <NewMudancaDialog
         open={showNewDialog}

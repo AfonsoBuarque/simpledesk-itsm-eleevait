@@ -1057,6 +1057,50 @@ export type Database = {
           },
         ]
       }
+      mudanca_aprovacoes: {
+        Row: {
+          aprovador_id: string
+          atualizado_em: string | null
+          criado_em: string | null
+          data_aprovacao: string | null
+          id: string
+          justificativa: string | null
+          mudanca_id: string
+          nivel_aprovacao: number | null
+          status_aprovacao: string
+        }
+        Insert: {
+          aprovador_id: string
+          atualizado_em?: string | null
+          criado_em?: string | null
+          data_aprovacao?: string | null
+          id?: string
+          justificativa?: string | null
+          mudanca_id: string
+          nivel_aprovacao?: number | null
+          status_aprovacao?: string
+        }
+        Update: {
+          aprovador_id?: string
+          atualizado_em?: string | null
+          criado_em?: string | null
+          data_aprovacao?: string | null
+          id?: string
+          justificativa?: string | null
+          mudanca_id?: string
+          nivel_aprovacao?: number | null
+          status_aprovacao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mudanca_aprovacoes_mudanca_id_fkey"
+            columns: ["mudanca_id"]
+            isOneToOne: false
+            referencedRelation: "mudancas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mudanca_chat_mensagens: {
         Row: {
           arquivo_url: string | null
@@ -1091,6 +1135,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "mudanca_chat_mensagens_mudanca_id_fkey"
+            columns: ["mudanca_id"]
+            isOneToOne: false
+            referencedRelation: "mudancas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mudanca_evidencias: {
+        Row: {
+          criado_em: string | null
+          criado_por: string
+          etapa_workflow: string | null
+          id: string
+          mime_type: string | null
+          mudanca_id: string
+          nome_arquivo: string
+          tamanho_bytes: number | null
+          tipo: string
+          url_arquivo: string
+        }
+        Insert: {
+          criado_em?: string | null
+          criado_por: string
+          etapa_workflow?: string | null
+          id?: string
+          mime_type?: string | null
+          mudanca_id: string
+          nome_arquivo: string
+          tamanho_bytes?: number | null
+          tipo: string
+          url_arquivo: string
+        }
+        Update: {
+          criado_em?: string | null
+          criado_por?: string
+          etapa_workflow?: string | null
+          id?: string
+          mime_type?: string | null
+          mudanca_id?: string
+          nome_arquivo?: string
+          tamanho_bytes?: number | null
+          tipo?: string
+          url_arquivo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mudanca_evidencias_mudanca_id_fkey"
             columns: ["mudanca_id"]
             isOneToOne: false
             referencedRelation: "mudancas"
@@ -1136,6 +1227,95 @@ export type Database = {
           },
         ]
       }
+      mudanca_tipos: {
+        Row: {
+          aprovacao_automatica: boolean | null
+          ativo: boolean | null
+          codigo: string
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          nivel_risco_maximo: string | null
+          nome: string
+          requer_aprovacao: boolean | null
+          sla_horas: number
+        }
+        Insert: {
+          aprovacao_automatica?: boolean | null
+          ativo?: boolean | null
+          codigo: string
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          nivel_risco_maximo?: string | null
+          nome: string
+          requer_aprovacao?: boolean | null
+          sla_horas: number
+        }
+        Update: {
+          aprovacao_automatica?: boolean | null
+          ativo?: boolean | null
+          codigo?: string
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          nivel_risco_maximo?: string | null
+          nome?: string
+          requer_aprovacao?: boolean | null
+          sla_horas?: number
+        }
+        Relationships: []
+      }
+      mudanca_workflow: {
+        Row: {
+          criado_em: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          etapa: string
+          evidencias: Json | null
+          id: string
+          mudanca_id: string
+          observacoes: string | null
+          ordem: number
+          responsavel_id: string | null
+          status: string
+        }
+        Insert: {
+          criado_em?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          etapa: string
+          evidencias?: Json | null
+          id?: string
+          mudanca_id: string
+          observacoes?: string | null
+          ordem: number
+          responsavel_id?: string | null
+          status: string
+        }
+        Update: {
+          criado_em?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          etapa?: string
+          evidencias?: Json | null
+          id?: string
+          mudanca_id?: string
+          observacoes?: string | null
+          ordem?: number
+          responsavel_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mudanca_workflow_mudanca_id_fkey"
+            columns: ["mudanca_id"]
+            isOneToOne: false
+            referencedRelation: "mudancas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mudancas: {
         Row: {
           anexos: Json | null
@@ -1147,14 +1327,19 @@ export type Database = {
           atualizado_por: string | null
           canal_origem: string | null
           categoria_id: string | null
+          cis_impactados: Json | null
+          classificacao_risco: string | null
           cliente_id: string | null
           criado_em: string | null
           criado_por: string | null
           data_abertura: string | null
           data_aprovacao: string | null
+          data_execucao_planejada: string | null
           data_limite_resolucao: string | null
           data_limite_resposta: string | null
+          data_sla_limite: string | null
           descricao: string | null
+          evidencias: Json | null
           grupo_responsavel_id: string | null
           id: string
           impacto: string | null
@@ -1162,15 +1347,21 @@ export type Database = {
           incidentes_relacionados: Json | null
           janela_manutencao_fim: string | null
           janela_manutencao_inicio: string | null
+          justificativa_negocio: string | null
+          justificativa_tecnica: string | null
           notas_internas: string | null
           numero: string
           origem_id: string | null
           plano_implementacao: string | null
           plano_rollback: string | null
+          plano_testes: string | null
           prioridade: string | null
           problemas_relacionados: Json | null
+          responsavel_tecnico_id: string | null
           riscos_identificados: string | null
           sla_id: string | null
+          sla_prazo_horas: number | null
+          sla_tipo: string | null
           solicitante_id: string | null
           status: string
           tags: Json | null
@@ -1190,14 +1381,19 @@ export type Database = {
           atualizado_por?: string | null
           canal_origem?: string | null
           categoria_id?: string | null
+          cis_impactados?: Json | null
+          classificacao_risco?: string | null
           cliente_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
           data_aprovacao?: string | null
+          data_execucao_planejada?: string | null
           data_limite_resolucao?: string | null
           data_limite_resposta?: string | null
+          data_sla_limite?: string | null
           descricao?: string | null
+          evidencias?: Json | null
           grupo_responsavel_id?: string | null
           id?: string
           impacto?: string | null
@@ -1205,15 +1401,21 @@ export type Database = {
           incidentes_relacionados?: Json | null
           janela_manutencao_fim?: string | null
           janela_manutencao_inicio?: string | null
+          justificativa_negocio?: string | null
+          justificativa_tecnica?: string | null
           notas_internas?: string | null
           numero: string
           origem_id?: string | null
           plano_implementacao?: string | null
           plano_rollback?: string | null
+          plano_testes?: string | null
           prioridade?: string | null
           problemas_relacionados?: Json | null
+          responsavel_tecnico_id?: string | null
           riscos_identificados?: string | null
           sla_id?: string | null
+          sla_prazo_horas?: number | null
+          sla_tipo?: string | null
           solicitante_id?: string | null
           status?: string
           tags?: Json | null
@@ -1233,14 +1435,19 @@ export type Database = {
           atualizado_por?: string | null
           canal_origem?: string | null
           categoria_id?: string | null
+          cis_impactados?: Json | null
+          classificacao_risco?: string | null
           cliente_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
           data_aprovacao?: string | null
+          data_execucao_planejada?: string | null
           data_limite_resolucao?: string | null
           data_limite_resposta?: string | null
+          data_sla_limite?: string | null
           descricao?: string | null
+          evidencias?: Json | null
           grupo_responsavel_id?: string | null
           id?: string
           impacto?: string | null
@@ -1248,15 +1455,21 @@ export type Database = {
           incidentes_relacionados?: Json | null
           janela_manutencao_fim?: string | null
           janela_manutencao_inicio?: string | null
+          justificativa_negocio?: string | null
+          justificativa_tecnica?: string | null
           notas_internas?: string | null
           numero?: string
           origem_id?: string | null
           plano_implementacao?: string | null
           plano_rollback?: string | null
+          plano_testes?: string | null
           prioridade?: string | null
           problemas_relacionados?: Json | null
+          responsavel_tecnico_id?: string | null
           riscos_identificados?: string | null
           sla_id?: string | null
+          sla_prazo_horas?: number | null
+          sla_tipo?: string | null
           solicitante_id?: string | null
           status?: string
           tags?: Json | null
@@ -1974,6 +2187,19 @@ export type Database = {
       }
     }
     Views: {
+      mudanca_stats: {
+        Row: {
+          mudancas_emergenciais: number | null
+          mudancas_normais: number | null
+          mudancas_padrao: number | null
+          mudancas_rollback: number | null
+          mudancas_sla_vencido: number | null
+          mudancas_sucesso: number | null
+          tempo_medio_aprovacao_horas: number | null
+          total_mudancas: number | null
+        }
+        Relationships: []
+      }
       problema_stats: {
         Row: {
           problemas_abertos: number | null
