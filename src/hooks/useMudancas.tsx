@@ -11,12 +11,12 @@ export const useMudancas = () => {
     queryKey: ['mudancas'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('mudancas')
+        .from('mudancas' as any)
         .select('*')
         .order('criado_em', { ascending: false });
 
       if (error) throw error;
-      return data as Mudanca[];
+      return (data as any[]) || [];
     },
   });
 
@@ -25,12 +25,12 @@ export const useMudancas = () => {
       const { data: user } = await supabase.auth.getUser();
       
       const { data, error } = await supabase
-        .from('mudancas')
-        .insert([{
+        .from('mudancas' as any)
+        .insert({
           ...mudanca,
           criado_por: user.user?.id,
           solicitante_id: user.user?.id,
-        }])
+        })
         .select()
         .single();
 
@@ -59,7 +59,7 @@ export const useMudancas = () => {
       const { data: user } = await supabase.auth.getUser();
       
       const { data, error } = await supabase
-        .from('mudancas')
+        .from('mudancas' as any)
         .update({
           ...mudanca,
           atualizado_por: user.user?.id,
@@ -92,7 +92,7 @@ export const useMudancas = () => {
   const deleteMudanca = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('mudancas')
+        .from('mudancas' as any)
         .delete()
         .eq('id', id);
 
