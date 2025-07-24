@@ -2,7 +2,7 @@ import { supabase } from '../integrations/supabase/client';
 
 export function useSupabaseQuery() {
   // Função genérica para consultas SELECT
-  const selectQuery = async <T>(
+  const selectQuery = async (
     table: string, 
     columns: string = '*', 
     filters?: {column: string, value: any}[],
@@ -13,7 +13,7 @@ export function useSupabaseQuery() {
     }
   ) => {
     try {
-      let query = supabase.from(table).select(columns);
+      let query = supabase.from(table as any).select(columns);
       
       // Aplicar filtros
       if (filters && filters.length > 0) {
@@ -42,13 +42,13 @@ export function useSupabaseQuery() {
   };
 
   // Função genérica para inserções
-  const insertQuery = async <T>(
+  const insertQuery = async (
     table: string,
     data: any
   ) => {
     try {
       const { data: result, error } = await supabase
-        .from(table)
+        .from(table as any)
         .insert(data)
         .select();
       
@@ -59,13 +59,13 @@ export function useSupabaseQuery() {
   };
 
   // Função genérica para atualizações
-  const updateQuery = async <T>(
+  const updateQuery = async (
     table: string,
     data: any,
     filters: {column: string, value: any}[]
   ) => {
     try {
-      let query = supabase.from(table).update(data);
+      let query = supabase.from(table as any).update(data);
       
       // Aplicar filtros
       if (filters && filters.length > 0) {
@@ -88,7 +88,7 @@ export function useSupabaseQuery() {
     filters: {column: string, value: any}[]
   ) => {
     try {
-      let query = supabase.from(table).delete();
+      let query = supabase.from(table as any).delete();
       
       // Aplicar filtros
       if (filters && filters.length > 0) {
