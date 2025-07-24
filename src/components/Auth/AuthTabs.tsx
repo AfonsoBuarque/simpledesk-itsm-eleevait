@@ -15,18 +15,6 @@ type Props = {
 export const AuthTabs = ({ loading, signIn, signUp }: Props) => {
   return (
     <div className="w-full mb-6">
-      {/* Azure Sign In Button */}
-      <div className="mb-6">
-        <AzureSignInButton loading={loading} />
-      </div>
-      
-      <div className="relative mb-6">
-        <Separator />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="bg-white px-4 text-sm text-gray-500">ou</span>
-        </div>
-      </div>
-
       <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid grid-cols-2 w-full mb-6 bg-gray-100 rounded-lg overflow-hidden">
           <TabsTrigger value="login" className="rounded-none py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:bg-transparent">
@@ -43,6 +31,18 @@ export const AuthTabs = ({ loading, signIn, signUp }: Props) => {
           <AuthSignupForm loading={loading} signUp={signUp} />
         </TabsContent>
       </Tabs>
+      
+      <div className="relative mb-6">
+        <Separator />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-white px-4 text-sm text-gray-500">ou</span>
+        </div>
+      </div>
+
+      {/* Azure Sign In Button */}
+      <div>
+        <AzureSignInButton loading={loading} />
+      </div>
     </div>
   );
 };
