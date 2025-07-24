@@ -37,9 +37,9 @@ export const AuthTabs = ({ loading, signIn, signUp }: Props) => {
           <AuthSignupForm loading={loading} signUp={signUp} />
         </TabsContent>
       </Tabs>
-
+      
       {/* Azure Sign In Button */}
-      <div>
+      <div className="mt-4">
         <AzureSignInButton loading={loading} />
       </div>
     </div>
