@@ -58,11 +58,27 @@ export const useAuth = () => {
 
     // Listener de mudanças de sessão
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, sessionArg) => {
+      async (event, sessionArg) => {
         if (!mountedRef.current) return;
 
         setSession(sessionArg);
         setUser(sessionArg?.user ?? null);
+        
+        // Se é login com Azure, sincronizar usuário
+        if (event === 'SIGNED_IN' && sessionArg?.user?.app_metadata?.provider === 'azure') {
+          console.log('Azure login detected, syncing user...');
+          try {
+            await supabase.functions.invoke('azure-user-sync', {
+              body: {
+                user: sessionArg.user,
+                action: 'sync_user'
+              }
+            });
+          } catch (error) {
+            console.error('Error syncing Azure user:', error);
+          }
+        }
+        
         if (sessionArg?.user) {
           fetchUserProfile(sessionArg.user.id);
         } else {

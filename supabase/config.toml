@@ -1,1 +1,4 @@
 project_id = "idctavngatyyileoitgz"
+
+[functions.azure-user-sync]
+verify_jwt = false
