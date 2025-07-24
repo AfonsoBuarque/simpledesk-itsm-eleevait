@@ -25,12 +25,6 @@ export const AuthTabs = ({ loading, signIn, signUp }: Props) => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="login">
-          <div className="relative mb-6">
-            <Separator />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-white px-4 text-sm text-gray-500">ou</span>
-            </div>
-          </div>
           <AuthLoginForm loading={loading} signIn={signIn} />
         </TabsContent>
         <TabsContent value="signup">
@@ -38,8 +32,15 @@ export const AuthTabs = ({ loading, signIn, signUp }: Props) => {
         </TabsContent>
       </Tabs>
       
+      <div className="relative my-6">
+        <Separator />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-white px-4 text-sm text-gray-500">ou</span>
+        </div>
+      </div>
+
       {/* Azure Sign In Button */}
-      <div className="mt-4">
+      <div>
         <AzureSignInButton loading={loading} />
       </div>
     </div>
