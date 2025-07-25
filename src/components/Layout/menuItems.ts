@@ -25,7 +25,6 @@ import {
 
 export const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'admin', label: 'Console Admin', icon: Shield, adminOnly: true },
   { 
     id: 'tickets', 
     label: 'Gestão de Tickets', 
