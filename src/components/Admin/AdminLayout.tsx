@@ -13,8 +13,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   // Verificar se o usuário é admin
   if (!user) {
-    sessionStorage.setItem('admin-redirect', '/admin');
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   // Aguardar carregamento do perfil
@@ -35,6 +34,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const handleSignOut = async () => {
     await signOut();
+    window.location.href = '/admin/login';
   };
 
   return (
