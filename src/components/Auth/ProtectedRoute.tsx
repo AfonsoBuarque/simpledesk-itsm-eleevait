@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const currentPath = window.location.pathname;
   
-  console.log('ProtectedRoute - Auth state:', {user, loading, currentPath});
+  // console.log('ProtectedRoute - Auth state:', {user, loading, currentPath});
 
   // Mostrar indicador de carregamento enquanto os dados de autenticação estão sendo carregados
   if (loading) {
@@ -27,12 +27,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Redirecionar para a página de login se não estiver autenticado
   if (!user) {
-    console.log('Usuário não autenticado, redirecionando para /auth');
+    // console.log('Usuário não autenticado, redirecionando para /auth');
     return <Navigate to="/auth" replace />;
   }
 
   // Se chegou aqui, o usuário está autenticado e pode acessar a rota
-  console.log(`Permitindo acesso para usuário na rota ${currentPath}`);
+  // console.log(`Permitindo acesso para usuário na rota ${currentPath}`);
   return <>{children}</>;
 };
 

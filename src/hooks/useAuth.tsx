@@ -104,8 +104,11 @@ export const useAuth = () => {
     initializeAuth();
 
     timeoutId = setTimeout(() => {
-      if (mountedRef.current && loading) setLoading(false);
-    }, 3000);
+      if (mountedRef.current && loading) {
+        console.log("Auth - Timeout de segurança atingido");
+        setLoading(false);
+      }
+    }, 5000);
 
     return () => {
       mountedRef.current = false;

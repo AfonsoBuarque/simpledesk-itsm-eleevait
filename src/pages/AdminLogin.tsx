@@ -18,20 +18,27 @@ const AdminLogin = () => {
   const { user, profile, profileLoading, signIn } = useAuth();
   const { toast } = useToast();
 
-  // Debug: Mostrar estado de autenticação
-  useEffect(() => {
-    console.log("AdminLogin - Auth state:", { user, profile, profileLoading });
-  }, [user, profile, profileLoading]);
+  // Debug: Mostrar estado de autenticação (removido para evitar spam)
+  // useEffect(() => {
+  //   console.log("AdminLogin - Auth state:", { user, profile, profileLoading });
+  // }, [user, profile, profileLoading]);
+
+  // Aguardar carregamento do perfil antes de decidir redirecionamento
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Redirecionar se já está autenticado como admin
-  if (user && !profileLoading && profile?.role === 'admin') {
-    console.log("AdminLogin - Admin autenticado, redirecionando para /admin");
+  if (user && profile?.role === 'admin') {
     return <Navigate to="/admin" replace />;
   }
 
   // Redirecionar se está autenticado mas não é admin
-  if (user && !profileLoading && profile?.role !== 'admin') {
-    console.log("AdminLogin - Usuário não é admin, redirecionando para /");
+  if (user && profile && profile.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 

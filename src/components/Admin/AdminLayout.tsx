@@ -11,12 +11,7 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, profile, profileLoading, signOut } = useAuth();
 
-  // Verificar se o usuário é admin
-  if (!user) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  // Aguardar carregamento do perfil
+  // Aguardar carregamento do perfil antes de decidir redirecionamento
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -28,7 +23,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     );
   }
 
-  if (profile?.role !== 'admin') {
+  // Verificar se o usuário é admin
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  if (profile && profile.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
