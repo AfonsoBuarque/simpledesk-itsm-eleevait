@@ -13,6 +13,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   // Verificar se o usuário é admin
   if (!user) {
+    sessionStorage.setItem('admin-redirect', '/admin');
     return <Navigate to="/auth" replace />;
   }
 

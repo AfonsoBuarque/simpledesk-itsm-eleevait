@@ -28,6 +28,12 @@ const Auth = () => {
   // Redirecionar usuários autenticados para /portal
   if (user && !loading) {
     console.log("Auth - Usuário autenticado, redirecionando para /portal");
+    // Não redirecionar se o usuário estava tentando acessar /admin
+    const originalPath = sessionStorage.getItem('admin-redirect');
+    if (originalPath === '/admin') {
+      sessionStorage.removeItem('admin-redirect');
+      return <Navigate to="/admin" replace />;
+    }
     return <Navigate to="/portal" replace />;
   }
 
