@@ -4,14 +4,19 @@ import { Navigate } from 'react-router-dom';
 import { AdminDashboard } from '@/components/Admin/AdminDashboard';
 
 const AdminConsole = () => {
-  const { user } = useAuth();
+  const { user, profile, profileLoading } = useAuth();
 
   // Verificar se o usuário é admin
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (user.role !== 'admin') {
+  // Aguardar carregamento do perfil
+  if (profileLoading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (profile?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
