@@ -48,6 +48,10 @@ const Index = () => {
     switch (activeModule) {
       case 'dashboard':
         return <DashboardOverview />;
+      case 'admin':
+        // Redirecionar para a página do console administrativo
+        window.location.href = '/admin';
+        return null;
       case 'incidents':
         return <IncidentesManagement />;
       case 'requests':

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import UserPortal from "./pages/UserPortal";
+import AdminConsole from "./pages/AdminConsole";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import UserOnlyRoute from "./components/Auth/UserOnlyRoute";
@@ -27,6 +28,11 @@ const App = () => (
             <UserOnlyRoute>
               <UserPortal />
             </UserOnlyRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminConsole />
+            </ProtectedRoute>
           } />
           <Route path="/" element={
             <ProtectedRoute>

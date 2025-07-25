@@ -2,6 +2,7 @@
 import React from 'react';
 import SidebarMenuItem from './SidebarMenuItem';
 import { menuItems } from './menuItems';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarNavigationProps {
   activeModule: string;
@@ -18,9 +19,19 @@ const SidebarNavigation = ({
   onModuleChange, 
   onToggleExpanded 
 }: SidebarNavigationProps) => {
+  const { user } = useAuth();
+  
+  // Filtrar itens do menu baseado no papel do usuário
+  const filteredMenuItems = menuItems.filter(item => {
+    if ((item as any).adminOnly) {
+      return user?.role === 'admin';
+    }
+    return true;
+  });
+
   return (
     <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-hide">
-      {menuItems.map((item) => (
+      {filteredMenuItems.map((item) => (
         <SidebarMenuItem
           key={item.id}
           item={item}
