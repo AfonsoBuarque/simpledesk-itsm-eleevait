@@ -19,12 +19,12 @@ const SidebarNavigation = ({
   onModuleChange, 
   onToggleExpanded 
 }: SidebarNavigationProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   
   // Filtrar itens do menu baseado no papel do usuário
   const filteredMenuItems = menuItems.filter(item => {
     if ((item as any).adminOnly) {
-      return user?.role === 'admin';
+      return profile?.role === 'admin';
     }
     return true;
   });
