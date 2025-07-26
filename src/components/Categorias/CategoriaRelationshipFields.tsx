@@ -55,7 +55,7 @@ const CategoriaRelationshipFields = ({ form }: CategoriaRelationshipFieldsProps)
 
       <FormField
         control={form.control}
-        name="cliente_id"
+        name="client_id"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Cliente</FormLabel>

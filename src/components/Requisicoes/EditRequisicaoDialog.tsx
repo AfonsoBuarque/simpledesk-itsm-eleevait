@@ -39,7 +39,7 @@ const requisicaoSchema = z.object({
   prioridade: z.enum(['baixa', 'media', 'alta', 'critica']),
   status: z.enum(['aberta', 'em_andamento', 'pendente', 'resolvida', 'fechada']),
   solicitante_id: z.string().optional(),
-  cliente_id: z.string().optional(),
+  client_id: z.string().optional(),
   grupo_responsavel_id: z.string().optional(),
   atendente_id: z.string().optional(),
   canal_origem: z.enum(['portal', 'email', 'telefone', 'chat', 'presencial']),
@@ -123,7 +123,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
     // MOSTRAR IDs RELEVANTES PARA DEBUG
     console.log('DEBUG: user.id', user.id);
     console.log('DEBUG: requisicao.solicitante_id', requisicao.solicitante_id);
-    console.log('DEBUG: requisicao.cliente_id', requisicao.cliente_id);
+    console.log('DEBUG: requisicao.client_id', requisicao.client_id);
     console.log('DEBUG: requisicao.grupo_responsavel_id', requisicao.grupo_responsavel_id);
     console.log('DEBUG: requisicao.atendente_id', requisicao.atendente_id);
 

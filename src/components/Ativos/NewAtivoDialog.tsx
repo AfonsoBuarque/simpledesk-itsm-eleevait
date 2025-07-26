@@ -39,7 +39,7 @@ const ativoSchema = z.object({
   data_retirada: z.string().optional(),
   ultima_auditoria: z.string().optional(),
   proxima_auditoria: z.string().optional(),
-  cliente_id: z.string().optional(),
+  client_id: z.string().optional(),
   dono_negocio_id: z.string().optional(),
   grupo_responsavel_id: z.string().optional(),
   departamento_id: z.string().optional(),

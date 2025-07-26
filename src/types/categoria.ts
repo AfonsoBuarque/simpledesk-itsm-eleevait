@@ -7,7 +7,7 @@ export interface Categoria {
   categoria_pai_id?: string;
   ordem_exibicao: number;
   ativo: boolean;
-  cliente_id?: string;
+  client_id?: string;
   grupo_id?: string;
   sla_id?: string;
   usuario_responsavel_id?: string;
@@ -41,7 +41,7 @@ export interface CategoriaFormData {
   categoria_pai_id?: string;
   ordem_exibicao: number;
   ativo: boolean;
-  cliente_id?: string;
+  client_id?: string;
   grupo_id?: string;
   sla_id?: string;
   usuario_responsavel_id?: string;

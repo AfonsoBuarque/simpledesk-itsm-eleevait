@@ -104,10 +104,10 @@ const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias }:
         />
       )}
 
-      {shouldRenderField('cliente_id') && (
+      {shouldRenderField('client_id') && (
         <FormField
           control={form.control}
-          name="cliente_id"
+          name="client_id"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cliente</FormLabel>

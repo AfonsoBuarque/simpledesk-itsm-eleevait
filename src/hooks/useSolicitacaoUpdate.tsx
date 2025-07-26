@@ -46,7 +46,7 @@ export const useSolicitacaoUpdate = () => {
         prioridade: data.prioridade,
         status: data.status,
         solicitante_id: data.solicitante_id || null,
-        cliente_id: data.cliente_id || null,
+        client_id: data.client_id || null,
         grupo_responsavel_id: data.grupo_responsavel_id || null,
         atendente_id: data.atendente_id || null,
         canal_origem: data.canal_origem,

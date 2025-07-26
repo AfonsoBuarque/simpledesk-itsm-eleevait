@@ -5,7 +5,7 @@ export interface SLA {
   descricao?: string;
   tipo_aplicacao: 'categoria' | 'grupo' | 'urgencia' | 'cliente' | 'global';
   grupo_id?: string;
-  cliente_id?: string;
+  client_id?: string;
   prioridade?: string;
   tempo_resposta_min: number;
   tempo_resolucao_min: number;
@@ -28,7 +28,7 @@ export interface SLAFormData {
   descricao?: string;
   tipo_aplicacao: 'categoria' | 'grupo' | 'urgencia' | 'cliente' | 'global';
   grupo_id?: string;
-  cliente_id?: string;
+  client_id?: string;
   prioridade?: string;
   tempo_resposta_min: number;
   tempo_resolucao_min: number;

@@ -11,7 +11,7 @@ export interface Mudanca {
   prioridade?: string;
   status: string;
   solicitante_id?: string;
-  cliente_id?: string;
+  client_id?: string;
   grupo_responsavel_id?: string;
   atendente_id?: string;
   canal_origem?: string;

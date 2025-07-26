@@ -30,7 +30,7 @@ const incidenteSchema = z.object({
   prioridade: z.enum(['baixa', 'media', 'alta', 'critica']),
   status: z.enum(['aberta', 'em_andamento', 'pendente', 'resolvida', 'fechada']),
   solicitante_id: z.string().min(1, 'Solicitante é obrigatório'),
-  cliente_id: z.string().optional(),
+  client_id: z.string().optional(),
   grupo_responsavel_id: z.string().optional(),
   atendente_id: z.string().optional(),
   canal_origem: z.enum(['portal', 'email', 'telefone', 'chat', 'presencial']),

@@ -13,7 +13,7 @@ export interface Solicitacao {
   status: 'aberta' | 'em_andamento' | 'pendente' | 'resolvida' | 'fechada';
   
   solicitante_id?: string;
-  cliente_id?: string;
+  client_id?: string;
   grupo_responsavel_id?: string;
   atendente_id?: string;
   canal_origem: 'portal' | 'email' | 'telefone' | 'chat' | 'presencial';
@@ -70,7 +70,7 @@ export interface SolicitacaoFormData {
   prioridade: 'baixa' | 'media' | 'alta' | 'critica';
   status: 'aberta' | 'em_andamento' | 'pendente' | 'resolvida' | 'fechada';
   solicitante_id?: string;
-  cliente_id?: string;
+  client_id?: string;
   grupo_responsavel_id?: string;
   atendente_id?: string;
   canal_origem: 'portal' | 'email' | 'telefone' | 'chat' | 'presencial';

@@ -40,9 +40,9 @@ export const useEditRequisicaoFormLogic = ({ form, requisicao }: EditRequisicaoF
         console.log('Dados da categoria:', categoriaSelecionada);
         
         // Preencher automaticamente os campos baseados na categoria
-        if (categoriaSelecionada.cliente_id) {
-          console.log('Preenchendo cliente_id:', categoriaSelecionada.cliente_id);
-          form.setValue('cliente_id', categoriaSelecionada.cliente_id, { 
+        if (categoriaSelecionada.client_id) {
+          console.log('Preenchendo client_id:', categoriaSelecionada.client_id);
+          form.setValue('client_id', categoriaSelecionada.client_id, {
             shouldValidate: true, 
             shouldDirty: true,
             shouldTouch: true 
@@ -68,7 +68,7 @@ export const useEditRequisicaoFormLogic = ({ form, requisicao }: EditRequisicaoF
         }
 
         // Forçar re-render do formulário
-        form.trigger(['cliente_id', 'sla_id', 'grupo_responsavel_id']);
+        form.trigger(['client_id', 'sla_id', 'grupo_responsavel_id']);
       }
     }
   }, [categoriaId, categorias, form]);
@@ -86,7 +86,7 @@ export const useEditRequisicaoFormLogic = ({ form, requisicao }: EditRequisicaoF
         prioridade: requisicao.prioridade,
         status: requisicao.status,
         solicitante_id: requisicao.solicitante_id || '',
-        cliente_id: requisicao.cliente_id || '',
+        client_id: requisicao.client_id || '',
         grupo_responsavel_id: requisicao.grupo_responsavel_id || '',
         atendente_id: requisicao.atendente_id || '',
         canal_origem: requisicao.canal_origem,

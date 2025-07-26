@@ -115,7 +115,7 @@ const SLAFormFields = ({ form }: SLAFormFieldsProps) => {
 
         <FormField
           control={form.control}
-          name="cliente_id"
+          name="client_id"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cliente</FormLabel>

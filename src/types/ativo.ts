@@ -34,7 +34,7 @@ export interface Ativo {
   proxima_auditoria?: string;
 
   // Negócio
-  cliente_id?: string;
+  client_id?: string;
   dono_negocio_id?: string;
   grupo_responsavel_id?: string;
   departamento_id?: string;
@@ -138,7 +138,7 @@ export interface AtivoFormData {
   proxima_auditoria?: string;
 
   // Negócio
-  cliente_id?: string;
+  client_id?: string;
   dono_negocio_id?: string;
   grupo_responsavel_id?: string;
   departamento_id?: string;
@@ -212,7 +212,7 @@ export interface AtivoFromDB {
   proxima_auditoria: string | null;
 
   // Negócio
-  cliente_id: string | null;
+  client_id: string | null;
   dono_negocio_id: string | null;
   grupo_responsavel_id: string | null;
   departamento_id: string | null;

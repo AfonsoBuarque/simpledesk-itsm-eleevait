@@ -20,7 +20,7 @@ export type Database = {
           atualizado_em: string | null
           atualizado_por: string | null
           categoria_pai_id: string | null
-          cliente_id: string | null
+          client_id: string | null
           criado_em: string | null
           criado_por: string | null
           descricao: string | null
@@ -37,7 +37,7 @@ export type Database = {
           atualizado_em?: string | null
           atualizado_por?: string | null
           categoria_pai_id?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           descricao?: string | null
@@ -54,7 +54,7 @@ export type Database = {
           atualizado_em?: string | null
           atualizado_por?: string | null
           categoria_pai_id?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           descricao?: string | null
@@ -83,7 +83,7 @@ export type Database = {
           },
           {
             foreignKeyName: "categorias_servico_cliente_id_fkey"
-            columns: ["cliente_id"]
+            columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
@@ -167,7 +167,7 @@ export type Database = {
           certificados: Json | null
           ciclo_vida_esperado: number | null
           classificacao_dados: string | null
-          cliente_id: string | null
+          client_id: string | null
           compliance: Json | null
           componentes: Json | null
           contrato_id: string | null
@@ -233,7 +233,7 @@ export type Database = {
           certificados?: Json | null
           ciclo_vida_esperado?: number | null
           classificacao_dados?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           compliance?: Json | null
           componentes?: Json | null
           contrato_id?: string | null
@@ -299,7 +299,7 @@ export type Database = {
           certificados?: Json | null
           ciclo_vida_esperado?: number | null
           classificacao_dados?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           compliance?: Json | null
           componentes?: Json | null
           contrato_id?: string | null
@@ -363,7 +363,7 @@ export type Database = {
           },
           {
             foreignKeyName: "cmdb_ativos_cliente_id_fkey"
-            columns: ["cliente_id"]
+            columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
@@ -663,7 +663,7 @@ export type Database = {
           atualizado_por: string | null
           canal_origem: string | null
           categoria_id: string | null
-          cliente_id: string | null
+          client_id: string | null
           criado_em: string | null
           criado_por: string | null
           data_abertura: string | null
@@ -693,7 +693,7 @@ export type Database = {
           atualizado_por?: string | null
           canal_origem?: string | null
           categoria_id?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -723,7 +723,7 @@ export type Database = {
           atualizado_por?: string | null
           canal_origem?: string | null
           categoria_id?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -1329,7 +1329,7 @@ export type Database = {
           categoria_id: string | null
           cis_impactados: Json | null
           classificacao_risco: string | null
-          cliente_id: string | null
+          client_id: string | null
           criado_em: string | null
           criado_por: string | null
           data_abertura: string | null
@@ -1383,7 +1383,7 @@ export type Database = {
           categoria_id?: string | null
           cis_impactados?: Json | null
           classificacao_risco?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -1437,7 +1437,7 @@ export type Database = {
           categoria_id?: string | null
           cis_impactados?: Json | null
           classificacao_risco?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -1570,7 +1570,7 @@ export type Database = {
           canal_origem: string | null
           categoria_id: string | null
           causa_raiz: string | null
-          cliente_id: string | null
+          client_id: string | null
           criado_em: string | null
           criado_por: string | null
           data_abertura: string | null
@@ -1605,7 +1605,7 @@ export type Database = {
           canal_origem?: string | null
           categoria_id?: string | null
           causa_raiz?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -1640,7 +1640,7 @@ export type Database = {
           canal_origem?: string | null
           categoria_id?: string | null
           causa_raiz?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -1796,7 +1796,7 @@ export type Database = {
           ativo: boolean | null
           atualizado_em: string | null
           atualizado_por: string | null
-          cliente_id: string | null
+          client_id: string | null
           criado_em: string | null
           criado_por: string | null
           descricao: string | null
@@ -1813,7 +1813,7 @@ export type Database = {
           ativo?: boolean | null
           atualizado_em?: string | null
           atualizado_por?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           descricao?: string | null
@@ -1830,7 +1830,7 @@ export type Database = {
           ativo?: boolean | null
           atualizado_em?: string | null
           atualizado_por?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           descricao?: string | null
@@ -1853,7 +1853,7 @@ export type Database = {
           },
           {
             foreignKeyName: "slas_cliente_id_fkey"
-            columns: ["cliente_id"]
+            columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
@@ -1884,7 +1884,7 @@ export type Database = {
           avaliacao_usuario: number | null
           canal_origem: string | null
           categoria_id: string | null
-          cliente_id: string | null
+          client_id: string | null
           criado_em: string | null
           criado_por: string | null
           data_abertura: string | null
@@ -1918,7 +1918,7 @@ export type Database = {
           avaliacao_usuario?: number | null
           canal_origem?: string | null
           categoria_id?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -1952,7 +1952,7 @@ export type Database = {
           avaliacao_usuario?: number | null
           canal_origem?: string | null
           categoria_id?: string | null
-          cliente_id?: string | null
+          client_id?: string | null
           criado_em?: string | null
           criado_por?: string | null
           data_abertura?: string | null
@@ -2001,7 +2001,7 @@ export type Database = {
           },
           {
             foreignKeyName: "solicitacoes_cliente_id_fkey"
-            columns: ["cliente_id"]
+            columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
@@ -2140,6 +2140,8 @@ export type Database = {
       }
       users: {
         Row: {
+          azure_id: string | null
+          azure_tenant_id: string | null
           client_id: string | null
           created_at: string
           department: string | null
@@ -2152,6 +2154,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          azure_id?: string | null
+          azure_tenant_id?: string | null
           client_id?: string | null
           created_at?: string
           department?: string | null
@@ -2164,6 +2168,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          azure_id?: string | null
+          azure_tenant_id?: string | null
           client_id?: string | null
           created_at?: string
           department?: string | null
@@ -2225,7 +2231,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_client_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }

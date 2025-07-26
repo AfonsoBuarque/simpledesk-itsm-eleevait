@@ -6,7 +6,7 @@ import { SolicitacaoFormData } from "@/types/solicitacao";
 
 /**
  * Sincroniza dependentes da categoria na criação da requisição:
- *  - cliente_id (opcional)
+ *  - client_id (opcional)
  *  - sla_id (opcional)
  *  - grupo_responsavel_id (opcional)
  */
@@ -22,8 +22,8 @@ export function useSyncCategoriaDependentes(
       if (!categoria) return;
 
       // Cliente
-      if (categoria.cliente_id) {
-        form.setValue("cliente_id", categoria.cliente_id, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+      if (categoria.client_id) {
+        form.setValue("client_id", categoria.client_id, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
       }
 
       // SLA (ou limpá-la se não houver)
@@ -39,7 +39,7 @@ export function useSyncCategoriaDependentes(
       }
 
       // Forçar validação dos campos vinculados
-      form.trigger(["cliente_id", "sla_id", "grupo_responsavel_id"]);
+      form.trigger(["client_id", "sla_id", "grupo_responsavel_id"]);
     }
   }, [categoriaId, categorias, form]);
 }
