@@ -33,7 +33,7 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   
-  const USERS_PER_PAGE = 7;
+  const USERS_PER_PAGE = 6;
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,6 +51,50 @@ const UserManagement = () => {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+
+  // Smart pagination logic
+  const getPaginationItems = () => {
+    const items = [];
+    const maxVisible = 5; // Maximum number of page buttons to show
+    
+    if (totalPages <= maxVisible) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(i);
+      }
+    } else {
+      // Always show first page
+      items.push(1);
+      
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+      
+      // Add ellipsis after first page if needed
+      if (start > 2) {
+        items.push('ellipsis-start');
+        start = Math.max(start, currentPage - 1);
+      }
+      
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        if (i !== 1 && i !== totalPages) {
+          items.push(i);
+        }
+      }
+      
+      // Add ellipsis before last page if needed
+      if (end < totalPages - 1) {
+        items.push('ellipsis-end');
+      }
+      
+      // Always show last page
+      if (totalPages > 1) {
+        items.push(totalPages);
+      }
+    }
+    
+    return items;
+  };
 
   const handleDeleteUser = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
@@ -188,8 +232,16 @@ const UserManagement = () => {
                   />
                 </PaginationItem>
                 
-                {[...Array(totalPages)].map((_, index) => {
-                  const page = index + 1;
+                {getPaginationItems().map((item, index) => {
+                  if (typeof item === 'string' && item.startsWith('ellipsis')) {
+                    return (
+                      <PaginationItem key={item}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    );
+                  }
+                  
+                  const page = item as number;
                   return (
                     <PaginationItem key={page}>
                       <PaginationLink
