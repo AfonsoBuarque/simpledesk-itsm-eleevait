@@ -109,6 +109,7 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
                           <SelectItem value="servidor">Servidor</SelectItem>
                           <SelectItem value="desktop">Desktop</SelectItem>
                           <SelectItem value="notebook">Notebook</SelectItem>
+                          <SelectItem value="monitor">Monitor</SelectItem>
                           <SelectItem value="impressora">Impressora</SelectItem>
                           <SelectItem value="switch">Switch</SelectItem>
                           <SelectItem value="roteador">Roteador</SelectItem>
@@ -198,7 +199,7 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
                 )}
               />
 
-              {(tipoAtivo === 'notebook' || tipoAtivo === 'desktop') && (
+              {(tipoAtivo === 'notebook' || tipoAtivo === 'desktop' || tipoAtivo === 'monitor') && (
                 <FormField
                   control={form.control}
                   name="proprietario_id"
