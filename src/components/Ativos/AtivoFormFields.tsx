@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import {
   FormControl,
@@ -18,6 +18,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { 
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Check, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/useClients';
 import { useFabricantes } from '@/hooks/useFabricantes';
 import { useContratos } from '@/hooks/useContratos';
@@ -39,8 +55,14 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
   const { localizacoes } = useLocalizacoes();
   const { users } = useUsers();
   const { groups } = useGroups();
+  const [proprietarioOpen, setProprietarioOpen] = useState(false);
 
   const tipoAtivo = form.watch('tipo_id');
+  
+  // Organize users alphabetically
+  const sortedUsers = React.useMemo(() => {
+    return users?.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')) || [];
+  }, [users]);
 
   return (
     <Tabs defaultValue="basico" className="w-full">
@@ -180,26 +202,59 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
                 <FormField
                   control={form.control}
                   name="proprietario_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Proprietário</FormLabel>
-                      <FormControl>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o proprietário" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {users?.map((user) => (
-                              <SelectItem key={user.id} value={user.id}>
-                                {user.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const selectedUser = sortedUsers.find(user => user.id === field.value);
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>Proprietário</FormLabel>
+                        <Popover open={proprietarioOpen} onOpenChange={setProprietarioOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={proprietarioOpen}
+                                className="w-full justify-between"
+                              >
+                                {selectedUser ? selectedUser.name : "Selecione o proprietário..."}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar usuário..." />
+                              <CommandList>
+                                <CommandEmpty>Nenhum usuário encontrado.</CommandEmpty>
+                                <CommandGroup>
+                                  {sortedUsers.map((user) => (
+                                    <CommandItem
+                                      key={user.id}
+                                      value={user.name}
+                                      onSelect={() => {
+                                        field.onChange(user.id);
+                                        setProprietarioOpen(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          field.value === user.id ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      {user.name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               )}
             </div>
