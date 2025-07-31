@@ -39,7 +39,7 @@ const UserManagement = () => {
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (user.client?.name && user.client.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
