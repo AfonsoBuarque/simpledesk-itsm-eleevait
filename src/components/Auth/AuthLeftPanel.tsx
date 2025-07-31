@@ -3,9 +3,9 @@ const AuthLeftPanel = () => <div className="hidden md:flex flex-col justify-cent
     <div className="max-w-md w-full">
       <div className="flex items-center justify-start mb-6">
         <div className="bg-white bg-opacity-10 rounded-full p-3 mr-3">
-          <span role="img" aria-label="logo" className="text-3xl">🕒</span>
+          <img src="/logos/logo_Aruan_header.png" alt="Vertice Aruan Logo" className="w-8 h-8" />
         </div>
-        <span className="font-bold text-lg tracking-wide">Vertice Aruan</span>
+        <img src="/logos/logo_Aruan.png" alt="Vertice Aruan" className="h-22 w-auto" />
       </div>
       <h2 className="text-4xl font-bold mb-2">Olá, <br />bem-vindo!</h2>
       <p className="text-lg text-blue-100 mb-6">

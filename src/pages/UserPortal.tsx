@@ -42,7 +42,7 @@ const UserPortal = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse-slow">
-                <AlertTriangle className="h-6 w-6 text-white" />
+                <img src="/logos/logo_Aruan_header.png" alt="Aruan Logo" className="h-6 w-6" />
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">

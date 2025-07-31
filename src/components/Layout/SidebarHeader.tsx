@@ -9,7 +9,7 @@ const SidebarHeader = ({ isCollapsed }: SidebarHeaderProps) => {
   return (
     <div className={cn("flex items-center gap-2", isCollapsed && "justify-center")}>
       <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
-        <AlertTriangle className="h-6 w-6" />
+        <img src="/logos/logo_Aruan_header.png" alt="Aruan Logo" className="h-6 w-6" />
       </div>
       {!isCollapsed && (
         <div>

@@ -165,7 +165,17 @@ const DashboardOverview = () => {
                     <div className="flex justify-between items-center text-xs text-gray-500">
                       <span>Meta: {metric.target}%</span>
                       <span className={`${metric.current >= metric.target ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} font-bold px-2 py-0.5 rounded-full text-xs`}>
-                        {metric.current >= metric.target ? '✓ Meta atingida' : '⚠️ Abaixo da meta'}
+                        {metric.current >= metric.target ? (
+                          <span className="flex items-center gap-1">
+                            <img src="/logos/logo_Aruan_header.png" alt="Aruan" className="w-3 h-3" />
+                            ✓ Meta atingida
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <img src="/logos/logo_Aruan_header.png" alt="Aruan" className="w-3 h-3" />
+                            ⚠️ Abaixo da meta
+                          </span>
+                        )}
                       </span>
                     </div>
                   </div>
