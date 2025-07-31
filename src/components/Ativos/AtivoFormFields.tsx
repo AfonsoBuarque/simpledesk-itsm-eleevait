@@ -40,6 +40,8 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
   const { users } = useUsers();
   const { groups } = useGroups();
 
+  const tipoAtivo = form.watch('tipo_id');
+
   return (
     <Tabs defaultValue="basico" className="w-full">
       <TabsList className="grid w-full grid-cols-4">
@@ -440,6 +442,33 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
                   </FormItem>
                 )}
               />
+
+              {(tipoAtivo === 'notebook' || tipoAtivo === 'desktop') && (
+                <FormField
+                  control={form.control}
+                  name="proprietario_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Proprietário</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o proprietário" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users?.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

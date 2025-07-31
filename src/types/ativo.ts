@@ -38,6 +38,7 @@ export interface Ativo {
   dono_negocio_id?: string;
   grupo_responsavel_id?: string;
   departamento_id?: string;
+  proprietario_id?: string;
   centro_de_custo?: string;
   valor_aquisicao?: number;
   valor_atual?: number;
@@ -102,6 +103,10 @@ export interface Ativo {
     id: string;
     name: string;
   };
+  proprietario?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AtivoFormData {
@@ -142,6 +147,7 @@ export interface AtivoFormData {
   dono_negocio_id?: string;
   grupo_responsavel_id?: string;
   departamento_id?: string;
+  proprietario_id?: string;
   centro_de_custo?: string;
   valor_aquisicao?: number;
   valor_atual?: number;
@@ -216,6 +222,7 @@ export interface AtivoFromDB {
   dono_negocio_id: string | null;
   grupo_responsavel_id: string | null;
   departamento_id: string | null;
+  proprietario_id: string | null;
   centro_de_custo: string | null;
   valor_aquisicao: number | null;
   valor_atual: number | null;

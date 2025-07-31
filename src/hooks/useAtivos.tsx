@@ -30,6 +30,10 @@ const transformAtivoFromDB = (ativo: any): Ativo => {
     grupo_responsavel: ativo.groups ? {
       id: ativo.groups.id,
       name: ativo.groups.name
+    } : undefined,
+    proprietario: ativo.proprietario ? {
+      id: ativo.proprietario.id,
+      name: ativo.proprietario.name
     } : undefined
   };
 };
@@ -50,7 +54,8 @@ export const useAtivos = () => {
           contratos(id, numero_contrato),
           localizacoes(id, nome),
           dono_negocio:users!dono_negocio_id(id, name),
-          groups(id, name)
+          groups(id, name),
+          proprietario:users!proprietario_id(id, name)
         `)
         .order('nome');
 

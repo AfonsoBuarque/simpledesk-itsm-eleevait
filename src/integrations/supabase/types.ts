@@ -198,6 +198,7 @@ export type Database = {
           patrimonio: string | null
           politica_retirada: string | null
           prazo_renovacao: string | null
+          proprietario_id: string | null
           proxima_auditoria: string | null
           relacionado_a_chamados: boolean | null
           requer_criptografia: boolean | null
@@ -264,6 +265,7 @@ export type Database = {
           patrimonio?: string | null
           politica_retirada?: string | null
           prazo_renovacao?: string | null
+          proprietario_id?: string | null
           proxima_auditoria?: string | null
           relacionado_a_chamados?: boolean | null
           requer_criptografia?: boolean | null
@@ -330,6 +332,7 @@ export type Database = {
           patrimonio?: string | null
           politica_retirada?: string | null
           prazo_renovacao?: string | null
+          proprietario_id?: string | null
           proxima_auditoria?: string | null
           relacionado_a_chamados?: boolean | null
           requer_criptografia?: boolean | null
@@ -422,6 +425,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "cmdb_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cmdb_ativos_proprietario_id_fkey"
+            columns: ["proprietario_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
