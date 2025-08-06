@@ -60,8 +60,8 @@ const UserPortal = () => {
                 <p className="text-xs text-gray-500">Cliente</p>
               </div>
               
-              {/* Link para Administração - apenas para admin */}
-              {profile?.role === 'admin' && (
+              {/* Link para Administração - apenas para admin ou client_admin */}
+              {(profile?.role === 'admin' || profile?.role === 'client_admin') && (
                 <Button
                   variant="outline"
                   size="sm"

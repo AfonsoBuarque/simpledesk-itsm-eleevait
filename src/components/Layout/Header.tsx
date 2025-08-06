@@ -219,6 +219,7 @@ const Header = ({
             </DropdownMenuLabel>
             <DropdownMenuLabel className="text-xs text-gray-600 font-normal">
               {profile?.role === 'admin' && 'Administrador'}
+              {profile?.role === 'client_admin' && 'Admin do Cliente'}
               {profile?.role === 'manager' && 'Gerente'}
               {profile?.role === 'technician' && <Badge variant="outline" className="ml-1">Técnico</Badge>}
               {profile?.role === 'user' && 'Usuário'}

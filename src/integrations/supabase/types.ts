@@ -2249,7 +2249,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_or_client_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_client_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_technician_admin_or_client_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -2259,6 +2271,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "client_admin" | "manager" | "technician" | "user"
       ticket_priority: "low" | "medium" | "high" | "critical"
       ticket_status: "open" | "in_progress" | "pending" | "resolved" | "closed"
       ticket_type: "incident" | "request" | "problem" | "change"
@@ -2389,6 +2402,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "client_admin", "manager", "technician", "user"],
       ticket_priority: ["low", "medium", "high", "critical"],
       ticket_status: ["open", "in_progress", "pending", "resolved", "closed"],
       ticket_type: ["incident", "request", "problem", "change"],

@@ -77,12 +77,16 @@ export const UsersOverview = () => {
       render: (user: any) => {
         const roleColors = {
           admin: 'bg-red-100 text-red-800',
+          client_admin: 'bg-orange-100 text-orange-800',
           technician: 'bg-blue-100 text-blue-800',
+          manager: 'bg-green-100 text-green-800',
           user: 'bg-gray-100 text-gray-800'
         };
         return (
           <Badge className={roleColors[user.role as keyof typeof roleColors] || roleColors.user}>
             {user.role === 'admin' ? 'Administrador' : 
+             user.role === 'client_admin' ? 'Admin Cliente' :
+             user.role === 'manager' ? 'Gerente' :
              user.role === 'technician' ? 'Técnico' : 'Usuário'}
           </Badge>
         );

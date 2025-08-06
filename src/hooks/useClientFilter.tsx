@@ -12,17 +12,20 @@ export const useClientFilter = () => {
 
   // Verificar se o usuário é admin (pode ver todos os clientes)
   const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+  
+  // Verificar se o usuário é admin do cliente (admin limitado ao seu cliente)
+  const isClientAdmin = profile?.role === 'client_admin';
 
   /**
    * Retorna o filtro que deve ser aplicado nas queries
    * Para admins: null (sem filtro)
-   * Para usuários normais: client_id obrigatório
+   * Para client_admins e usuários normais: client_id obrigatório
    */
   const getClientFilter = () => {
     if (isAdmin) {
       return null; // Admin pode ver todos os dados
     }
-    return currentClientId;
+    return currentClientId; // Client_admin e usuários normais veem apenas seu cliente
   };
 
   /**
@@ -68,7 +71,7 @@ export const useClientFilter = () => {
       };
     }
 
-    // Garantir que o client_id está definido nos dados
+    // Para client_admin e usuários normais, garantir que o client_id está definido
     const validatedData = {
       ...data,
       client_id: currentClientId
@@ -92,6 +95,7 @@ export const useClientFilter = () => {
   return {
     currentClientId,
     isAdmin,
+    isClientAdmin,
     clientLoading,
     getClientFilter,
     canAccessRecord,
