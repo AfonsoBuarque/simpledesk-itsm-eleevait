@@ -11,10 +11,11 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
+        // First, handle the auth hash from URL
+        const { data: authData, error: authError } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error('Auth callback error:', error);
+        if (authError) {
+          console.error('Auth callback error:', authError);
           toast({
             title: "Erro na autenticação",
             description: "Houve um problema na autenticação. Tente novamente.",
@@ -24,8 +25,29 @@ const AuthCallback = () => {
           return;
         }
 
-        if (data.session) {
-          console.log('Auth callback successful, redirecting...');
+        if (authData.session?.user) {
+          console.log('Auth callback successful, syncing user...');
+          
+          try {
+            // Sync user with our database through Azure function
+            const { data: syncData, error: syncError } = await supabase.functions.invoke('azure-user-sync', {
+              body: {
+                user: authData.session.user,
+                action: 'sync_user'
+              }
+            });
+
+            if (syncError) {
+              console.error('User sync error:', syncError);
+              // Continue with login even if sync fails - user might already exist
+            } else {
+              console.log('User sync successful:', syncData);
+            }
+          } catch (syncError) {
+            console.error('User sync error:', syncError);
+            // Continue with login even if sync fails
+          }
+
           toast({
             title: "Login realizado com sucesso",
             description: "Bem-vindo ao sistema!",
