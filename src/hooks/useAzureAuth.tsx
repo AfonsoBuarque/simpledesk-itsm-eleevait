@@ -11,7 +11,7 @@ export const useAzureAuth = () => {
         provider: 'azure',
         options: {
           scopes: 'email profile openid User.Read',
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `https://vertice-aruan.eleevait.com.br/auth/callback`,
           queryParams: {
             access_type: 'offline',
             prompt: 'select_account'
