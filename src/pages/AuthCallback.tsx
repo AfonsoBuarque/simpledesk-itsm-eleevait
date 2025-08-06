@@ -13,33 +13,39 @@ const AuthCallback = () => {
       try {
         console.log('AuthCallback: Starting callback processing...');
         console.log('Current URL:', window.location.href);
-        console.log('URL hash:', window.location.hash);
-        console.log('URL search:', window.location.search);
         
-        // First, check for auth callback in the URL fragments
+        // Check for error in URL first
         const urlParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        if (window.location.hash.includes('access_token') || urlParams.has('code')) {
-          console.log('Found auth parameters in URL, processing...');
+        if (urlParams.has('error') || hashParams.has('error')) {
+          const error = urlParams.get('error') || hashParams.get('error');
+          const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
           
-          // Use exchangeCodeForSession if we have a code, otherwise rely on the hash
-          if (urlParams.has('code')) {
-            console.log('Processing authorization code...');
-            // The auth code will be automatically processed by Supabase
+          console.error('Auth callback error from URL:', error, errorDescription);
+          
+          if (errorDescription?.includes('Database error saving new user')) {
+            toast({
+              title: "Erro na autenticação",
+              description: "Usuário já existe no sistema. Aguarde um momento e tente novamente.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Erro na autenticação",
+              description: "Houve um problema na autenticação com Azure AD. Tente novamente.",
+              variant: "destructive",
+            });
           }
           
-          // Wait longer for auth state to settle after OAuth callback
-          await new Promise(resolve => setTimeout(resolve, 3000));
-        } else {
-          // No auth params, wait less time
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          navigate('/auth');
+          return;
         }
         
-        // Try multiple times to get the session as it might take time
+        // Wait for auth session to be established
         let session = null;
         let attempts = 0;
-        const maxAttempts = 10;
+        const maxAttempts = 15;
         
         while (!session && attempts < maxAttempts) {
           attempts++;
@@ -58,103 +64,31 @@ const AuthCallback = () => {
             break;
           }
           
-          // Wait before next attempt
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Wait before next attempt, longer wait for later attempts
+          await new Promise(resolve => setTimeout(resolve, attempts > 5 ? 1000 : 500));
         }
         
         if (!session) {
           console.log('No session found after all attempts, redirecting to auth...');
+          toast({
+            title: "Erro na autenticação",
+            description: "Não foi possível estabelecer a sessão. Tente novamente.",
+            variant: "destructive",
+          });
           navigate('/auth');
           return;
         }
 
         console.log('Auth callback successful. User:', session.user.email);
         
-        // Check if user exists in public.users table by email
-        const { data: existingUser, error: userCheckError } = await supabase
-          .from('users')
-          .select('id, email, name, role')
-          .eq('email', session.user.email)
-          .maybeSingle();
-
-        if (userCheckError) {
-          console.error('Error checking existing user:', userCheckError);
-        }
-
-        if (existingUser) {
-          console.log('User exists in public.users:', existingUser.email);
-          
-          // Update the existing user record with the auth user ID
-          const { error: updateError } = await supabase
-            .from('users')
-            .update({ 
-              id: session.user.id,
-              updated_at: new Date().toISOString()
-            })
-            .eq('email', existingUser.email);
-
-          if (updateError) {
-            console.error('Error updating user ID:', updateError);
-          }
-
-          // Create/update profile record
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .upsert({
-              id: session.user.id,
-              full_name: existingUser.name,
-              email: existingUser.email,
-              role: existingUser.role,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-
-          if (profileError) {
-            console.error('Error updating profile:', profileError);
-          }
-
-          console.log('Successfully linked existing user with auth');
-        } else {
-          console.log('Creating new user through Azure sync...');
-          
-          // User doesn't exist, create through Azure sync
-          try {
-            const { data: syncData, error: syncError } = await supabase.functions.invoke('azure-user-sync', {
-              body: {
-                user: session.user,
-                action: 'sync_user'
-              }
-            });
-
-            if (syncError) {
-              console.error('User sync error:', syncError);
-              toast({
-                title: "Erro na sincronização",
-                description: "Não foi possível sincronizar o usuário. Entre em contato com o administrador.",
-                variant: "destructive",
-              });
-              navigate('/auth');
-              return;
-            } else {
-              console.log('User sync successful:', syncData);
-            }
-          } catch (syncError) {
-            console.error('User sync error:', syncError);
-            toast({
-              title: "Erro na sincronização",
-              description: "Erro ao criar usuário. Entre em contato com o administrador.",
-              variant: "destructive",
-            });
-            navigate('/auth');
-            return;
-          }
-        }
-
+        // The trigger will handle the user/profile creation automatically
+        // Just show success and redirect
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema!",
         });
         navigate('/');
+        
       } catch (error) {
         console.error('Auth callback error:', error);
         toast({
