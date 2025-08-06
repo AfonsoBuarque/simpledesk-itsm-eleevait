@@ -11,7 +11,11 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // First, handle the auth hash from URL
+        console.log('AuthCallback: Starting callback processing...');
+        
+        // Wait a bit for the auth process to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         const { data: authData, error: authError } = await supabase.auth.getSession();
         
         if (authError) {
@@ -26,26 +30,78 @@ const AuthCallback = () => {
         }
 
         if (authData.session?.user) {
-          console.log('Auth callback successful, syncing user...');
+          console.log('Auth callback successful. User:', authData.session.user.email);
           
-          try {
-            // Sync user with our database through Azure function
-            const { data: syncData, error: syncError } = await supabase.functions.invoke('azure-user-sync', {
-              body: {
-                user: authData.session.user,
-                action: 'sync_user'
-              }
-            });
+          // First, check if user exists in public.users table by email
+          const { data: existingUser, error: userCheckError } = await supabase
+            .from('users')
+            .select('id, email, name, role')
+            .eq('email', authData.session.user.email)
+            .maybeSingle();
 
-            if (syncError) {
+          if (userCheckError) {
+            console.error('Error checking existing user:', userCheckError);
+          }
+
+          if (existingUser) {
+            console.log('User exists in public.users:', existingUser.email);
+            
+            // Update the existing user record with the auth user ID
+            await supabase
+              .from('users')
+              .update({ 
+                id: authData.session.user.id,
+                updated_at: new Date().toISOString()
+              })
+              .eq('email', existingUser.email);
+
+            // Create/update profile record
+            await supabase
+              .from('profiles')
+              .upsert({
+                id: authData.session.user.id,
+                full_name: existingUser.name,
+                email: existingUser.email,
+                role: existingUser.role,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+
+            console.log('Successfully linked existing user with auth');
+          } else {
+            console.log('Creating new user through Azure sync...');
+            
+            // User doesn't exist, create through Azure sync
+            try {
+              const { data: syncData, error: syncError } = await supabase.functions.invoke('azure-user-sync', {
+                body: {
+                  user: authData.session.user,
+                  action: 'sync_user'
+                }
+              });
+
+              if (syncError) {
+                console.error('User sync error:', syncError);
+                toast({
+                  title: "Erro na sincronização",
+                  description: "Não foi possível sincronizar o usuário. Entre em contato com o administrador.",
+                  variant: "destructive",
+                });
+                navigate('/auth');
+                return;
+              } else {
+                console.log('User sync successful:', syncData);
+              }
+            } catch (syncError) {
               console.error('User sync error:', syncError);
-              // Continue with login even if sync fails - user might already exist
-            } else {
-              console.log('User sync successful:', syncData);
+              toast({
+                title: "Erro na sincronização",
+                description: "Erro ao criar usuário. Entre em contato com o administrador.",
+                variant: "destructive",
+              });
+              navigate('/auth');
+              return;
             }
-          } catch (syncError) {
-            console.error('User sync error:', syncError);
-            // Continue with login even if sync fails
           }
 
           toast({
