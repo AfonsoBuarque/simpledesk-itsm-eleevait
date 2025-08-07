@@ -5,7 +5,7 @@ import { Solicitacao } from '@/types/solicitacao';
 import { useClientFilter } from './useClientFilter';
 
 export const useSolicitacoesFetch = () => {
-  const { currentClientId, isAdmin, clientLoading } = useClientFilter();
+  const { currentClientId, isAdmin, clientLoading, applyClientFilter } = useClientFilter();
   
   const { data: solicitacoes = [], isLoading, error } = useQuery({
     queryKey: ['solicitacoes', currentClientId, isAdmin],
@@ -24,10 +24,8 @@ export const useSolicitacoesFetch = () => {
           atendente:users!solicitacoes_atendente_id_fkey(name)
         `);
 
-      // As RLS policies já fazem o filtro, mas vamos ser explícitos no frontend também
-      if (!isAdmin && currentClientId) {
-        query = query.eq('client_id', currentClientId);
-      }
+      // Aplicar filtro de cliente usando o useClientFilter
+      query = applyClientFilter(query, 'client_id');
 
       const { data, error } = await query.order('criado_em', { ascending: false });
 

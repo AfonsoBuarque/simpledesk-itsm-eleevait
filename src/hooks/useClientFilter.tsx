@@ -1,5 +1,7 @@
 import { useClientContext } from '@/contexts/ClientContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook para garantir isolamento de dados por cliente
@@ -7,8 +9,45 @@ import { useAuth } from '@/hooks/useAuth';
  * e funções utilitárias para validação de acesso
  */
 export const useClientFilter = () => {
-  const { currentClientId, loading: clientLoading } = useClientContext();
-  const { profile } = useAuth();
+  const { currentClientId: contextClientId, loading: clientLoading } = useClientContext();
+  const { profile, user } = useAuth();
+  const [currentClientId, setCurrentClientId] = useState<string | null>(null);
+
+  // Buscar o client_id diretamente do banco quando necessário
+  useEffect(() => {
+    const fetchClientId = async () => {
+      if (!user?.id) {
+        setCurrentClientId(null);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('client_id')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user client_id:', error);
+          setCurrentClientId(null);
+          return;
+        }
+
+        setCurrentClientId(data?.client_id || null);
+      } catch (err) {
+        console.error('Error in fetchClientId:', err);
+        setCurrentClientId(null);
+      }
+    };
+
+    // Usar o valor do contexto se disponível, senão buscar diretamente
+    if (contextClientId) {
+      setCurrentClientId(contextClientId);
+    } else if (user?.id) {
+      fetchClientId();
+    }
+  }, [contextClientId, user?.id]);
 
   // Verificar se o usuário é admin (pode ver todos os clientes)
   const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';

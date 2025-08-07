@@ -9,7 +9,7 @@ export const useRequisicoes = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { calculateAndSetSLADeadlines } = useSLACalculation();
-  const { currentClientId, isAdmin, clientLoading, validateClientData } = useClientFilter();
+  const { currentClientId, isAdmin, clientLoading, validateClientData, applyClientFilter } = useClientFilter();
 
   const { data: requisicoes = [], isLoading, error } = useQuery({
     queryKey: ['requisicoes', currentClientId, isAdmin],
@@ -29,10 +29,8 @@ export const useRequisicoes = () => {
         `)
         .eq('tipo', 'requisicao');
 
-      // As RLS policies já fazem o filtro, mas vamos ser explícitos no frontend também
-      if (!isAdmin && currentClientId) {
-        query = query.eq('client_id', currentClientId);
-      }
+      // Aplicar filtro de cliente usando o useClientFilter
+      query = applyClientFilter(query, 'client_id');
 
       const { data, error } = await query.order('criado_em', { ascending: false });
 
