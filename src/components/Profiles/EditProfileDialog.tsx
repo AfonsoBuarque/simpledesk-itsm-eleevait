@@ -204,7 +204,8 @@ export const EditProfileDialog = ({ open, onOpenChange, profile, onSuccess }: Ed
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="admin">Admin Full</SelectItem>
+                      <SelectItem value="client_admin">Admin do Cliente</SelectItem>
                       <SelectItem value="manager">Gerente</SelectItem>
                       <SelectItem value="technician">Técnico</SelectItem>
                       <SelectItem value="user">Usuário</SelectItem>
