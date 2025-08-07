@@ -2,13 +2,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Solicitacao } from '@/types/solicitacao';
+import { useClientFilter } from './useClientFilter';
 
 export const useSolicitacoesFetch = () => {
+  const { currentClientId, isAdmin, clientLoading } = useClientFilter();
+  
   const { data: solicitacoes = [], isLoading, error } = useQuery({
-    queryKey: ['solicitacoes'],
+    queryKey: ['solicitacoes', currentClientId, isAdmin],
     queryFn: async () => {
-      console.log('Fetching solicitações...');
-      const { data, error } = await supabase
+      console.log('Fetching solicitações with client isolation...', { currentClientId, isAdmin });
+      
+      let query = supabase
         .from('solicitacoes')
         .select(`
           *,
@@ -18,17 +22,24 @@ export const useSolicitacoesFetch = () => {
           cliente:clients(name),
           grupo_responsavel:groups(name),
           atendente:users!solicitacoes_atendente_id_fkey(name)
-        `)
-        .order('criado_em', { ascending: false });
+        `);
+
+      // As RLS policies já fazem o filtro, mas vamos ser explícitos no frontend também
+      if (!isAdmin && currentClientId) {
+        query = query.eq('client_id', currentClientId);
+      }
+
+      const { data, error } = await query.order('criado_em', { ascending: false });
 
       if (error) {
         console.error('Error fetching solicitações:', error);
         throw error;
       }
 
-      console.log('Solicitações fetched:', data);
+      console.log('Solicitações fetched with security:', data?.length, 'records');
       return data as Solicitacao[];
     },
+    enabled: !clientLoading, // Só executa quando o cliente já foi carregado
   });
 
   return {
