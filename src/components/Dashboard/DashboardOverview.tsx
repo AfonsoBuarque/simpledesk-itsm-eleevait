@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import MetricsCard from './MetricsCard';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { getSLAStatus, getStatusColor, getUrgenciaColor } from '@/utils/slaStatus';
@@ -13,11 +14,15 @@ import {
   Clock, 
   CheckCircle, 
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const DashboardOverview = () => {
   const { tickets, stats, slaMetrics, isLoading } = useDashboardData();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
 
   if (isLoading) {
     return (
@@ -29,6 +34,23 @@ const DashboardOverview = () => {
 
   const getPriorityColor = (priority: string) => {
     return getUrgenciaColor(priority);
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(tickets.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedTickets = tickets.slice(startIndex, startIndex + itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   return (
@@ -95,42 +117,75 @@ const DashboardOverview = () => {
                   Nenhum ticket encontrado
                 </div>
               ) : (
-                tickets.slice(0, 5).map((ticket) => {
-                  const slaStatus = getSLAStatus(ticket);
-                  return (
-                    <div 
-                      key={ticket.id} 
-                      className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer group"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <span className="font-semibold text-blue-600 text-lg">{ticket.numero}</span>
-                          <Badge className={`${getPriorityColor(ticket.prioridade)} capitalize shadow`}>
-                            {ticket.prioridade}
-                          </Badge>
-                        </div>
-                        <p className="text-base font-medium text-gray-700 mb-1 truncate">{ticket.titulo}</p>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs text-gray-500">Cliente:</span>
-                          <span className="text-xs font-semibold text-gray-700">
-                            {ticket.cliente?.name || 'Não informado'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className={`${getStatusColor(ticket.status)} shadow-sm`}>
-                            {ticket.status.replace('_', ' ')}
-                          </Badge>
-                          <Badge className={`${slaStatus.color} shadow-sm`}>
-                            {slaStatus.label}
-                          </Badge>
-                          <span className="text-xs text-gray-400">
-                            {format(new Date(ticket.criado_em), 'dd/MM/yyyy', { locale: ptBR })}
-                          </span>
+                <>
+                  {paginatedTickets.map((ticket) => {
+                    const slaStatus = getSLAStatus(ticket);
+                    return (
+                      <div 
+                        key={ticket.id} 
+                        className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer group"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <span className="font-semibold text-blue-600 text-lg">{ticket.numero}</span>
+                            <Badge className={`${getPriorityColor(ticket.prioridade)} capitalize shadow`}>
+                              {ticket.prioridade}
+                            </Badge>
+                          </div>
+                          <p className="text-base font-medium text-gray-700 mb-1 truncate">{ticket.titulo}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs text-gray-500">Cliente:</span>
+                            <span className="text-xs font-semibold text-gray-700">
+                              {ticket.cliente?.name || 'Não informado'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={`${getStatusColor(ticket.status)} shadow-sm`}>
+                              {ticket.status.replace('_', ' ')}
+                            </Badge>
+                            <Badge className={`${slaStatus.color} shadow-sm`}>
+                              {slaStatus.label}
+                            </Badge>
+                            <span className="text-xs text-gray-400">
+                              {format(new Date(ticket.criado_em), 'dd/MM/yyyy', { locale: ptBR })}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                    );
+                  })}
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                      <div className="text-sm text-gray-500">
+                        Página {currentPage} de {totalPages} ({tickets.length} tickets)
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={goToPrevPage}
+                          disabled={currentPage === 1}
+                          className="flex items-center gap-1"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Anterior
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={goToNextPage}
+                          disabled={currentPage === totalPages}
+                          className="flex items-center gap-1"
+                        >
+                          Próximo
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  );
-                })
+                  )}
+                </>
               )}
             </div>
           </CardContent>
