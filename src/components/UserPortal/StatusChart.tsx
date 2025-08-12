@@ -50,18 +50,7 @@ const StatusChart = ({ data }: StatusChartProps) => {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => (
-                <text 
-                  x="50%" 
-                  y="50%" 
-                  fill="#333" 
-                  textAnchor="middle" 
-                  dominantBaseline="middle"
-                  className="font-medium"
-                >
-                  {`${name} (${(percent * 100).toFixed(0)}%)`}
-                </text>
-              )}
+              label={false}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
