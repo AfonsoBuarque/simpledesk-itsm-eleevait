@@ -167,7 +167,7 @@ const NewProblemaDialog: React.FC<NewProblemaDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {slas?.map((sla) => (
+                        {slas?.filter((sla) => sla.aplica_a === 'problema').map((sla) => (
                           <SelectItem key={sla.id} value={sla.id}>
                             {sla.nome}
                           </SelectItem>
