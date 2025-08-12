@@ -61,6 +61,29 @@ const SLAFormFields = ({ form }: SLAFormFieldsProps) => {
 
         <FormField
           control={form.control}
+          name="aplica_a"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aplica a *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de registro" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="incidente">Incidente</SelectItem>
+                  <SelectItem value="solicitacao">Solicitação</SelectItem>
+                  <SelectItem value="problema">Problema</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="tipo_aplicacao"
           render={({ field }) => (
             <FormItem>

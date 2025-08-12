@@ -19,6 +19,7 @@ const slaSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   descricao: z.string().optional(),
   tipo_aplicacao: z.enum(['categoria', 'grupo', 'urgencia', 'cliente', 'global']),
+  aplica_a: z.enum(['incidente', 'solicitacao', 'problema']),
   grupo_id: z.string().optional(),
   client_id: z.string().optional(),
   prioridade: z.string().optional(),
@@ -38,18 +39,19 @@ export const NewSLADialog = ({ isOpen, onClose }: NewSLADialogProps) => {
 
   const form = useForm<SLAFormData>({
     resolver: zodResolver(slaSchema),
-    defaultValues: {
-      nome: '',
-      descricao: '',
-      tipo_aplicacao: 'global',
-      grupo_id: undefined,
-      client_id: undefined,
-      prioridade: '',
-      tempo_resposta_min: 15,
-      tempo_resolucao_min: 240,
-      ativo: true,
-      observacoes: '',
-    },
+  defaultValues: {
+    nome: '',
+    descricao: '',
+    tipo_aplicacao: 'global',
+    aplica_a: 'incidente',
+    grupo_id: undefined,
+    client_id: undefined,
+    prioridade: '',
+    tempo_resposta_min: 15,
+    tempo_resolucao_min: 240,
+    ativo: true,
+    observacoes: '',
+  },
   });
 
   const onSubmit = async (data: SLAFormData) => {

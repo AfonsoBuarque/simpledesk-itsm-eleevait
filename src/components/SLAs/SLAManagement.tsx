@@ -108,6 +108,7 @@ const SLAManagement = () => {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Tipo</TableHead>
+                  <TableHead>Aplica a</TableHead>
                   <TableHead>Grupo</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Prioridade</TableHead>
@@ -133,6 +134,9 @@ const SLAManagement = () => {
                         {getTypeIcon(sla.tipo_aplicacao)}
                         {getTypeLabel(sla.tipo_aplicacao)}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {sla.aplica_a ? ({ incidente: 'Incidente', solicitacao: 'Solicitação', problema: 'Problema' } as const)[sla.aplica_a] : '-'}
                     </TableCell>
                     <TableCell>
                       {sla.group?.name || '-'}

@@ -1803,6 +1803,7 @@ export type Database = {
       }
       slas: {
         Row: {
+          aplica_a: Database["public"]["Enums"]["sla_tipo_aplicacao"] | null
           ativo: boolean | null
           atualizado_em: string | null
           atualizado_por: string | null
@@ -1820,6 +1821,7 @@ export type Database = {
           tipo_aplicacao: string
         }
         Insert: {
+          aplica_a?: Database["public"]["Enums"]["sla_tipo_aplicacao"] | null
           ativo?: boolean | null
           atualizado_em?: string | null
           atualizado_por?: string | null
@@ -1837,6 +1839,7 @@ export type Database = {
           tipo_aplicacao: string
         }
         Update: {
+          aplica_a?: Database["public"]["Enums"]["sla_tipo_aplicacao"] | null
           ativo?: boolean | null
           atualizado_em?: string | null
           atualizado_por?: string | null
@@ -2272,6 +2275,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "client_admin" | "manager" | "technician" | "user"
+      sla_tipo_aplicacao: "incidente" | "solicitacao" | "problema"
       ticket_priority: "low" | "medium" | "high" | "critical"
       ticket_status: "open" | "in_progress" | "pending" | "resolved" | "closed"
       ticket_type: "incident" | "request" | "problem" | "change"
@@ -2403,6 +2407,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "client_admin", "manager", "technician", "user"],
+      sla_tipo_aplicacao: ["incidente", "solicitacao", "problema"],
       ticket_priority: ["low", "medium", "high", "critical"],
       ticket_status: ["open", "in_progress", "pending", "resolved", "closed"],
       ticket_type: ["incident", "request", "problem", "change"],

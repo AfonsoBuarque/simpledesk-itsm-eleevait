@@ -4,6 +4,7 @@ export interface SLA {
   nome: string;
   descricao?: string;
   tipo_aplicacao: 'categoria' | 'grupo' | 'urgencia' | 'cliente' | 'global';
+  aplica_a?: 'incidente' | 'solicitacao' | 'problema';
   grupo_id?: string;
   client_id?: string;
   prioridade?: string;
@@ -27,6 +28,7 @@ export interface SLAFormData {
   nome: string;
   descricao?: string;
   tipo_aplicacao: 'categoria' | 'grupo' | 'urgencia' | 'cliente' | 'global';
+  aplica_a: 'incidente' | 'solicitacao' | 'problema';
   grupo_id?: string;
   client_id?: string;
   prioridade?: string;
