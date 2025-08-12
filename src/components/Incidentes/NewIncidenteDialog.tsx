@@ -125,7 +125,7 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <SolicitacaoFormFields form={form} filteredCategorias={(categorias || []).filter(c => c.tipo === 'incidente')} />
+            <SolicitacaoFormFields form={form} filteredCategorias={(categorias || []).filter(c => c.tipo === 'incidente')} slaAplicaA="incidente" />
             <FileUpload
               onFilesChange={setAnexos}
               maxFiles={5}

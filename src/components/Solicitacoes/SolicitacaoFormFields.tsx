@@ -24,18 +24,22 @@ interface SolicitacaoFormFieldsProps {
   form: UseFormReturn<SolicitacaoFormData>;
   excludeFields?: string[];
   filteredCategorias?: Categoria[];
+  slaAplicaA?: 'incidente' | 'solicitacao' | 'problema';
 }
 
-const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias }: SolicitacaoFormFieldsProps) => {
+const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias, slaAplicaA }: SolicitacaoFormFieldsProps) => {
   const { users } = useUsers();
   const { clients } = useClients();
   const { categorias } = useCategorias();
   const { slas } = useSLAs();
-  const { groups } = useGroups();
+const { groups } = useGroups();
+
+  const slasToShow = React.useMemo(() => {
+    return slaAplicaA ? slas.filter((s) => s.aplica_a === slaAplicaA) : slas;
+  }, [slas, slaAplicaA]);
 
   // Use filtered categories if provided, otherwise use all categories
   const categoriasToShow = filteredCategorias || categorias;
-
   const shouldRenderField = (fieldName: string) => {
     return !excludeFields.includes(fieldName);
   };
@@ -172,7 +176,7 @@ const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias }:
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {slas.map((sla) => (
+                  {slasToShow.map((sla) => (
                     <SelectItem key={sla.id} value={sla.id}>
                       {sla.nome}
                     </SelectItem>
