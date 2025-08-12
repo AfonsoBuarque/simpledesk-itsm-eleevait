@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Activity } from 'lucide-react';
 
 interface StatusChartProps {
@@ -14,6 +14,7 @@ interface StatusChartProps {
 
 const StatusChart = ({ data }: StatusChartProps) => {
   const hasData = data.some(item => item.value > 0);
+  const total = data.reduce((sum, item) => sum + item.value, 0);
 
   if (!hasData) {
     return (
@@ -70,9 +71,22 @@ const StatusChart = ({ data }: StatusChartProps) => {
               ))}
             </Pie>
             <Tooltip formatter={(value) => [value, 'Tickets']} />
-            <Legend />
           </PieChart>
         </ResponsiveContainer>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+          {data.filter((d) => d.value > 0).map((entry) => (
+            <div key={entry.name} className="flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: entry.color }}
+                aria-hidden
+              />
+              <span className="text-sm text-gray-600">
+                {entry.name} ({entry.value}{total ? `, ${Math.round((entry.value / total) * 100)}%` : ''})
+              </span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
