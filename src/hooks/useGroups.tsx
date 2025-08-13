@@ -23,7 +23,7 @@ export const useGroups = () => {
           *,
           clients:client_id (id, name),
           responsible_user:responsible_user_id (id, name),
-          user_groups (count)
+          user_groups (user_id)
         `)
         .order('created_at', { ascending: false });
 
