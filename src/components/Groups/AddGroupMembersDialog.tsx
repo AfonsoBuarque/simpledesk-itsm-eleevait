@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -75,18 +76,27 @@ export const AddGroupMembersDialog: React.FC<AddGroupMembersDialogProps> = ({ op
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg w-full">
         <DialogHeader>
           <DialogTitle>Adicionar Membros ao Grupo</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 w-full min-w-0 overflow-hidden">
+          <div className="flex items-center gap-2 w-full min-w-0">
             <Input
+              className="w-full min-w-0"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por nome ou email..."
             />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setPage(1)}
+              aria-label="Buscar usuário"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
           </div>
 
           {loading ? (
@@ -96,7 +106,7 @@ export const AddGroupMembersDialog: React.FC<AddGroupMembersDialogProps> = ({ op
           ) : (
             <>
               <div className="text-xs text-muted-foreground">Mostrando {start + 1}-{end} de {total}</div>
-              <div className="flex flex-col gap-2 max-h-80 overflow-auto pr-1">
+              <div className="flex flex-col gap-2 max-h-80 overflow-auto pr-1 w-full min-w-0">
                 {paginatedUsers.map((user) => (
                   <label key={user.id} className="flex items-center gap-2 cursor-pointer">
                     <Checkbox
@@ -111,7 +121,7 @@ export const AddGroupMembersDialog: React.FC<AddGroupMembersDialogProps> = ({ op
               </div>
 
               {totalPages > 1 && (
-                <Pagination className="mt-1">
+                <Pagination className="mt-1 overflow-x-auto">
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); goToPage(page - 1); }} />
@@ -137,7 +147,7 @@ export const AddGroupMembersDialog: React.FC<AddGroupMembersDialogProps> = ({ op
           )}
         </div>
 
-        <div className="flex justify-end gap-2 pt-3">
+        <div className="flex justify-end gap-2 pt-3 w-full">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button onClick={handleAdd} disabled={selected.length === 0}>Adicionar {selected.length > 0 ? `(${selected.length})` : ""}</Button>
         </div>
