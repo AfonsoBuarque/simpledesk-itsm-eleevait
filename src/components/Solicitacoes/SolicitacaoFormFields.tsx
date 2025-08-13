@@ -19,20 +19,34 @@ import { useCategorias } from '@/hooks/useCategorias';
 import { useSLAs } from '@/hooks/useSLAs';
 import { useGroups } from '@/hooks/useGroups';
 import { Categoria } from '@/types/categoria';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
 
 interface SolicitacaoFormFieldsProps {
   form: UseFormReturn<SolicitacaoFormData>;
   excludeFields?: string[];
   filteredCategorias?: Categoria[];
   slaAplicaA?: 'incidente' | 'solicitacao' | 'problema';
+  userSelectMode?: 'default' | 'searchable';
 }
 
-const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias, slaAplicaA }: SolicitacaoFormFieldsProps) => {
+const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias, slaAplicaA, userSelectMode = 'default' }: SolicitacaoFormFieldsProps) => {
   const { users } = useUsers();
   const { clients } = useClients();
   const { categorias } = useCategorias();
   const { slas } = useSLAs();
 const { groups } = useGroups();
+
+  const [solicitanteOpen, setSolicitanteOpen] = React.useState(false);
+  const [atendenteOpen, setAtendenteOpen] = React.useState(false);
+
+  const sortedUsers = React.useMemo(() => {
+    return [...users].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pt', { sensitivity: 'base' }));
+  }, [users]);
 
   const slasToShow = React.useMemo(() => {
     return slaAplicaA ? slas.filter((s) => s.aplica_a === slaAplicaA) : slas;
@@ -88,20 +102,66 @@ const { groups } = useGroups();
           render={({ field }) => (
             <FormItem>
               <FormLabel>Solicitante</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o solicitante" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {userSelectMode === 'searchable' ? (
+                <Popover open={solicitanteOpen} onOpenChange={setSolicitanteOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={solicitanteOpen}
+                        className="w-full justify-between"
+                      >
+                        {sortedUsers.find(u => u.id === field.value)?.name || "Selecione o solicitante..."}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar usuário..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum usuário encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          {sortedUsers.map((user) => (
+                            <CommandItem
+                              key={user.id}
+                              value={user.name}
+                              onSelect={() => {
+                                field.onChange(user.id);
+                                setSolicitanteOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === user.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {user.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o solicitante" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {sortedUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -327,20 +387,66 @@ const { groups } = useGroups();
           render={({ field }) => (
             <FormItem>
               <FormLabel>Atendente</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o atendente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {userSelectMode === 'searchable' ? (
+                <Popover open={atendenteOpen} onOpenChange={setAtendenteOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={atendenteOpen}
+                        className="w-full justify-between"
+                      >
+                        {sortedUsers.find(u => u.id === field.value)?.name || "Selecione o atendente..."}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar usuário..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum usuário encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          {sortedUsers.map((user) => (
+                            <CommandItem
+                              key={user.id}
+                              value={user.name}
+                              onSelect={() => {
+                                field.onChange(user.id);
+                                setAtendenteOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === user.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {user.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o atendente" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {sortedUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <FormMessage />
             </FormItem>
           )}
