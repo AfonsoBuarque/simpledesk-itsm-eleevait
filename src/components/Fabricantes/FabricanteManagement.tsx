@@ -81,13 +81,14 @@ const FabricanteManagement = () => {
               <TableHead>Nome</TableHead>
               <TableHead>País de Origem</TableHead>
               <TableHead>Contato de Suporte</TableHead>
+              <TableHead>Cliente</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {fabricantes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                   Nenhum fabricante cadastrado
                 </TableCell>
               </TableRow>
@@ -98,6 +99,9 @@ const FabricanteManagement = () => {
                   <TableCell>{fabricante.pais_origem || '-'}</TableCell>
                   <TableCell className="max-w-xs truncate">
                     {fabricante.contato_suporte || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {(fabricante as any).clients?.name || '-'}
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">

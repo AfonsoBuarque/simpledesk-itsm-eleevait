@@ -17,7 +17,10 @@ export const useFabricantes = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fabricantes')
-        .select('*')
+        .select(`
+          *,
+          clients:client_id (id, name)
+        `)
         .order('nome');
       
       if (error) throw error;

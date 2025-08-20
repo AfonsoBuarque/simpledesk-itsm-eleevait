@@ -21,6 +21,7 @@ const fabricanteSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   pais_origem: z.string().optional(),
   contato_suporte: z.string().optional(),
+  client_id: z.string().optional(),
 });
 
 const NewFabricanteDialog = () => {
@@ -33,6 +34,7 @@ const NewFabricanteDialog = () => {
       nome: '',
       pais_origem: '',
       contato_suporte: '',
+      client_id: '',
     },
   });
 
