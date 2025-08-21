@@ -19,6 +19,7 @@ const fabricanteSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   pais_origem: z.string().optional(),
   contato_suporte: z.string().optional(),
+  client_id: z.string().optional(),
 });
 
 interface EditFabricanteDialogProps {
@@ -36,6 +37,7 @@ const EditFabricanteDialog = ({ fabricante, open, onOpenChange }: EditFabricante
       nome: '',
       pais_origem: '',
       contato_suporte: '',
+      client_id: '',
     },
   });
 
@@ -45,6 +47,7 @@ const EditFabricanteDialog = ({ fabricante, open, onOpenChange }: EditFabricante
         nome: fabricante.nome,
         pais_origem: fabricante.pais_origem || '',
         contato_suporte: fabricante.contato_suporte || '',
+        client_id: fabricante.client_id || '',
       });
     }
   }, [fabricante, form]);
