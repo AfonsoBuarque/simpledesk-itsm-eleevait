@@ -37,12 +37,12 @@ const Sidebar = ({ isOpen, onClose, activeModule, onModuleChange, isCollapsed, o
       )}
       
       <aside className={cn(
-        "fixed top-0 left-0 z-50 h-screen bg-gray-900 text-white transition-all duration-300 ease-in-out",
-        "lg:relative lg:translate-x-0 shadow-xl lg:h-full",
+        "fixed top-0 left-0 z-50 h-screen min-h-screen bg-gray-900 text-white transition-all duration-300 ease-in-out",
+        "lg:relative lg:translate-x-0 shadow-xl lg:h-screen lg:min-h-screen",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         isCollapsed ? "w-16 min-w-16" : "w-64 min-w-64 max-w-80"
       )}>
-        <div className={cn("p-4 h-full flex flex-col overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800", isCollapsed && "px-2")}>
+        <div className={cn("p-4 h-screen min-h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800", isCollapsed && "px-2")}>
           <div className="mb-6">
             <SidebarHeader isCollapsed={isCollapsed} />
           </div>
