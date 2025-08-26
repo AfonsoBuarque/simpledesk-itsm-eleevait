@@ -19,6 +19,7 @@ export const useAuth = () => {
 
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
+  const syncedUsersRef = useRef(new Set<string>());
 
   // Nova função auxiliar para buscar o perfil no banco Supabase
   const fetchUserProfile = useCallback(async (userId: string) => {
@@ -64,19 +65,28 @@ export const useAuth = () => {
         setSession(sessionArg);
         setUser(sessionArg?.user ?? null);
         
-        // Se é login com Azure, sincronizar usuário
-        if (event === 'SIGNED_IN' && sessionArg?.user?.app_metadata?.provider === 'azure') {
+        // Se é login com Azure, sincronizar usuário (apenas no primeiro login, não no refresh)
+        if (event === 'SIGNED_IN' && 
+            sessionArg?.user?.app_metadata?.provider === 'azure' && 
+            !syncedUsersRef.current.has(sessionArg.user.id)) {
           console.log('Azure login detected, syncing user...');
-          try {
-            await supabase.functions.invoke('azure-user-sync', {
-              body: {
-                user: sessionArg.user,
-                action: 'sync_user'
-              }
-            });
-          } catch (error) {
-            console.error('Error syncing Azure user:', error);
-          }
+          syncedUsersRef.current.add(sessionArg.user.id);
+          
+          // Usar setTimeout para evitar problemas com o onAuthStateChange
+          setTimeout(async () => {
+            try {
+              await supabase.functions.invoke('azure-user-sync', {
+                body: {
+                  user: sessionArg.user,
+                  action: 'sync_user'
+                }
+              });
+            } catch (error) {
+              console.error('Error syncing Azure user:', error);
+              // Remover da lista se houve erro para permitir retry
+              syncedUsersRef.current.delete(sessionArg.user.id);
+            }
+          }, 0);
         }
         
         if (sessionArg?.user) {
@@ -220,6 +230,7 @@ export const useAuth = () => {
       setUser(null);
       setSession(null);
       setProfile(null);
+      syncedUsersRef.current.clear(); // Limpar lista de usuários sincronizados no logout
       setLoading(false);
       setTimeout(() => {
         setUser(null);
