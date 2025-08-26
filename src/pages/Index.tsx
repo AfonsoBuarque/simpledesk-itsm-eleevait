@@ -28,7 +28,7 @@ import ProblemasManagement from '@/components/Problemas/ProblemasManagement';
 import MudancasManagement from '@/components/Mudancas/MudancasManagement';
 
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading, profileLoading } = useAuth();
   const [activeModule, setActiveModule] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -39,8 +39,14 @@ const Index = () => {
     return <Navigate to="/portal" replace />;
   }
 
-  if (loading) {
+  // Aguardar carregamento do perfil para verificar role
+  if (loading || profileLoading) {
     return <PageLoading message="Autenticando..." />;
+  }
+
+  // Redirecionar usuários com role "user" para /portal
+  if (profile?.role === 'user') {
+    return <Navigate to="/portal" replace />;
   }
 
   const handleModuleChange = (module: string) => {
