@@ -16,11 +16,17 @@ export const useProfiles = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          clients:client_id (
+            id,
+            name
+          )
+        `)
         .order('full_name');
 
       if (error) throw error;
-      return data as Profile[];
+      return data;
     }
   });
 

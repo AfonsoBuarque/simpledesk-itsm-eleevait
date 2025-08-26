@@ -1694,6 +1694,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          client_id: string | null
           created_at: string | null
           department: string | null
           email: string | null
@@ -1704,6 +1705,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          client_id?: string | null
           created_at?: string | null
           department?: string | null
           email?: string | null
@@ -1714,6 +1716,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          client_id?: string | null
           created_at?: string | null
           department?: string | null
           email?: string | null
@@ -1723,7 +1726,15 @@ export type Database = {
           role?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       requisicao_chat_mensagens: {
         Row: {
@@ -2250,6 +2261,10 @@ export type Database = {
       }
     }
     Functions: {
+      associar_usuario_por_dominio: {
+        Args: { user_email: string }
+        Returns: string
+      }
       get_current_user_client_id: {
         Args: Record<PropertyKey, never>
         Returns: string

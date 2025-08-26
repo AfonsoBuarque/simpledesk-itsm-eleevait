@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useClients } from '@/hooks/useClients';
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'Nome é obrigatório'),
@@ -35,6 +36,7 @@ const profileSchema = z.object({
   phone: z.string().optional(),
   department: z.string().optional(),
   role: z.string().min(1, 'Role é obrigatória'),
+  client_id: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -46,6 +48,7 @@ interface Profile {
   phone: string | null;
   department: string | null;
   role: string;
+  client_id: string | null;
 }
 
 interface EditProfileDialogProps {
@@ -57,6 +60,7 @@ interface EditProfileDialogProps {
 
 export const EditProfileDialog = ({ open, onOpenChange, profile, onSuccess }: EditProfileDialogProps) => {
   const { toast } = useToast();
+  const { clients } = useClients();
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -66,6 +70,7 @@ export const EditProfileDialog = ({ open, onOpenChange, profile, onSuccess }: Ed
       phone: '',
       department: '',
       role: 'user',
+      client_id: '',
     },
   });
 
@@ -77,6 +82,7 @@ export const EditProfileDialog = ({ open, onOpenChange, profile, onSuccess }: Ed
         phone: profile.phone || '',
         department: profile.department || '',
         role: profile.role || 'user',
+        client_id: profile.client_id || '',
       });
     }
   }, [profile, open, form]);
@@ -91,6 +97,7 @@ export const EditProfileDialog = ({ open, onOpenChange, profile, onSuccess }: Ed
           phone: data.phone || null,
           department: data.department || null,
           role: data.role,
+          client_id: data.client_id || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);
@@ -209,6 +216,38 @@ export const EditProfileDialog = ({ open, onOpenChange, profile, onSuccess }: Ed
                       <SelectItem value="manager">Gerente</SelectItem>
                       <SelectItem value="technician">Técnico</SelectItem>
                       <SelectItem value="user">Usuário</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="client_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cliente</FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      const newValue = value === 'no-client' ? '' : value;
+                      field.onChange(newValue);
+                    }} 
+                    value={field.value || 'no-client'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um cliente (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="no-client">Sem cliente específico</SelectItem>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
