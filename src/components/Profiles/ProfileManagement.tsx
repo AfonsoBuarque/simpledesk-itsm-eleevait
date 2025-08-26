@@ -152,7 +152,7 @@ const ProfileManagement = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
+                <TableHead>Cliente</TableHead>
                 <TableHead>Departamento</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Criado em</TableHead>
@@ -171,12 +171,7 @@ const ProfileManagement = () => {
                       <span>{profile.email || 'N/A'}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{profile.phone || 'N/A'}</span>
-                    </div>
-                  </TableCell>
+                  <TableCell>{profile.clients?.name || 'Sem cliente'}</TableCell>
                   <TableCell>{profile.department || 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant={getRoleBadgeVariant(profile.role || 'user')}>
