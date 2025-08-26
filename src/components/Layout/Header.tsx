@@ -39,6 +39,9 @@ const Header = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userClient, setUserClient] = useState<string>('');
   const [clientLoading, setClientLoading] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   // NOVO: Buscar nome do cliente real do usuário logado
   useEffect(() => {
@@ -132,6 +135,66 @@ const Header = ({
     window.location.replace("/auth");
   };
 
+  const handleSearch = async (term: string) => {
+    if (!term.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Buscar em tickets/solicitações
+      const { data: tickets } = await supabase
+        .from('solicitacoes')
+        .select('id, numero, titulo, status, tipo')
+        .or(`titulo.ilike.%${term}%,numero.ilike.%${term}%,descricao.ilike.%${term}%`)
+        .limit(5);
+
+      // Buscar em base de conhecimento
+      const { data: articles } = await supabase
+        .from('knowledge_base')
+        .select('id, title, content')
+        .or(`title.ilike.%${term}%,content.ilike.%${term}%`)
+        .limit(5);
+
+      // Buscar em CIs (Configuration Items)
+      const { data: cis } = await supabase
+        .from('ativos')
+        .select('id, nome, tipo, numero_serie')
+        .or(`nome.ilike.%${term}%,numero_serie.ilike.%${term}%`)
+        .limit(5);
+
+      const results = [
+        ...(tickets || []).map(item => ({ ...item, type: 'ticket' })),
+        ...(articles || []).map(item => ({ ...item, type: 'article' })),
+        ...(cis || []).map(item => ({ ...item, type: 'ci' }))
+      ];
+
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Erro na busca:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao realizar busca.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    // Debounce search
+    const timeoutId = setTimeout(() => {
+      handleSearch(value);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  };
+
   const getNotificationText = (notification: Notification) => {
     if (notification.prioridade === 'critica') {
       return `Ticket crítico: ${notification.numero}`;
@@ -166,7 +229,51 @@ const Header = ({
       <div className="flex-1 max-w-md mx-4 hidden md:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input placeholder="Buscar tickets, artigos, CIs..." className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
+          <Input 
+            placeholder="Buscar tickets, artigos, CIs..." 
+            className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" 
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          {/* Dropdown de resultados */}
+          {searchTerm && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto">
+              {isSearching ? (
+                <div className="p-3 text-center text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mx-auto"></div>
+                  <span className="ml-2">Buscando...</span>
+                </div>
+              ) : searchResults.length > 0 ? (
+                <>
+                  {searchResults.map((result, index) => (
+                    <div key={`${result.type}-${result.id}`} className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {result.type === 'ticket' && 'Ticket'}
+                              {result.type === 'article' && 'Artigo'}
+                              {result.type === 'ci' && 'CI'}
+                            </Badge>
+                            <span className="text-sm font-medium">
+                              {result.numero || result.title || result.nome}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1 truncate">
+                            {result.titulo || result.content?.substring(0, 100) || result.tipo}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="p-3 text-center text-gray-500">
+                  Nenhum resultado encontrado
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

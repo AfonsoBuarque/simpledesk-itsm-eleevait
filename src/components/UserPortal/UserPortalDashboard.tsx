@@ -6,6 +6,7 @@ import StatusChart from './StatusChart';
 import UrgencyChart from './UrgencyChart';
 import MonthlyTrendChart from './MonthlyTrendChart';
 import RecentTickets from './RecentTickets';
+import { NotificationBanner } from './NotificationBanner';
 import { Loader2 } from 'lucide-react';
 
 const UserPortalDashboard = () => {
@@ -31,6 +32,13 @@ const UserPortalDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Banner de Notificações */}
+      <NotificationBanner 
+        urgentTickets={urgenciaData.find(item => item.name === 'alta')?.value || 0}
+        pendingTickets={statusData.find(item => item.name === 'em_andamento')?.value || 0}
+        resolvedToday={statusData.find(item => item.name === 'resolvida')?.value || 0}
+      />
+
       {/* Métricas principais */}
       <div className="animate-fade-in" style={{ '--tw-animation-delay': '0.1s' } as React.CSSProperties}>
         <DashboardMetrics stats={stats} />
