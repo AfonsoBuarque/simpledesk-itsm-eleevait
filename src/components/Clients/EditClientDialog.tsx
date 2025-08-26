@@ -32,6 +32,7 @@ const EditClientDialog = ({ open, onOpenChange, client, onSubmit }: EditClientDi
     phone: '',
     address: '',
     description: '',
+    dominio: '',
     status: 'active' as 'active' | 'inactive'
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +45,7 @@ const EditClientDialog = ({ open, onOpenChange, client, onSubmit }: EditClientDi
         phone: client.phone,
         address: client.address,
         description: client.description || '',
+        dominio: (client as any).dominio || '',
         status: client.status
       });
     } else {
@@ -53,6 +55,7 @@ const EditClientDialog = ({ open, onOpenChange, client, onSubmit }: EditClientDi
         phone: '',
         address: '',
         description: '',
+        dominio: '',
         status: 'active'
       });
     }
@@ -140,6 +143,16 @@ const EditClientDialog = ({ open, onOpenChange, client, onSubmit }: EditClientDi
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Descrição do cliente (opcional)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dominio">Domínio</Label>
+            <Input
+              id="dominio"
+              value={formData.dominio}
+              onChange={(e) => setFormData({ ...formData, dominio: e.target.value })}
+              placeholder="exemplo.com.br"
             />
           </div>
 

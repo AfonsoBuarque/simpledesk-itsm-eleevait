@@ -123,6 +123,7 @@ export type Database = {
           address: string
           created_at: string
           description: string | null
+          dominio: string | null
           email: string
           id: string
           name: string
@@ -134,6 +135,7 @@ export type Database = {
           address: string
           created_at?: string
           description?: string | null
+          dominio?: string | null
           email: string
           id?: string
           name: string
@@ -145,6 +147,7 @@ export type Database = {
           address?: string
           created_at?: string
           description?: string | null
+          dominio?: string | null
           email?: string
           id?: string
           name?: string

@@ -20,6 +20,7 @@ interface ClientFormData {
   phone: string;
   address: string;
   description?: string;
+  dominio?: string;
 }
 
 const NewClientDialog = ({ open, onOpenChange, onSubmit }: NewClientDialogProps) => {
@@ -124,6 +125,17 @@ const NewClientDialog = ({ open, onOpenChange, onSubmit }: NewClientDialogProps)
               {...register('description')}
               placeholder="Informações adicionais sobre o cliente (opcional)"
               rows={2}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dominio">
+              Domínio
+            </Label>
+            <Input
+              id="dominio"
+              {...register('dominio')}
+              placeholder="exemplo.com.br"
             />
           </div>
 

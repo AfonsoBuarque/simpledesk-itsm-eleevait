@@ -120,7 +120,7 @@ const ClientManagement = () => {
                       </Badge>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
                         <span>{client.email}</span>
@@ -133,6 +133,13 @@ const ClientManagement = () => {
                         <MapPin className="h-4 w-4" />
                         <span>{client.address}</span>
                       </div>
+                      {(client as any).dominio && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {(client as any).dominio}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     
                     {client.description && (
