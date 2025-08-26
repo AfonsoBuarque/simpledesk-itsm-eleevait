@@ -3,6 +3,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
+import { PageLoading } from '@/components/ui/page-loading';
+import { usePageTransition } from '@/hooks/usePageTransition';
 import DashboardOverview from '@/components/Dashboard/DashboardOverview';
 import TicketList from '@/components/Tickets/TicketList';
 import KnowledgeBase from '@/components/Knowledge/KnowledgeBase';
@@ -30,6 +32,7 @@ const Index = () => {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isLoading: isTransitioning, loadingMessage, startTransition, endTransition } = usePageTransition();
 
   // Redirecionar usuários não autenticados para /portal
   if (!loading && !user) {
@@ -37,12 +40,43 @@ const Index = () => {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoading message="Autenticando..." />;
   }
+
+  const handleModuleChange = (module: string) => {
+    if (module === activeModule) return;
+    
+    // Mapear módulos para mensagens de loading personalizadas
+    const loadingMessages: { [key: string]: string } = {
+      'dashboard': 'Carregando Dashboard...',
+      'incidents': 'Carregando Incidentes...',
+      'requests': 'Carregando Requisições...',
+      'problems': 'Carregando Problemas...',
+      'changes': 'Carregando Mudanças...',
+      'knowledge': 'Carregando Base de Conhecimento...',
+      'users': 'Carregando Usuários...',
+      'groups': 'Carregando Grupos...',
+      'profiles': 'Carregando Perfis...',
+      'clients': 'Carregando Clientes...',
+      'categoria': 'Carregando Categorias...',
+      'sla': 'Carregando SLAs...',
+      'solicitacoes': 'Carregando Solicitações...',
+      'cmdb': 'Carregando CMDB...',
+      'ativos': 'Carregando Ativos...',
+      'contratos': 'Carregando Contratos...',
+      'fabricantes': 'Carregando Fabricantes...',
+      'fornecedores': 'Carregando Fornecedores...',
+      'localizacao': 'Carregando Localizações...'
+    };
+
+    startTransition(loadingMessages[module] || 'Carregando...');
+    setActiveModule(module);
+    
+    // Simular tempo de carregamento para permitir que o componente seja renderizado
+    setTimeout(() => {
+      endTransition();
+    }, 500);
+  };
 
   const renderContent = () => {
     switch (activeModule) {
@@ -95,11 +129,11 @@ const Index = () => {
 
   return (
     <div className="h-screen min-h-screen bg-gray-50 flex w-full overflow-hidden">
-      <Sidebar
+        <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         activeModule={activeModule}
-        onModuleChange={setActiveModule}
+        onModuleChange={handleModuleChange}
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
@@ -120,6 +154,9 @@ const Index = () => {
       
       {/* Chat Bot */}
       <ChatBot />
+      
+      {/* Page Loading Overlay */}
+      {isTransitioning && <PageLoading message={loadingMessage} />}
     </div>
   );
 };
