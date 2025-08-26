@@ -1,17 +1,20 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Building, Mail, Phone, MapPin, Loader2 } from 'lucide-react';
+import { Plus, Search, Building, Mail, Phone, MapPin, Loader2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import NewClientDialog from './NewClientDialog';
+import EditClientDialog from './EditClientDialog';
 import { useClients } from '@/hooks/useClients';
 
 const ClientManagement = () => {
-  const { clients, loading, addClient } = useClients();
+  const { clients, loading, addClient, updateClient } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+  const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -23,6 +26,20 @@ const ClientManagement = () => {
     if (success) {
       setIsNewClientDialogOpen(false);
     }
+  };
+
+  const handleEditClient = (client: any) => {
+    setSelectedClient(client);
+    setIsEditClientDialogOpen(true);
+  };
+
+  const handleUpdateClient = async (id: string, clientData: any) => {
+    const success = await updateClient(id, clientData);
+    if (success) {
+      setIsEditClientDialogOpen(false);
+      setSelectedClient(null);
+    }
+    return success;
   };
 
   if (loading) {
@@ -125,7 +142,16 @@ const ClientManagement = () => {
                     )}
                   </div>
                   
-                  <div className="text-right">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditClient(client)}
+                      className="h-8"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
                     <div className="text-xs text-gray-400">
                       Cadastrado em: {new Date(client.created_at).toLocaleDateString('pt-BR')}
                     </div>
@@ -147,6 +173,13 @@ const ClientManagement = () => {
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}
         onSubmit={handleAddClient}
+      />
+
+      <EditClientDialog
+        open={isEditClientDialogOpen}
+        onOpenChange={setIsEditClientDialogOpen}
+        client={selectedClient}
+        onSubmit={handleUpdateClient}
       />
     </div>
   );

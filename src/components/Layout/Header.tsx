@@ -152,22 +152,22 @@ const Header = ({
 
       // Buscar em base de conhecimento
       const { data: articles } = await supabase
-        .from('knowledge_base')
-        .select('id, title, content')
-        .or(`title.ilike.%${term}%,content.ilike.%${term}%`)
+        .from('kb_artigos')
+        .select('id, titulo, conteudo')
+        .or(`titulo.ilike.%${term}%,conteudo.ilike.%${term}%`)
         .limit(5);
 
       // Buscar em CIs (Configuration Items)
       const { data: cis } = await supabase
-        .from('ativos')
-        .select('id, nome, tipo, numero_serie')
+        .from('cmdb_ativos')
+        .select('id, nome, tipo_id, numero_serie')
         .or(`nome.ilike.%${term}%,numero_serie.ilike.%${term}%`)
         .limit(5);
 
       const results = [
         ...(tickets || []).map(item => ({ ...item, type: 'ticket' })),
-        ...(articles || []).map(item => ({ ...item, type: 'article' })),
-        ...(cis || []).map(item => ({ ...item, type: 'ci' }))
+        ...(articles || []).map(item => ({ ...item, type: 'article', title: item.titulo, content: item.conteudo })),
+        ...(cis || []).map(item => ({ ...item, type: 'ci', tipo: item.tipo_id }))
       ];
 
       setSearchResults(results);
