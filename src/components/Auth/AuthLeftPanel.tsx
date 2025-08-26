@@ -7,8 +7,8 @@ const AuthLeftPanel = () => <div className="hidden md:flex flex-col justify-cent
       </div>
       <h2 className="text-4xl font-bold mb-2">Olá, <br />bem-vindo!</h2>
       <p className="text-lg text-blue-100 mb-6">
-        Plataforma completa de gestão de tempo e projetos<br />
-        com controle de horas, relatórios e análise por IA.
+        Plataforma completa de gestão chamados, ativos e SLA<br />
+        com relatórios e análise por IA.
       </p>
     </div>
   </div>;
