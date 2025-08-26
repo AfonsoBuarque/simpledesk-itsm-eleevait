@@ -26,6 +26,12 @@ const SidebarNavigation = ({
     if ((item as any).adminOnly) {
       return profile?.role === 'admin';
     }
+    
+    // Técnicos não podem ver Contatos e Configurações
+    if (profile?.role === 'tecnico') {
+      return item.id !== 'contacts' && item.id !== 'settings';
+    }
+    
     return true;
   });
 
