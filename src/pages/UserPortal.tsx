@@ -150,7 +150,7 @@ const UserPortal = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 animate-fade-in" style={{ '--tw-animation-delay': '0.4s' } as React.CSSProperties}>
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 bg-white/50 backdrop-blur-sm border shadow-sm rounded-xl overflow-hidden">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-white/50 backdrop-blur-sm border shadow-sm rounded-xl overflow-hidden">
             <TabsTrigger 
               value="dashboard" 
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm py-3"
