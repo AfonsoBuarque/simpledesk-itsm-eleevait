@@ -26,14 +26,14 @@ export const useAuth = () => {
     setProfileLoading(true);
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, role')
+        .from('users')
+        .select('id, name, email, role')
         .eq('id', userId)
         .maybeSingle();
       if (!error && data) {
         setProfile({
           id: data.id,
-          full_name: data.full_name,
+          full_name: data.name,
           email: data.email,
           role: data.role || 'user',
         });

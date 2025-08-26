@@ -28,7 +28,7 @@ const SidebarNavigation = ({
     }
     
     // Técnicos não podem ver Contatos e Configurações
-    if (profile?.role === 'tecnico') {
+    if (profile?.role === 'technician') {
       return item.id !== 'contacts' && item.id !== 'settings';
     }
     
