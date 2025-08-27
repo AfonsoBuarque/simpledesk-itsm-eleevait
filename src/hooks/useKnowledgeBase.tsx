@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useUserData } from './useUserData';
 import { toast } from '@/components/ui/use-toast';
 
 export interface KBArticle {
@@ -9,6 +10,7 @@ export interface KBArticle {
   titulo: string;
   conteudo: string;
   categoria_id?: string;
+  client_id?: string;
   tags?: string[];
   status: 'rascunho' | 'publicado' | 'arquivado';
   visibilidade: 'publico' | 'interno' | 'restrito';
@@ -18,6 +20,7 @@ export interface KBArticle {
   criado_em: string;
   atualizado_em?: string;
   categoria?: KBCategory;
+  cliente?: { name: string };
   autor?: string;
   views?: number;
   likes?: number;
@@ -45,7 +48,8 @@ export interface KBFeedback {
 }
 
 export const useKnowledgeBase = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const { userData } = useUserData(user?.id);
   const [articles, setArticles] = useState<KBArticle[]>([]);
   const [categories, setCategories] = useState<KBCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +61,8 @@ export const useKnowledgeBase = () => {
         .select(`
           *,
           categoria:categoria_id(nome),
-          autor:criado_por(name)
+          autor:criado_por(name),
+          cliente:client_id(name)
         `)
         .order('criado_em', { ascending: false });
 
@@ -142,6 +147,7 @@ export const useKnowledgeBase = () => {
         titulo: articleData.titulo!,
         conteudo: articleData.conteudo!,
         categoria_id: articleData.categoria_id && articleData.categoria_id !== '' ? articleData.categoria_id : null,
+        client_id: userData?.client_id || null,
         tags: articleData.tags || [],
         status: articleData.status || 'rascunho',
         visibilidade: articleData.visibilidade || 'interno',

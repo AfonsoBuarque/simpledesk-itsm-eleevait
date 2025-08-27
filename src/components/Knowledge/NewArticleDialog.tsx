@@ -21,6 +21,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
 import { useKnowledgeBase, KBCategory } from '@/hooks/useKnowledgeBase';
+import { useUserData } from '@/hooks/useUserData';
+import { useAuth } from '@/hooks/useAuth';
 
 interface NewArticleDialogProps {
   trigger: React.ReactNode;
@@ -29,6 +31,8 @@ interface NewArticleDialogProps {
 
 const NewArticleDialog = ({ trigger, categories }: NewArticleDialogProps) => {
   const { createArticle } = useKnowledgeBase();
+  const { user } = useAuth();
+  const { userData } = useUserData(user?.id);
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',
@@ -101,6 +105,16 @@ const NewArticleDialog = ({ trigger, categories }: NewArticleDialogProps) => {
               onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
               placeholder="Digite o título do artigo"
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="cliente">Cliente</Label>
+            <Input
+              id="cliente"
+              value={userData?.client?.name || 'N/A'}
+              disabled
+              className="bg-muted"
             />
           </div>
 

@@ -853,6 +853,7 @@ export type Database = {
           artigo_relacionado_ids: string[] | null
           atualizado_em: string | null
           categoria_id: string | null
+          client_id: string | null
           conteudo: string
           criado_em: string | null
           criado_por: string | null
@@ -867,6 +868,7 @@ export type Database = {
           artigo_relacionado_ids?: string[] | null
           atualizado_em?: string | null
           categoria_id?: string | null
+          client_id?: string | null
           conteudo: string
           criado_em?: string | null
           criado_por?: string | null
@@ -881,6 +883,7 @@ export type Database = {
           artigo_relacionado_ids?: string[] | null
           atualizado_em?: string | null
           categoria_id?: string | null
+          client_id?: string | null
           conteudo?: string
           criado_em?: string | null
           criado_por?: string | null
@@ -896,6 +899,13 @@ export type Database = {
             columns: ["categoria_id"]
             isOneToOne: false
             referencedRelation: "kb_categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_artigos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
