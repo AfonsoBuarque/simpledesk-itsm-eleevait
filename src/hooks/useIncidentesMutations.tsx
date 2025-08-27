@@ -100,9 +100,112 @@ export const useIncidentesMutations = () => {
     },
   });
 
+  // Função para criar logs de alteração para incidentes
+  const createIncidenteAuditLog = async (
+    incidenteId: string, 
+    acao: string, 
+    tipo: string, 
+    userId: string
+  ) => {
+    try {
+      await supabase
+        .from('incidentes_logs')
+        .insert({
+          incidente_id: incidenteId,
+          acao,
+          tipo,
+          usuario_id: userId,
+        });
+    } catch (error) {
+      console.error('Error creating incidente audit log:', error);
+    }
+  };
+
+  // Função para comparar valores e gerar logs para incidentes
+  const generateIncidenteAuditLogs = async (
+    incidenteId: string,
+    oldData: any,
+    newData: any,
+    userId: string
+  ) => {
+    const logs: Array<{ acao: string; tipo: string }> = [];
+
+    // Verificar alterações nos campos principais
+    if (oldData.status !== newData.status) {
+      logs.push({
+        acao: `Status alterado de "${oldData.status}" para "${newData.status}"`,
+        tipo: 'status'
+      });
+    }
+
+    if (oldData.data_limite_resposta !== newData.data_limite_resposta) {
+      logs.push({
+        acao: `Data limite resposta alterada de "${oldData.data_limite_resposta}" para "${newData.data_limite_resposta}"`,
+        tipo: 'data_limite_resposta'
+      });
+    }
+
+    if (oldData.data_limite_resolucao !== newData.data_limite_resolucao) {
+      logs.push({
+        acao: `Data limite resolução alterada de "${oldData.data_limite_resolucao}" para "${newData.data_limite_resolucao}"`,
+        tipo: 'data_limite_resolucao'
+      });
+    }
+
+    if (oldData.prioridade !== newData.prioridade) {
+      logs.push({
+        acao: `Prioridade alterada de "${oldData.prioridade}" para "${newData.prioridade}"`,
+        tipo: 'prioridade'
+      });
+    }
+
+    if (oldData.atendente_id !== newData.atendente_id) {
+      logs.push({
+        acao: `Atendente alterado`,
+        tipo: 'atendente_id'
+      });
+    }
+
+    if (oldData.grupo_responsavel_id !== newData.grupo_responsavel_id) {
+      logs.push({
+        acao: `Grupo responsável alterado`,
+        tipo: 'grupo_responsavel_id'
+      });
+    }
+
+    if (oldData.notas_internas !== newData.notas_internas) {
+      logs.push({
+        acao: `Notas internas alteradas`,
+        tipo: 'notas_internas'
+      });
+    }
+
+    // Criar todos os logs
+    for (const log of logs) {
+      await createIncidenteAuditLog(incidenteId, log.acao, log.tipo, userId);
+    }
+  };
+
   const updateIncidente = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Atualizando incidente:', id, data);
+
+      // Obter dados atuais para comparação
+      const { data: currentData, error: currentError } = await supabase
+        .from('incidentes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (currentError) {
+        throw currentError;
+      }
+
+      // Obter usuário atual
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
+        throw new Error('Usuário não autenticado');
+      }
 
       // Tratar campos UUID vazios que causam erro
       const updateData: Record<string, any> = {
@@ -164,6 +267,9 @@ export const useIncidentesMutations = () => {
         console.error('Erro ao atualizar incidente:', error);
         throw error;
       }
+
+      // Gerar logs de auditoria após atualização bem-sucedida
+      await generateIncidenteAuditLogs(id, currentData, updated, currentUser.id);
 
       return updated;
     },

@@ -10,9 +10,112 @@ export const useSolicitacaoUpdate = () => {
   const queryClient = useQueryClient();
   const { calculateAndSetSLADeadlines } = useSLACalculation();
 
+  // Função para criar logs de alteração
+  const createAuditLog = async (
+    requisicaoId: string, 
+    acao: string, 
+    tipo: string, 
+    userId: string
+  ) => {
+    try {
+      await supabase
+        .from('requisicao_logs')
+        .insert({
+          requisicao_id: requisicaoId,
+          acao,
+          tipo,
+          usuario_id: userId,
+        });
+    } catch (error) {
+      console.error('Error creating audit log:', error);
+    }
+  };
+
+  // Função para comparar valores e gerar logs
+  const generateAuditLogs = async (
+    requisicaoId: string,
+    oldData: any,
+    newData: any,
+    userId: string
+  ) => {
+    const logs: Array<{ acao: string; tipo: string }> = [];
+
+    // Verificar alterações nos campos principais
+    if (oldData.status !== newData.status) {
+      logs.push({
+        acao: `Status alterado de "${oldData.status}" para "${newData.status}"`,
+        tipo: 'status'
+      });
+    }
+
+    if (oldData.data_limite_resposta !== newData.data_limite_resposta) {
+      logs.push({
+        acao: `Data limite resposta alterada de "${oldData.data_limite_resposta}" para "${newData.data_limite_resposta}"`,
+        tipo: 'data_limite_resposta'
+      });
+    }
+
+    if (oldData.data_limite_resolucao !== newData.data_limite_resolucao) {
+      logs.push({
+        acao: `Data limite resolução alterada de "${oldData.data_limite_resolucao}" para "${newData.data_limite_resolucao}"`,
+        tipo: 'data_limite_resolucao'
+      });
+    }
+
+    if (oldData.prioridade !== newData.prioridade) {
+      logs.push({
+        acao: `Prioridade alterada de "${oldData.prioridade}" para "${newData.prioridade}"`,
+        tipo: 'prioridade'
+      });
+    }
+
+    if (oldData.atendente_id !== newData.atendente_id) {
+      logs.push({
+        acao: `Atendente alterado`,
+        tipo: 'atendente_id'
+      });
+    }
+
+    if (oldData.grupo_responsavel_id !== newData.grupo_responsavel_id) {
+      logs.push({
+        acao: `Grupo responsável alterado`,
+        tipo: 'grupo_responsavel_id'
+      });
+    }
+
+    if (oldData.notas_internas !== newData.notas_internas) {
+      logs.push({
+        acao: `Notas internas alteradas`,
+        tipo: 'notas_internas'
+      });
+    }
+
+    // Criar todos os logs
+    for (const log of logs) {
+      await createAuditLog(requisicaoId, log.acao, log.tipo, userId);
+    }
+  };
+
   const updateSolicitacao = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
       console.log('Updating solicitação:', id, data);
+      
+      // Obter dados atuais para comparação
+      const { data: currentData, error: currentError } = await supabase
+        .from('solicitacoes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (currentError) {
+        throw currentError;
+      }
+
+      // Obter usuário atual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
       
       // Se categoria ou grupo responsável mudaram, recalcular SLA
       let slaDeadlines = {
@@ -69,6 +172,9 @@ export const useSolicitacaoUpdate = () => {
         console.error('Error updating solicitação:', error);
         throw error;
       }
+
+      // Gerar logs de auditoria após atualização bem-sucedida
+      await generateAuditLogs(id, currentData, updatedData, user.id);
 
       return updatedData;
     },

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useRequisicaoLogs } from "@/hooks/useRequisicaoLogs";
+import { useIncidenteLogs } from "@/hooks/useIncidenteLogs";
 import { Solicitacao } from "@/types/solicitacao";
 
 interface IncidenteLogsProps {
@@ -8,7 +8,7 @@ interface IncidenteLogsProps {
 }
 
 export const IncidenteLogs: React.FC<IncidenteLogsProps> = ({ incidente }) => {
-  const { logs, isLoading, error } = useRequisicaoLogs(incidente.id);
+  const { logs, isLoading, error } = useIncidenteLogs(incidente.id);
   return (
     <div className="border bg-background rounded-lg p-4 flex-1 min-h-0 overflow-y-auto">
       <h4 className="font-semibold text-base mb-2">Logs de Alteração</h4>
