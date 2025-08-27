@@ -8,6 +8,9 @@ export type RequisicaoLog = {
   acao: string;
   tipo?: string | null;
   usuario_id?: string | null;
+  usuario?: {
+    name: string;
+  } | null;
   criado_em: string;
 };
 
@@ -18,7 +21,10 @@ export const useRequisicaoLogs = (requisicaoId: string | undefined) => {
       if (!requisicaoId) return [];
       const { data, error } = await supabase
         .from('requisicao_logs')
-        .select('*')
+        .select(`
+          *,
+          usuario:users!requisicao_logs_usuario_id_fkey(name)
+        `)
         .eq('requisicao_id', requisicaoId)
         .order('criado_em', { ascending: true });
 

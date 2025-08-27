@@ -20,7 +20,7 @@ export const RequisicaoLogs: React.FC<RequisicaoLogsProps> = ({ requisicao }) =>
       <ul className="space-y-2">
         {logs.map((l) => (
           <li key={l.id} className="flex items-center gap-2 border-b pb-2 text-sm">
-            <span className="font-semibold">{l.usuario_id || "Usuário"}:</span>
+            <span className="font-semibold">{l.usuario?.name || "Sistema"}:</span>
             <span>{l.acao}</span>
             <span className="ml-auto text-xs opacity-60">
               {new Date(l.criado_em).toLocaleString()}
