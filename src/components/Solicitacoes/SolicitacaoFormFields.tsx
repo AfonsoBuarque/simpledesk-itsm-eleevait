@@ -230,10 +230,10 @@ const { groups } = useGroups();
           render={({ field }) => (
             <FormItem>
               <FormLabel>SLA</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={true}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o SLA" />
+                  <SelectTrigger className="bg-muted">
+                    <SelectValue placeholder="SLA será preenchido automaticamente" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
