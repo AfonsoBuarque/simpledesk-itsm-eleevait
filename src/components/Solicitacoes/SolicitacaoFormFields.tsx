@@ -29,12 +29,13 @@ import { cn } from '@/lib/utils';
 interface SolicitacaoFormFieldsProps {
   form: UseFormReturn<SolicitacaoFormData>;
   excludeFields?: string[];
+  readOnlyFields?: string[];
   filteredCategorias?: Categoria[];
   slaAplicaA?: 'incidente' | 'solicitacao' | 'problema';
   userSelectMode?: 'default' | 'searchable';
 }
 
-const SolicitacaoFormFields = ({ form, excludeFields = [], filteredCategorias, slaAplicaA, userSelectMode = 'default' }: SolicitacaoFormFieldsProps) => {
+const SolicitacaoFormFields = ({ form, excludeFields = [], readOnlyFields = [], filteredCategorias, slaAplicaA, userSelectMode = 'default' }: SolicitacaoFormFieldsProps) => {
   const { users } = useUsers();
   const { clients } = useClients();
   const { categorias } = useCategorias();
@@ -461,7 +462,12 @@ const { groups } = useGroups();
             <FormItem>
               <FormLabel>Data Limite Resposta</FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input 
+                  type="datetime-local" 
+                  {...field} 
+                  readOnly={readOnlyFields.includes('data_limite_resposta')}
+                  className={readOnlyFields.includes('data_limite_resposta') ? "bg-gray-50" : ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -477,7 +483,12 @@ const { groups } = useGroups();
             <FormItem>
               <FormLabel>Data Limite Resolução</FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input 
+                  type="datetime-local" 
+                  {...field} 
+                  readOnly={readOnlyFields.includes('data_limite_resolucao')}
+                  className={readOnlyFields.includes('data_limite_resolucao') ? "bg-gray-50" : ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

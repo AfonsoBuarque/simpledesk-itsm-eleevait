@@ -125,7 +125,13 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <SolicitacaoFormFields form={form} filteredCategorias={(categorias || []).filter(c => c.tipo === 'incidente')} slaAplicaA="incidente" userSelectMode="searchable" />
+            <SolicitacaoFormFields 
+              form={form} 
+              readOnlyFields={['data_limite_resposta', 'data_limite_resolucao']}
+              filteredCategorias={(categorias || []).filter(c => c.tipo === 'incidente')} 
+              slaAplicaA="incidente" 
+              userSelectMode="searchable" 
+            />
             <FileUpload
               onFilesChange={setAnexos}
               maxFiles={5}

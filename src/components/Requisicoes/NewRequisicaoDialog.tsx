@@ -108,7 +108,12 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <SolicitacaoFormFields form={form} filteredCategorias={(categorias || []).filter(c => c.tipo === 'solicitacao' || c.tipo === 'requisicao')} slaAplicaA="solicitacao" />
+            <SolicitacaoFormFields 
+              form={form} 
+              readOnlyFields={['data_limite_resposta', 'data_limite_resolucao']}
+              filteredCategorias={(categorias || []).filter(c => c.tipo === 'solicitacao' || c.tipo === 'requisicao')} 
+              slaAplicaA="solicitacao" 
+            />
 
             <FileUpload
               onFilesChange={setAnexos}
