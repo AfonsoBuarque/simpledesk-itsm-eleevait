@@ -13,6 +13,7 @@ import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useIncidentes } from '@/hooks/useIncidentes';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useAuth } from '@/hooks/useAuth';
+import { useClientContext } from '@/contexts/ClientContext';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useSyncCategoriaDependentes } from "@/hooks/useSyncCategoriaDependentes";
@@ -51,6 +52,7 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
   const { createIncidente } = useIncidentes();
   const { categorias } = useCategorias();
   const { user } = useAuth();
+  const { currentClientId } = useClientContext();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -67,12 +69,15 @@ export const NewIncidenteDialog = ({ isOpen, onClose }: NewIncidenteDialogProps)
     },
   });
 
-  // Garantir que o solicitante_id seja sempre do usuário logado
+  // Garantir que o solicitante_id seja sempre do usuário logado e client_id do cliente do usuário
   useEffect(() => {
     if (user?.id) {
       form.setValue("solicitante_id", user.id);
     }
-  }, [user?.id, form]);
+    if (currentClientId) {
+      form.setValue("client_id", currentClientId);
+    }
+  }, [user?.id, currentClientId, form]);
 
   // Sincronizar campos dependentes da categoria escolhida
   useSyncCategoriaDependentes(form, categorias);

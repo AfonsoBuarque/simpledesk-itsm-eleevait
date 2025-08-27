@@ -14,6 +14,7 @@ import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useRequisicoes } from '@/hooks/useRequisicoes';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useAuth } from '@/hooks/useAuth';
+import { useClientContext } from '@/contexts/ClientContext';
 import SolicitacaoFormFields from '../Solicitacoes/SolicitacaoFormFields';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useSyncCategoriaDependentes } from "@/hooks/useSyncCategoriaDependentes";
@@ -51,6 +52,7 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
   const { createRequisicao } = useRequisicoes();
   const { categorias } = useCategorias();
   const { user } = useAuth();
+  const { currentClientId } = useClientContext();
   const [anexos, setAnexos] = useState<string[]>([]);
 
   const form = useForm<SolicitacaoFormData>({
@@ -67,12 +69,15 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
     },
   });
 
-  // Preencher solicitante_id quando o usuário estiver disponível
+  // Preencher solicitante_id e client_id quando o usuário estiver disponível
   useEffect(() => {
     if (user?.id) {
       form.setValue("solicitante_id", user.id);
     }
-  }, [user?.id, form]);
+    if (currentClientId) {
+      form.setValue("client_id", currentClientId);
+    }
+  }, [user?.id, currentClientId, form]);
 
   // Sincronizar campos dependentes da categoria escolhida
   useSyncCategoriaDependentes(form, categorias);
