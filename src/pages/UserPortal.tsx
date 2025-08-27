@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, LogOut, BarChart3, Plus, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useClientContext } from '@/contexts/ClientContext';
 import { UserPortalForm } from '@/components/UserPortal/UserPortalForm';
 import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { UserTicketsList } from '@/components/UserPortal/UserTicketsList';
@@ -13,6 +14,7 @@ import { NovaRequisicaoModal } from '@/components/UserPortal/NovaRequisicaoModal
 
 const UserPortal = () => {
   const { signOut, profile } = useAuth();
+  const { currentClientName, loading: clientLoading } = useClientContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
@@ -59,7 +61,7 @@ const UserPortal = () => {
                 <p className="text-sm font-medium text-gray-900">
                   <span className="gradient-heading">{profile?.full_name || 'Usuário'}</span>
                 </p>
-                <p className="text-xs text-gray-500">Cliente</p>
+                <p className="text-xs text-gray-500">{currentClientName || 'Cliente'}</p>
               </div>
               
               {/* Link para Administração - apenas para admin ou client_admin */}
