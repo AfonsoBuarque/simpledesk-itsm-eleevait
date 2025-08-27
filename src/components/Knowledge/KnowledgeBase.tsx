@@ -21,6 +21,7 @@ import {
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import NewArticleDialog from './NewArticleDialog';
 import NewCategoryDialog from './NewCategoryDialog';
+import EditArticleDialog from './EditArticleDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -38,6 +39,7 @@ const KnowledgeBase = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [editingArticle, setEditingArticle] = useState<any>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -253,11 +255,20 @@ const KnowledgeBase = () => {
                               {article.categoria.nome}
                             </Badge>
                           )}
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm">
+                           <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setEditingArticle(article)}
+                            >
                               <Edit className="h-3 w-3" />
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-red-600">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-red-600"
+                              onClick={() => deleteArticle(article.id)}
+                            >
                               <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
@@ -336,7 +347,13 @@ const KnowledgeBase = () => {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">Editar</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setEditingArticle(article)}
+                            >
+                              Editar
+                            </Button>
                             <Button 
                               size="sm"
                               onClick={() => updateArticle(article.id, { status: 'publicado' })}
@@ -423,6 +440,16 @@ const KnowledgeBase = () => {
           </Card>
         </div>
       </div>
+
+      {/* Edit Article Dialog */}
+      {editingArticle && (
+        <EditArticleDialog
+          article={editingArticle}
+          isOpen={!!editingArticle}
+          onClose={() => setEditingArticle(null)}
+          categories={categories}
+        />
+      )}
     </div>
   );
 };
