@@ -18,7 +18,6 @@ export const useUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      console.log('Fetching users...');
       
       const { data, error } = await supabase
         .from('users')
@@ -31,21 +30,18 @@ export const useUsers = () => {
         `)
         .order('created_at', { ascending: false });
 
-      console.log('Users fetch result:', { data, error });
 
       if (error) {
         console.error('Error fetching users:', error);
         
         // Se o erro for 406 ou relacionado a RLS, vamos tentar uma consulta mais simples
         if (error.code === 'PGRST301' || error.message.includes('406')) {
-          console.log('Trying simplified users query...');
           
           const { data: simpleData, error: simpleError } = await supabase
             .from('users')
             .select('*')
             .order('created_at', { ascending: false });
           
-          console.log('Simple users fetch result:', { simpleData, simpleError });
           
           if (simpleError) {
             toast({

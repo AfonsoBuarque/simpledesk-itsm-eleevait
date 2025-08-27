@@ -97,17 +97,14 @@ export const useDashboardData = () => {
         // Corrigir chave de busca para Solicitações (aceitar solicitacao e requisicao)
         let tipoKeys = tipoConfig.synonyms || [tipoConfig.key];
 
-        // LOG para debug (remover quando estiver OK)
-        console.log(`Querying tickets for tipo(s): ${tipoKeys.join(', ')}`);
-
-        const { data: total, error: totalError } = await supabase
+        const { data, error } = await supabase
           .from('solicitacoes')
           .select('id, data_limite_resolucao, data_resolucao, status, tipo')
           .in('tipo', tipoKeys)
           .not('data_limite_resolucao', 'is', null);
 
-        if (totalError) {
-          console.error(`Erro ao buscar tickets de tipo(s) '${tipoKeys.join(', ')}':`, totalError);
+        if (error) {
+          console.error(`Erro ao buscar tickets de tipo(s) '${tipoKeys.join(', ')}':`, error);
           metrics.push({
             category: tipoConfig.label,
             target: 95,
@@ -117,7 +114,7 @@ export const useDashboardData = () => {
           continue;
         }
 
-        const totalTickets = total?.length || 0;
+        const totalTickets = data?.length || 0;
         if (totalTickets === 0) {
           metrics.push({
             category: tipoConfig.label,
@@ -128,7 +125,7 @@ export const useDashboardData = () => {
           continue;
         }
 
-        const onTime = total?.filter(ticket => {
+        const onTime = data?.filter(ticket => {
           if (ticket.status === 'resolvida' && ticket.data_resolucao && ticket.data_limite_resolucao) {
             return new Date(ticket.data_resolucao) <= new Date(ticket.data_limite_resolucao);
           }
@@ -140,12 +137,6 @@ export const useDashboardData = () => {
 
         const currentPercentage = totalTickets > 0 ? Math.round((onTime / totalTickets) * 100) : 0;
 
-        console.log(
-          `[${tipoConfig.label}] Tickets total:`,
-          totalTickets,
-          '- SLA OK:', onTime,
-          '- SLA %:', currentPercentage
-        );
 
         metrics.push({
           category: tipoConfig.label,

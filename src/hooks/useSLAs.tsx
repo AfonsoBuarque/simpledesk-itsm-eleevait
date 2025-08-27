@@ -15,7 +15,6 @@ export const useSLAs = () => {
   } = useQuery({
     queryKey: ['slas'],
     queryFn: async () => {
-      console.log('Fetching SLAs...');
       const { data, error } = await supabase
         .from('slas')
         .select(`
@@ -30,14 +29,12 @@ export const useSLAs = () => {
         throw error;
       }
 
-      console.log('SLAs fetched:', data);
       return data as SLA[];
     },
   });
 
   const createSLA = useMutation({
     mutationFn: async (slaData: SLAFormData) => {
-      console.log('Creating SLA:', slaData);
       const { data, error } = await supabase
         .from('slas')
         .insert([slaData])
@@ -49,7 +46,6 @@ export const useSLAs = () => {
         throw error;
       }
 
-      console.log('SLA created:', data);
       return data;
     },
     onSuccess: () => {
@@ -71,7 +67,6 @@ export const useSLAs = () => {
 
   const updateSLA = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SLAFormData> }) => {
-      console.log('Updating SLA:', id, data);
       const { data: updatedData, error } = await supabase
         .from('slas')
         .update(data)
@@ -84,7 +79,6 @@ export const useSLAs = () => {
         throw error;
       }
 
-      console.log('SLA updated:', updatedData);
       return updatedData;
     },
     onSuccess: () => {
@@ -106,7 +100,6 @@ export const useSLAs = () => {
 
   const deleteSLA = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting SLA:', id);
       const { error } = await supabase
         .from('slas')
         .delete()
@@ -117,7 +110,6 @@ export const useSLAs = () => {
         throw error;
       }
 
-      console.log('SLA deleted');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['slas'] });

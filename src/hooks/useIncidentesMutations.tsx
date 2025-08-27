@@ -232,20 +232,30 @@ export const useIncidentesMutations = () => {
         atualizado_por: user?.id,
       };
 
-      // Se categoria_id ou grupo_responsavel_id mudou, recalcule o SLA!
-      if (data.categoria_id && data.grupo_responsavel_id) {
-        const slaDeadlines = await calculateAndSetSLADeadlines(
-          data.categoria_id,
-          data.grupo_responsavel_id,
-          new Date().toISOString()
+      // Só recalcular SLA se categoria ou grupo mudaram E não havia SLA antes
+      const categoriaChanged = data.categoria_id && data.categoria_id !== currentData.categoria_id;
+      const grupoChanged = data.grupo_responsavel_id && data.grupo_responsavel_id !== currentData.grupo_responsavel_id;
+      const noSLABefore = !currentData.data_limite_resposta && !currentData.data_limite_resolucao;
+
+      let slaDeadlines = {
+        data_limite_resposta: currentData.data_limite_resposta,
+        data_limite_resolucao: currentData.data_limite_resolucao,
+      };
+
+      if ((categoriaChanged || grupoChanged) && noSLABefore) {
+        console.log('Recalculando SLA pois categoria/grupo mudou e não havia SLA antes');
+        const calculatedDeadlines = await calculateAndSetSLADeadlines(
+          data.categoria_id || currentData.categoria_id,
+          data.grupo_responsavel_id || currentData.grupo_responsavel_id,
+          currentData.data_abertura
         );
-        if (slaDeadlines.data_limite_resposta) {
-          updateData.data_limite_resposta = slaDeadlines.data_limite_resposta;
+        if (calculatedDeadlines.data_limite_resposta) {
+          updateData.data_limite_resposta = calculatedDeadlines.data_limite_resposta;
         }
-        if (slaDeadlines.data_limite_resolucao) {
-          updateData.data_limite_resolucao = slaDeadlines.data_limite_resolucao;
+        if (calculatedDeadlines.data_limite_resolucao) {
+          updateData.data_limite_resolucao = calculatedDeadlines.data_limite_resolucao;
         }
-        console.log('SLA deadlines recalculados ao atualizar:', slaDeadlines);
+        console.log('SLA deadlines recalculados ao atualizar:', calculatedDeadlines);
       }
 
       // Remover campos que são undefined ou string vazia para evitar erro de UUID

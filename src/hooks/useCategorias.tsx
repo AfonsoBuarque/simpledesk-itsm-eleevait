@@ -14,7 +14,6 @@ export const useCategorias = () => {
   } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      console.log('Fetching categorias...');
       const { data, error } = await supabase
         .from('categorias_servico')
         .select(`
@@ -32,7 +31,6 @@ export const useCategorias = () => {
         throw error;
       }
 
-      console.log('Categorias fetched:', data);
       
       // Transform the data to ensure proper typing and handle any join errors
       const transformedData = (data || []).map(item => ({
@@ -50,7 +48,6 @@ export const useCategorias = () => {
 
   const createCategoria = useMutation({
     mutationFn: async (categoriaData: CategoriaFormData) => {
-      console.log('Creating categoria:', categoriaData);
       const { data, error } = await supabase
         .from('categorias_servico')
         .insert([categoriaData])
@@ -62,7 +59,6 @@ export const useCategorias = () => {
         throw error;
       }
 
-      console.log('Categoria created:', data);
       return data;
     },
     onSuccess: () => {
@@ -84,7 +80,6 @@ export const useCategorias = () => {
 
   const updateCategoria = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<CategoriaFormData> }) => {
-      console.log('Updating categoria:', id, data);
       const { data: updatedData, error } = await supabase
         .from('categorias_servico')
         .update(data)
@@ -97,7 +92,6 @@ export const useCategorias = () => {
         throw error;
       }
 
-      console.log('Categoria updated:', updatedData);
       return updatedData;
     },
     onSuccess: () => {
@@ -119,7 +113,6 @@ export const useCategorias = () => {
 
   const deleteCategoria = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting categoria:', id);
       const { error } = await supabase
         .from('categorias_servico')
         .delete()
@@ -130,7 +123,6 @@ export const useCategorias = () => {
         throw error;
       }
 
-      console.log('Categoria deleted');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });

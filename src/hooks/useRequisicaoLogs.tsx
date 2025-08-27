@@ -19,17 +19,47 @@ export const useRequisicaoLogs = (requisicaoId: string | undefined) => {
     queryKey: ['requisicaoLogs', requisicaoId],
     queryFn: async () => {
       if (!requisicaoId) return [];
-      const { data, error } = await supabase
+      
+      // Primeiro buscar os logs
+      const { data: logsData, error: logsError } = await supabase
         .from('requisicao_logs')
-        .select(`
-          *,
-          usuario:users!requisicao_logs_usuario_id_fkey(name)
-        `)
+        .select('*')
         .eq('requisicao_id', requisicaoId)
         .order('criado_em', { ascending: true });
 
-      if (error) throw error;
-      return data as RequisicaoLog[];
+      if (logsError) {
+        console.error('Erro ao buscar logs de requisição:', logsError);
+        throw logsError;
+      }
+
+
+      // Buscar informações dos usuários para cada log
+      const logsWithUsers = await Promise.all(
+        logsData.map(async (log) => {
+          if (log.usuario_id) {
+            const { data: userData, error: userError } = await supabase
+              .from('users')
+              .select('name')
+              .eq('id', log.usuario_id)
+              .single();
+            
+            if (userError) {
+              console.error('Erro ao buscar usuário:', userError, 'para ID:', log.usuario_id);
+            }
+            
+            return {
+              ...log,
+              usuario: userData
+            };
+          }
+          return {
+            ...log,
+            usuario: null
+          };
+        })
+      );
+
+      return logsWithUsers as RequisicaoLog[];
     },
     enabled: !!requisicaoId,
   });

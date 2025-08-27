@@ -57,7 +57,6 @@ const getUrgenciaLabel = (urgencia: string) => {
 };
 
 const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: IncidentesTableProps) => {
-  console.log('Renderizando tabela com incidentes:', incidentes.length);
 
   if (incidentes.length === 0) {
     return (

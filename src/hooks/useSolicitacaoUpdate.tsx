@@ -18,14 +18,20 @@ export const useSolicitacaoUpdate = () => {
     userId: string
   ) => {
     try {
-      await supabase
+      const { data, error } = await supabase
         .from('requisicao_logs')
         .insert({
           requisicao_id: requisicaoId,
           acao,
           tipo,
           usuario_id: userId,
-        });
+        })
+        .select();
+      
+      if (error) {
+        console.error('Erro ao criar log:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('Error creating audit log:', error);
     }
@@ -117,16 +123,23 @@ export const useSolicitacaoUpdate = () => {
         throw new Error('Usuário não autenticado');
       }
       
-      // Se categoria ou grupo responsável mudaram, recalcular SLA
+      // Preservar prazos de SLA existentes - não recalcular
       let slaDeadlines = {
-        data_limite_resposta: data.data_limite_resposta,
-        data_limite_resolucao: data.data_limite_resolucao,
+        data_limite_resposta: currentData.data_limite_resposta,
+        data_limite_resolucao: currentData.data_limite_resolucao,
       };
 
-      if (data.categoria_id || data.grupo_responsavel_id) {
+      // Só recalcular SLA se categoria ou grupo mudaram E não havia SLA antes
+      const categoriaChanged = data.categoria_id && data.categoria_id !== currentData.categoria_id;
+      const grupoChanged = data.grupo_responsavel_id && data.grupo_responsavel_id !== currentData.grupo_responsavel_id;
+      const noSLABefore = !currentData.data_limite_resposta && !currentData.data_limite_resolucao;
+
+      if ((categoriaChanged || grupoChanged) && noSLABefore) {
+        console.log('Recalculando SLA pois categoria/grupo mudou e não havia SLA antes');
         const calculatedDeadlines = await calculateAndSetSLADeadlines(
-          data.categoria_id,
-          data.grupo_responsavel_id
+          data.categoria_id || currentData.categoria_id,
+          data.grupo_responsavel_id || currentData.grupo_responsavel_id,
+          currentData.data_abertura
         );
         
         if (calculatedDeadlines.data_limite_resposta) {
@@ -134,6 +147,25 @@ export const useSolicitacaoUpdate = () => {
         }
         if (calculatedDeadlines.data_limite_resolucao) {
           slaDeadlines.data_limite_resolucao = calculatedDeadlines.data_limite_resolucao;
+        }
+      }
+
+      // Gerenciar pausa/retomada do SLA baseado no status
+      const statusChanged = data.status && data.status !== currentData.status;
+      if (statusChanged) {
+        const statusAnterior = currentData.status;
+        const novoStatus = data.status;
+
+        // Se mudou PARA pendente, pausar SLA (apenas registrar no log)
+        if (novoStatus === 'pendente' && statusAnterior !== 'pendente') {
+          console.log('Status mudou para pendente - SLA deve ser pausado');
+          // Nota: A pausa real seria implementada com campos adicionais no banco
+        }
+
+        // Se mudou DE pendente para outro status, retomar SLA (apenas registrar no log)
+        if (statusAnterior === 'pendente' && novoStatus !== 'pendente') {
+          console.log('Status saiu de pendente - SLA deve ser retomado');
+          // Nota: A retomada real seria implementada com campos adicionais no banco
         }
       }
       

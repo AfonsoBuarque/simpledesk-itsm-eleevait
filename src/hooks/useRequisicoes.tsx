@@ -1,20 +1,113 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Solicitacao, SolicitacaoFormData } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
-import { useSLACalculation } from './useSLACalculation';
+import { useAuth } from '@/hooks/useAuth';
+import { useSLACalculation } from '@/hooks/useSLACalculation';
+import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useClientFilter } from './useClientFilter';
 
 export const useRequisicoes = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { calculateAndSetSLADeadlines } = useSLACalculation();
   const { currentClientId, isAdmin, clientLoading, validateClientData, applyClientFilter } = useClientFilter();
+
+  // Função para criar logs de alteração
+  const createAuditLog = async (
+    requisicaoId: string, 
+    acao: string, 
+    tipo: string, 
+    userId: string
+  ) => {
+    try {
+      const { data, error } = await supabase
+        .from('requisicao_logs')
+        .insert({
+          requisicao_id: requisicaoId,
+          acao,
+          tipo,
+          usuario_id: userId,
+        })
+        .select();
+      
+      if (error) {
+        console.error('Erro ao criar log de requisição:', error);
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error creating requisição audit log:', error);
+    }
+  };
+
+  // Função para comparar valores e gerar logs
+  const generateAuditLogs = async (
+    requisicaoId: string,
+    oldData: any,
+    newData: any,
+    userId: string
+  ) => {
+    const logs: Array<{ acao: string; tipo: string }> = [];
+
+    // Verificar alterações nos campos principais
+    if (oldData.status !== newData.status) {
+      logs.push({
+        acao: `Status alterado de "${oldData.status}" para "${newData.status}"`,
+        tipo: 'status'
+      });
+    }
+
+    if (oldData.prioridade !== newData.prioridade) {
+      logs.push({
+        acao: `Prioridade alterada de "${oldData.prioridade}" para "${newData.prioridade}"`,
+        tipo: 'prioridade'
+      });
+    }
+
+    if (oldData.grupo_responsavel_id !== newData.grupo_responsavel_id) {
+      logs.push({
+        acao: `Grupo responsável alterado`,
+        tipo: 'grupo'
+      });
+    }
+
+    if (oldData.atendente_id !== newData.atendente_id) {
+      logs.push({
+        acao: `Atendente alterado`,
+        tipo: 'atendente'
+      });
+    }
+
+    if (oldData.data_limite_resposta !== newData.data_limite_resposta) {
+      logs.push({
+        acao: `Data limite resposta alterada de "${oldData.data_limite_resposta}" para "${newData.data_limite_resposta}"`,
+        tipo: 'sla'
+      });
+    }
+
+    if (oldData.data_limite_resolucao !== newData.data_limite_resolucao) {
+      logs.push({
+        acao: `Data limite resolução alterada de "${oldData.data_limite_resolucao}" para "${newData.data_limite_resolucao}"`,
+        tipo: 'sla'
+      });
+    }
+
+    if (oldData.notas_internas !== newData.notas_internas) {
+      logs.push({
+        acao: `Notas internas alteradas`,
+        tipo: 'notas'
+      });
+    }
+
+    // Criar logs no banco
+    for (const log of logs) {
+      await createAuditLog(requisicaoId, log.acao, log.tipo, userId);
+    }
+  };
 
   const { data: requisicoes = [], isLoading, error } = useQuery({
     queryKey: ['requisicoes', currentClientId, isAdmin],
     queryFn: async () => {
-      console.log('Fetching requisições with client isolation...', { currentClientId, isAdmin });
       
       let query = supabase
         .from('solicitacoes')
@@ -39,7 +132,6 @@ export const useRequisicoes = () => {
         throw error;
       }
 
-      console.log('Requisições fetched with security:', data?.length, 'records');
       return data as Solicitacao[];
     },
     enabled: !clientLoading,
@@ -47,7 +139,6 @@ export const useRequisicoes = () => {
 
   const createRequisicao = useMutation({
     mutationFn: async (formData: SolicitacaoFormData) => {
-      console.log('Creating requisição:', formData);
       
       // Validar dados do cliente primeiro
       const { isValid, data: validatedData, error: validationError } = validateClientData(formData);
@@ -118,18 +209,34 @@ export const useRequisicoes = () => {
 
   const updateRequisicao = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SolicitacaoFormData> }) => {
-      console.log('Updating requisição:', id, data);
       
-      // Se categoria ou grupo responsável mudaram, recalcular SLA
+      // Obter dados atuais para comparação
+      const { data: currentData, error: currentError } = await supabase
+        .from('solicitacoes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (currentError) {
+        throw currentError;
+      }
+      
+      // Preservar prazos de SLA existentes - não recalcular
       let slaDeadlines = {
-        data_limite_resposta: data.data_limite_resposta,
-        data_limite_resolucao: data.data_limite_resolucao,
+        data_limite_resposta: currentData.data_limite_resposta,
+        data_limite_resolucao: currentData.data_limite_resolucao,
       };
 
-      if (data.categoria_id || data.grupo_responsavel_id) {
+      // Só recalcular SLA se categoria ou grupo mudaram E não havia SLA antes
+      const categoriaChanged = data.categoria_id && data.categoria_id !== currentData.categoria_id;
+      const grupoChanged = data.grupo_responsavel_id && data.grupo_responsavel_id !== currentData.grupo_responsavel_id;
+      const noSLABefore = !currentData.data_limite_resposta && !currentData.data_limite_resolucao;
+
+      if ((categoriaChanged || grupoChanged) && noSLABefore) {
         const calculatedDeadlines = await calculateAndSetSLADeadlines(
-          data.categoria_id,
-          data.grupo_responsavel_id
+          data.categoria_id || currentData.categoria_id,
+          data.grupo_responsavel_id || currentData.grupo_responsavel_id,
+          currentData.data_abertura
         );
         
         if (calculatedDeadlines.data_limite_resposta) {
@@ -174,6 +281,11 @@ export const useRequisicoes = () => {
       if (error) {
         console.error('Error updating requisição:', error);
         throw error;
+      }
+
+      // Gerar logs de auditoria após atualização bem-sucedida
+      if (user?.id) {
+        await generateAuditLogs(id, currentData, updatedData, user.id);
       }
 
       return updatedData;

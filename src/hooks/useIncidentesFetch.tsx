@@ -11,11 +11,9 @@ export const useIncidentesFetch = () => {
     queryKey: ['incidentes'],
     queryFn: async () => {
       if (!user?.id) {
-        console.log('Usuário não autenticado, retornando array vazio');
         return [];
       }
 
-      console.log('Buscando incidentes para o usuário:', user.id);
       
       const { data, error } = await supabase
         .from('incidentes')
@@ -27,7 +25,6 @@ export const useIncidentesFetch = () => {
         throw error;
       }
 
-      console.log('Incidentes encontrados:', data?.length || 0);
       
       return transformIncidenteData(data);
     },
