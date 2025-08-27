@@ -136,12 +136,11 @@ const EditArticleDialog = ({ article, isOpen, onClose, categories }: EditArticle
 
           <div>
             <Label htmlFor="categoria">Categoria</Label>
-            <Select value={formData.categoria_id} onValueChange={(value) => setFormData(prev => ({ ...prev, categoria_id: value }))}>
+            <Select value={formData.categoria_id || undefined} onValueChange={(value) => setFormData(prev => ({ ...prev, categoria_id: value || '' }))}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhuma categoria</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.nome}
