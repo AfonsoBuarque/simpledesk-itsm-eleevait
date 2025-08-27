@@ -35,6 +35,15 @@ serve(async (req) => {
         }
 
         if (!existingUser) {
+          // Associar cliente por domínio
+          const userDomain = user.email.split('@')[1];
+          const { data: clientData } = await supabase
+            .from('clients')
+            .select('id')
+            .eq('dominio', userDomain)
+            .eq('status', 'active')
+            .single();
+
           // Criar novo usuário
           const userData = {
             id: user.id,
@@ -46,6 +55,7 @@ serve(async (req) => {
             phone: user.user_metadata?.phone || null,
             azure_id: user.user_metadata?.sub || user.user_metadata?.oid,
             azure_tenant_id: user.user_metadata?.tid,
+            client_id: clientData?.id || null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }
@@ -71,6 +81,7 @@ serve(async (req) => {
             role: 'user',
             department: userData.department,
             phone: userData.phone,
+            client_id: userData.client_id,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }
@@ -91,6 +102,19 @@ serve(async (req) => {
             }
           )
         } else {
+          // Verificar e associar cliente por domínio se ainda não tiver
+          let clientId = existingUser.client_id;
+          if (!clientId) {
+            const userDomain = user.email.split('@')[1];
+            const { data: clientData } = await supabase
+              .from('clients')
+              .select('id')
+              .eq('dominio', userDomain)
+              .eq('status', 'active')
+              .single();
+            clientId = clientData?.id || null;
+          }
+
           // Atualizar usuário existente com dados do Azure
           const updateData = {
             name: user.user_metadata?.full_name || user.user_metadata?.name || existingUser.name,
@@ -99,6 +123,7 @@ serve(async (req) => {
             phone: user.user_metadata?.phone || existingUser.phone,
             azure_id: user.user_metadata?.sub || user.user_metadata?.oid || existingUser.azure_id,
             azure_tenant_id: user.user_metadata?.tid || existingUser.azure_tenant_id,
+            client_id: clientId,
             updated_at: new Date().toISOString()
           }
 
@@ -122,6 +147,7 @@ serve(async (req) => {
               email: updateData.email,
               department: updateData.department,
               phone: updateData.phone,
+              client_id: updateData.client_id,
               updated_at: new Date().toISOString()
             })
             .eq('id', user.id)
