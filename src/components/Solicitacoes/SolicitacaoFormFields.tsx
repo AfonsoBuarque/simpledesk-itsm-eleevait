@@ -361,10 +361,10 @@ const { groups } = useGroups();
           render={({ field }) => (
             <FormItem>
               <FormLabel>Grupo Responsável</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={true}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o grupo responsável" />
+                  <SelectTrigger className="bg-muted">
+                    <SelectValue placeholder="Grupo será preenchido automaticamente" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
