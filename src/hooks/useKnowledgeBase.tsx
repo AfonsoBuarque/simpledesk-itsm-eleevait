@@ -141,7 +141,7 @@ export const useKnowledgeBase = () => {
       const insertData = {
         titulo: articleData.titulo!,
         conteudo: articleData.conteudo!,
-        categoria_id: articleData.categoria_id,
+        categoria_id: articleData.categoria_id && articleData.categoria_id !== '' ? articleData.categoria_id : null,
         tags: articleData.tags || [],
         status: articleData.status || 'rascunho',
         visibilidade: articleData.visibilidade || 'interno',
