@@ -65,7 +65,14 @@ const RequisicoesTable = ({ requisicoes, onEditRequisicao, onNewRequisicao }: Re
               
               return (
                 <TableRow key={requisicao.id}>
-                  <TableCell className="font-medium">{requisicao.numero}</TableCell>
+                  <TableCell>
+                    <button
+                      onClick={() => onEditRequisicao(requisicao)}
+                      className="font-medium text-primary hover:text-primary/80 hover:underline transition-colors cursor-pointer"
+                    >
+                      {requisicao.numero}
+                    </button>
+                  </TableCell>
                   <TableCell className="max-w-xs truncate">
                     {requisicao.titulo}
                   </TableCell>

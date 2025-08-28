@@ -102,7 +102,14 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
           <TableBody>
             {incidentes.map((incidente) => (
               <TableRow key={incidente.id}>
-                <TableCell className="font-medium">{incidente.numero}</TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => onEditIncidente(incidente)}
+                    className="font-medium text-primary hover:text-primary/80 hover:underline transition-colors cursor-pointer"
+                  >
+                    {incidente.numero}
+                  </button>
+                </TableCell>
                 <TableCell className="max-w-xs">
                   <div className="truncate" title={incidente.titulo}>
                     {incidente.titulo}
