@@ -6,12 +6,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { generateIncidenteNumber } from '@/utils/incidenteDataTransform';
 import { useSLACalculation } from '@/hooks/useSLACalculation';
+import { useWebhookNotification } from './useWebhookNotification';
 
 export const useIncidentesMutations = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
   const { calculateAndSetSLADeadlines } = useSLACalculation();
+  const { notifyIncidenteCreated, notifyIncidenteUpdated } = useWebhookNotification();
 
   const createIncidente = useMutation({
     mutationFn: async (formData: SolicitacaoFormData) => {
@@ -83,8 +85,12 @@ export const useIncidentesMutations = () => {
       console.log('Incidente criado com sucesso:', data);
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['incidentes'] });
+      
+      // Enviar notificação webhook
+      await notifyIncidenteCreated(data);
+      
       toast({
         title: "Sucesso",
         description: `Incidente ${data.numero || data.id} criado com sucesso!`,
@@ -283,8 +289,12 @@ export const useIncidentesMutations = () => {
 
       return updated;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['incidentes'] });
+      
+      // Enviar notificação webhook
+      await notifyIncidenteUpdated(data);
+      
       toast({
         title: "Sucesso",
         description: "Incidente atualizado com sucesso!",

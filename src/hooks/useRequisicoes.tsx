@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSLACalculation } from '@/hooks/useSLACalculation';
 import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useClientFilter } from './useClientFilter';
+import { useWebhookNotification } from './useWebhookNotification';
 
 export const useRequisicoes = () => {
   const { toast } = useToast();
@@ -12,6 +13,7 @@ export const useRequisicoes = () => {
   const { user } = useAuth();
   const { calculateAndSetSLADeadlines } = useSLACalculation();
   const { currentClientId, isAdmin, clientLoading, validateClientData, applyClientFilter } = useClientFilter();
+  const { notifyRequisicaoCreated, notifyRequisicaoUpdated } = useWebhookNotification();
 
   // Função para criar logs de alteração
   const createAuditLog = async (
@@ -189,9 +191,13 @@ export const useRequisicoes = () => {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] });
       queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
+      
+      // Enviar notificação webhook
+      await notifyRequisicaoCreated(data);
+      
       toast({
         title: "Sucesso",
         description: "Requisição criada com sucesso! Prazos de SLA calculados automaticamente.",
@@ -290,9 +296,13 @@ export const useRequisicoes = () => {
 
       return updatedData;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] });
       queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
+      
+      // Enviar notificação webhook
+      await notifyRequisicaoUpdated(data);
+      
       toast({
         title: "Sucesso",
         description: "Requisição atualizada com sucesso!",
