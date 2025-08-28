@@ -16,8 +16,10 @@ import {
   Tag,
   Edit,
   Trash2,
-  FolderPlus
+  FolderPlus,
+  X
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import NewArticleDialog from './NewArticleDialog';
 import NewCategoryDialog from './NewCategoryDialog';
@@ -40,6 +42,7 @@ const KnowledgeBase = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [editingArticle, setEditingArticle] = useState<any>(null);
+  const [viewingArticle, setViewingArticle] = useState<any>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -75,8 +78,9 @@ const KnowledgeBase = () => {
     .sort((a, b) => (b.views || 0) - (a.views || 0))
     .slice(0, 5);
 
-  const handleArticleClick = async (articleId: string) => {
-    await recordView(articleId);
+  const handleArticleClick = async (article: any) => {
+    await recordView(article.id);
+    setViewingArticle(article);
   };
 
   const handleLike = async (articleId: string) => {
@@ -202,7 +206,7 @@ const KnowledgeBase = () => {
                           <div className="flex items-center gap-2 mb-2">
                             <h3 
                               className="text-lg font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
-                              onClick={() => handleArticleClick(article.id)}
+                              onClick={() => handleArticleClick(article)}
                             >
                               {article.titulo}
                             </h3>
@@ -391,9 +395,9 @@ const KnowledgeBase = () => {
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <p 
+                       <p 
                         className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
-                        onClick={() => handleArticleClick(article.id)}
+                        onClick={() => handleArticleClick(article)}
                       >
                         {article.titulo}
                       </p>
@@ -449,6 +453,70 @@ const KnowledgeBase = () => {
           onClose={() => setEditingArticle(null)}
           categories={categories}
         />
+      )}
+
+      {/* View Article Dialog */}
+      {viewingArticle && (
+        <Dialog open={!!viewingArticle} onOpenChange={() => setViewingArticle(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">{viewingArticle.titulo}</DialogTitle>
+              <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
+                <span>Por {viewingArticle.autor}</span>
+                <span>•</span>
+                <span>
+                  Atualizado em {format(new Date(viewingArticle.atualizado_em || viewingArticle.criado_em), 'dd/MM/yyyy', { locale: ptBR })}
+                </span>
+                {viewingArticle.categoria && (
+                  <>
+                    <span>•</span>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {viewingArticle.categoria.nome}
+                    </Badge>
+                  </>
+                )}
+              </div>
+            </DialogHeader>
+            
+            <div className="mt-6">
+              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: viewingArticle.conteudo }} />
+            </div>
+
+            {viewingArticle.tags && viewingArticle.tags.length > 0 && (
+              <div className="mt-6 pt-4 border-t">
+                <h4 className="text-sm font-medium mb-2">Tags:</h4>
+                <div className="flex flex-wrap gap-1">
+                  {viewingArticle.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 pt-4 border-t flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <Eye className="h-4 w-4" />
+                  {viewingArticle.views} visualizações
+                </div>
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <ThumbsUp className="h-4 w-4" />
+                  {viewingArticle.likes} likes
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleLike(viewingArticle.id)}
+              >
+                <ThumbsUp className="h-4 w-4 mr-1" />
+                Útil
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
