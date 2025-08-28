@@ -12,6 +12,9 @@ import { ptBR } from 'date-fns/locale';
 import { EditRequisicaoDialog } from '@/components/Requisicoes/EditRequisicaoDialog';
 import EditIncidenteDialog from '@/components/Incidentes/EditIncidenteDialog';
 import SLARiskTicketsModal from './SLARiskTicketsModal';
+import OpenTicketsModal from './OpenTicketsModal';
+import ResolvedTodayModal from './ResolvedTodayModal';
+import CriticalProblemsModal from './CriticalProblemsModal';
 import { 
   Ticket, 
   Clock, 
@@ -28,6 +31,9 @@ const DashboardOverview = () => {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSLARiskModalOpen, setIsSLARiskModalOpen] = useState(false);
+  const [isOpenTicketsModalOpen, setIsOpenTicketsModalOpen] = useState(false);
+  const [isResolvedTodayModalOpen, setIsResolvedTodayModalOpen] = useState(false);
+  const [isCriticalProblemsModalOpen, setIsCriticalProblemsModalOpen] = useState(false);
   const itemsPerPage = 3;
 
   if (isLoading) {
@@ -93,6 +99,7 @@ const DashboardOverview = () => {
           value={stats?.totalOpen || 0}
           icon={Ticket}
           trend={{ value: "Atual", direction: "neutral" }}
+          onClick={() => setIsOpenTicketsModalOpen(true)}
         />
         <MetricsCard
           title="SLA em Risco"
@@ -107,6 +114,7 @@ const DashboardOverview = () => {
           value={stats?.resolvedTodayCount || 0}
           icon={CheckCircle}
           trend={{ value: "Hoje", direction: "up" }}
+          onClick={() => setIsResolvedTodayModalOpen(true)}
         />
         <MetricsCard
           title="Problemas Críticos"
@@ -114,6 +122,7 @@ const DashboardOverview = () => {
           icon={AlertTriangle}
           trend={{ value: "Ativo", direction: "neutral" }}
           className="border-l-4 border-l-orange-500"
+          onClick={() => setIsCriticalProblemsModalOpen(true)}
         />
       </div>
 
@@ -286,6 +295,27 @@ const DashboardOverview = () => {
       <SLARiskTicketsModal
         isOpen={isSLARiskModalOpen}
         onClose={() => setIsSLARiskModalOpen(false)}
+        onTicketClick={handleTicketClick}
+      />
+
+      {/* Open Tickets Modal */}
+      <OpenTicketsModal
+        isOpen={isOpenTicketsModalOpen}
+        onClose={() => setIsOpenTicketsModalOpen(false)}
+        onTicketClick={handleTicketClick}
+      />
+
+      {/* Resolved Today Modal */}
+      <ResolvedTodayModal
+        isOpen={isResolvedTodayModalOpen}
+        onClose={() => setIsResolvedTodayModalOpen(false)}
+        onTicketClick={handleTicketClick}
+      />
+
+      {/* Critical Problems Modal */}
+      <CriticalProblemsModal
+        isOpen={isCriticalProblemsModalOpen}
+        onClose={() => setIsCriticalProblemsModalOpen(false)}
         onTicketClick={handleTicketClick}
       />
     </div>
