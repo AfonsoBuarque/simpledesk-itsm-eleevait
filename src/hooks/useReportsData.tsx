@@ -54,11 +54,10 @@ export const useReportsData = (selectedMonth: Date) => {
       const startDate = startOfMonth(selectedMonth);
       const endDate = endOfMonth(selectedMonth);
       
-      // Buscar dados de incidentes
+      // Buscar dados de cada tabela específica
       const { data: incidents } = await supabase
-        .from('solicitacoes')
+        .from('incidentes')
         .select('*')
-        .eq('tipo', 'incidente')
         .gte('criado_em', startDate.toISOString())
         .lte('criado_em', endDate.toISOString());
 
@@ -66,31 +65,29 @@ export const useReportsData = (selectedMonth: Date) => {
       const { data: requests } = await supabase
         .from('solicitacoes')
         .select('*')
-        .eq('tipo', 'requisicao')
         .gte('criado_em', startDate.toISOString())
         .lte('criado_em', endDate.toISOString());
 
       // Buscar dados de problemas
       const { data: problems } = await supabase
-        .from('solicitacoes')
+        .from('problemas')
         .select('*')
-        .eq('tipo', 'problema')
         .gte('criado_em', startDate.toISOString())
         .lte('criado_em', endDate.toISOString());
 
       // Buscar dados de mudanças
       const { data: changes } = await supabase
-        .from('solicitacoes')
+        .from('mudancas')
         .select('*')
-        .eq('tipo', 'mudanca')
         .gte('criado_em', startDate.toISOString())
         .lte('criado_em', endDate.toISOString());
 
+      // Normalizar dados adicionando campo 'tipo' para cada registro
       const allTickets = [
-        ...(incidents || []),
-        ...(requests || []),
-        ...(problems || []),
-        ...(changes || [])
+        ...(incidents || []).map(item => ({ ...item, tipo: 'incidente' })),
+        ...(requests || []).map(item => ({ ...item, tipo: 'requisicao' })),
+        ...(problems || []).map(item => ({ ...item, tipo: 'problema' })),
+        ...(changes || []).map(item => ({ ...item, tipo: 'mudanca' }))
       ];
 
       // Processar dados de status
