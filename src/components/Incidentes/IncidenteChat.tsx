@@ -1,11 +1,13 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRequisicaoChat } from "@/hooks/useRequisicaoChat";
+import { Paperclip, Send } from "lucide-react";
+import { useIncidenteChat } from "@/hooks/useIncidenteChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useIncidenteParticipants } from "./useIncidenteParticipants";
+import { useChatFileUpload } from "@/hooks/useChatFileUpload";
 import { Solicitacao } from "@/types/solicitacao";
 
 interface IncidenteChatProps {
@@ -14,10 +16,12 @@ interface IncidenteChatProps {
 
 export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
   const { user } = useAuth();
-  const { chatMessages, isLoading, error, sendMessage } = useRequisicaoChat(
+  const { chatMessages, isLoading, error, sendMessage, sendMessageWithFile } = useIncidenteChat(
     incidente.id
   );
+  const { uploadFile, uploading } = useChatFileUpload();
   const [mensagem, setMensagem] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     getSolicitanteId,
@@ -34,6 +38,60 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
   ]
     .filter(Boolean)
     .includes(user?.id || "");
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    if (!pertenceAoChamado) {
+      alert("Você não está autorizado a enviar arquivos neste incidente.");
+      return;
+    }
+
+    try {
+      const fileUrl = await uploadFile(file, incidente.id);
+      if (fileUrl) {
+        await sendMessageWithFile.mutateAsync({
+          incidente_id: incidente.id,
+          criado_por: user.id,
+          autor_tipo: "analista",
+          mensagem: `📎 Imagem enviada: ${file.name}`,
+          arquivo_url: fileUrl,
+          tipo_arquivo: file.type,
+        });
+
+        // Webhook notification
+        try {
+          await fetch(
+            "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                solicitante_id: getSolicitanteId(),
+                solicitante_nome: getSolicitanteNome(),
+                analista_id: getAnalistaId(),
+                analista_nome: getAnalistaNome(),
+                grupo_nome: getGrupoNome(),
+                grupo_id: getGrupoId(),
+                mensagem: `📎 Imagem enviada: ${file.name}`,
+              }),
+            }
+          );
+        } catch (wberr) {
+          console.error("Falha ao enviar webhook de notificação de chat:", wberr);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao enviar arquivo:", error);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleEnviarMensagem = async () => {
     if (!mensagem.trim()) return;
@@ -52,7 +110,7 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
 
     try {
       await sendMessage.mutateAsync({
-        requisicao_id: incidente.id,
+        incidente_id: incidente.id,
         criado_por: user.id,
         autor_tipo: "analista",
         mensagem: mensagem.trim(),
@@ -121,6 +179,17 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
                 }`}
               >
                 <span className="block">{msg.mensagem}</span>
+                {msg.arquivo_url && msg.tipo_arquivo?.startsWith('image/') && (
+                  <div className="mt-2">
+                    <img 
+                      src={msg.arquivo_url} 
+                      alt="Imagem anexa"
+                      className="max-w-full h-auto rounded cursor-pointer"
+                      style={{ maxHeight: '200px' }}
+                      onClick={() => window.open(msg.arquivo_url, '_blank')}
+                    />
+                  </div>
+                )}
                 <span className="block text-xs opacity-70 mt-1 text-right">
                   {new Date(msg.criado_em).toLocaleString()} • {getRemetenteLabel(msg)}
                 </span>
@@ -129,6 +198,13 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
           ))}
         </div>
       </ScrollArea>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept="image/*"
+        style={{ display: 'none' }}
+      />
       <form
         className="flex gap-2 pt-2"
         onSubmit={(e) => {
@@ -136,15 +212,31 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
           handleEnviarMensagem();
         }}
       >
-        <Input
-          value={mensagem}
-          onChange={(e) => setMensagem(e.target.value)}
-          placeholder="Digite uma mensagem..."
-          className="flex-1"
-          disabled={sendMessage.isPending}
-        />
-        <Button type="submit" disabled={!mensagem.trim() || sendMessage.isPending}>
-          {sendMessage.isPending ? "Enviando..." : "Enviar"}
+        <div className="flex gap-2 flex-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || sendMessage.isPending}
+            className="shrink-0"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Input
+            value={mensagem}
+            onChange={(e) => setMensagem(e.target.value)}
+            placeholder="Digite uma mensagem..."
+            className="flex-1"
+            disabled={sendMessage.isPending || uploading}
+          />
+        </div>
+        <Button 
+          type="submit" 
+          disabled={!mensagem.trim() || sendMessage.isPending || uploading}
+          size="icon"
+        >
+          <Send className="h-4 w-4" />
         </Button>
       </form>
     </div>

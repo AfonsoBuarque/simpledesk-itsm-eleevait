@@ -1,10 +1,9 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export type ChatMessage = {
+export type IncidenteChatMessage = {
   id: string;
-  requisicao_id: string;
+  incidente_id: string;
   criado_por: string;
   autor_tipo: 'analista' | 'cliente';
   mensagem: string;
@@ -13,47 +12,47 @@ export type ChatMessage = {
   criado_em: string;
 };
 
-export const useRequisicaoChat = (requisicaoId: string | undefined) => {
+export const useIncidenteChat = (incidenteId: string | undefined) => {
   const queryClient = useQueryClient();
 
   // Buscar mensagens do chat
   const { data: chatMessages = [], isLoading, error } = useQuery({
-    queryKey: ['requisicaoChat', requisicaoId],
+    queryKey: ['incidenteChat', incidenteId],
     queryFn: async () => {
-      if (!requisicaoId) return [];
+      if (!incidenteId) return [];
       const { data, error } = await supabase
-        .from('requisicao_chat_mensagens')
+        .from('incidentes_chat_mensagens')
         .select('*')
-        .eq('requisicao_id', requisicaoId)
+        .eq('incidente_id', incidenteId)
         .order('criado_em', { ascending: true });
 
       if (error) throw error;
-      return data as ChatMessage[];
+      return data as IncidenteChatMessage[];
     },
-    enabled: !!requisicaoId,
+    enabled: !!incidenteId,
   });
 
   // Enviar nova mensagem
   const sendMessage = useMutation({
-    mutationFn: async (payload: Omit<ChatMessage, 'id' | 'criado_em'>) => {
+    mutationFn: async (payload: Omit<IncidenteChatMessage, 'id' | 'criado_em'>) => {
       const { data, error } = await supabase
-        .from('requisicao_chat_mensagens')
+        .from('incidentes_chat_mensagens')
         .insert([payload])
         .select()
         .single();
 
       if (error) throw error;
-      return data as ChatMessage;
+      return data as IncidenteChatMessage;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requisicaoChat', requisicaoId] });
+      queryClient.invalidateQueries({ queryKey: ['incidenteChat', incidenteId] });
     },
   });
 
   // Enviar mensagem com arquivo
   const sendMessageWithFile = useMutation({
     mutationFn: async (payload: { 
-      requisicao_id: string;
+      incidente_id: string;
       criado_por: string;
       autor_tipo: 'analista' | 'cliente';
       mensagem: string;
@@ -61,16 +60,16 @@ export const useRequisicaoChat = (requisicaoId: string | undefined) => {
       tipo_arquivo?: string;
     }) => {
       const { data, error } = await supabase
-        .from('requisicao_chat_mensagens')
+        .from('incidentes_chat_mensagens')
         .insert([payload])
         .select()
         .single();
 
       if (error) throw error;
-      return data as ChatMessage;
+      return data as IncidenteChatMessage;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requisicaoChat', requisicaoId] });
+      queryClient.invalidateQueries({ queryKey: ['incidenteChat', incidenteId] });
     },
   });
 
