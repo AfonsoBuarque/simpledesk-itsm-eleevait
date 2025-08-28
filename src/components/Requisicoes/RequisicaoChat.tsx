@@ -8,6 +8,7 @@ import { useRequisicaoChat } from "@/hooks/useRequisicaoChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useRequisicaoParticipants } from "./useRequisicaoParticipants";
 import { useChatFileUpload } from "@/hooks/useChatFileUpload";
+import { useWebhookNotification } from "@/hooks/useWebhookNotification";
 import { Solicitacao } from "@/types/solicitacao";
 
 interface RequisicaoChatProps {
@@ -20,6 +21,7 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
     requisicao.id
   );
   const { uploadFile, uploading } = useChatFileUpload();
+  const { notifyRequisicaoUpdated } = useWebhookNotification();
   const [mensagem, setMensagem] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,28 +65,7 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
         });
 
         // Webhook notification
-        try {
-          await fetch(
-            "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                solicitante_id: getSolicitanteId(),
-                solicitante_nome: getSolicitanteNome(),
-                analista_id: getAnalistaId(),
-                analista_nome: getAnalistaNome(),
-                grupo_nome: getGrupoNome(),
-                grupo_id: getGrupoId(),
-                mensagem: `📎 Imagem enviada: ${file.name}`,
-              }),
-            }
-          );
-        } catch (wberr) {
-          console.error("Falha ao enviar webhook de notificação de chat:", wberr);
-        }
+        await notifyRequisicaoUpdated(requisicao);
       }
     } catch (error) {
       console.error("Erro ao enviar arquivo:", error);
@@ -118,29 +99,8 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
         mensagem: mensagem.trim(),
       });
 
-      // Disparar webhook (reutiliza a lógica anterior)
-      try {
-        await fetch(
-          "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              solicitante_id: getSolicitanteId(),
-              solicitante_nome: getSolicitanteNome(),
-              analista_id: getAnalistaId(),
-              analista_nome: getAnalistaNome(),
-              grupo_nome: getGrupoNome(),
-              grupo_id: getGrupoId(),
-              mensagem: mensagem.trim(),
-            }),
-          }
-        );
-      } catch (wberr) {
-        console.error("Falha ao enviar webhook de notificação de chat:", wberr);
-      }
+      // Webhook notification
+      await notifyRequisicaoUpdated(requisicao);
 
       setMensagem("");
     } catch (e: any) {
