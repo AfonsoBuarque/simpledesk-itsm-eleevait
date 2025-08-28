@@ -9,6 +9,8 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { getSLAStatus, getStatusColor, getUrgenciaColor } from '@/utils/slaStatus';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { EditRequisicaoDialog } from '@/components/Requisicoes/EditRequisicaoDialog';
+import EditIncidenteDialog from '@/components/Incidentes/EditIncidenteDialog';
 import { 
   Ticket, 
   Clock, 
@@ -22,6 +24,8 @@ import {
 const DashboardOverview = () => {
   const { tickets, stats, slaMetrics, isLoading } = useDashboardData();
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const itemsPerPage = 3;
 
   if (isLoading) {
@@ -40,6 +44,16 @@ const DashboardOverview = () => {
   const totalPages = Math.ceil(tickets.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTickets = tickets.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleTicketClick = (ticket: any) => {
+    setSelectedTicket(ticket);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsEditDialogOpen(false);
+    setSelectedTicket(null);
+  };
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -124,6 +138,7 @@ const DashboardOverview = () => {
                       <div 
                         key={ticket.id} 
                         className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer group"
+                        onClick={() => handleTicketClick(ticket)}
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
@@ -244,6 +259,25 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialogs */}
+      {selectedTicket && (
+        <>
+          {selectedTicket.tipo === 'incidente' ? (
+            <EditIncidenteDialog
+              incidente={selectedTicket}
+              isOpen={isEditDialogOpen}
+              onClose={handleCloseDialog}
+            />
+          ) : (
+            <EditRequisicaoDialog
+              requisicao={selectedTicket}
+              isOpen={isEditDialogOpen}
+              onClose={handleCloseDialog}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
