@@ -18,6 +18,7 @@ import { useClients } from '@/hooks/useClients';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useSLAs } from '@/hooks/useSLAs';
 import { useGroups } from '@/hooks/useGroups';
+import { useGroupUsers } from '@/hooks/useGroupUsers';
 import { Categoria } from '@/types/categoria';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -40,7 +41,11 @@ const SolicitacaoFormFields = ({ form, excludeFields = [], readOnlyFields = [], 
   const { clients } = useClients();
   const { categorias } = useCategorias();
   const { slas } = useSLAs();
-const { groups } = useGroups();
+  const { groups } = useGroups();
+
+  // Buscar usuários do grupo selecionado para filtrar atendentes
+  const selectedGroupId = form.watch('grupo_responsavel_id');
+  const { groupUsers } = useGroupUsers(selectedGroupId);
 
   const [solicitanteOpen, setSolicitanteOpen] = React.useState(false);
   const [atendenteOpen, setAtendenteOpen] = React.useState(false);
@@ -48,6 +53,25 @@ const { groups } = useGroups();
   const sortedUsers = React.useMemo(() => {
     return [...users].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pt', { sensitivity: 'base' }));
   }, [users]);
+
+  // Usuários filtrados para o campo atendente (apenas do grupo selecionado)
+  const availableAttendants = React.useMemo(() => {
+    if (!selectedGroupId || groupUsers.length === 0) {
+      return sortedUsers; // Se não há grupo selecionado, mostrar todos os usuários
+    }
+    return [...groupUsers].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pt', { sensitivity: 'base' }));
+  }, [selectedGroupId, groupUsers, sortedUsers]);
+
+  // Limpar atendente se ele não fizer mais parte do grupo selecionado
+  React.useEffect(() => {
+    const currentAttendantId = form.getValues('atendente_id');
+    if (currentAttendantId && selectedGroupId && groupUsers.length > 0) {
+      const isAttendantInGroup = groupUsers.some(user => user.id === currentAttendantId);
+      if (!isAttendantInGroup) {
+        form.setValue('atendente_id', '');
+      }
+    }
+  }, [selectedGroupId, groupUsers, form]);
 
   const slasToShow = React.useMemo(() => {
     return slaAplicaA ? slas.filter((s) => s.aplica_a === slaAplicaA) : slas;
@@ -397,9 +421,9 @@ const { groups } = useGroups();
                         role="combobox"
                         aria-expanded={atendenteOpen}
                         className="w-full justify-between"
-                      >
-                        {sortedUsers.find(u => u.id === field.value)?.name || "Selecione o atendente..."}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                       >
+                         {availableAttendants.find(u => u.id === field.value)?.name || "Selecione o atendente..."}
+                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -409,7 +433,7 @@ const { groups } = useGroups();
                       <CommandList>
                         <CommandEmpty>Nenhum usuário encontrado.</CommandEmpty>
                         <CommandGroup>
-                          {sortedUsers.map((user) => (
+                          {availableAttendants.map((user) => (
                             <CommandItem
                               key={user.id}
                               value={user.name}
@@ -440,7 +464,7 @@ const { groups } = useGroups();
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {sortedUsers.map((user) => (
+                    {availableAttendants.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
                       </SelectItem>
