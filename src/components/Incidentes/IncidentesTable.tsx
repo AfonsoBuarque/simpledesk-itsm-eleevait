@@ -2,59 +2,19 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, AlertCircle, Pencil } from 'lucide-react';
 import { Solicitacao } from '@/types/solicitacao';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { getSLAStatus, getStatusColor, getUrgenciaColor } from '@/utils/slaStatus';
 
 interface IncidentesTableProps {
   incidentes: Solicitacao[];
   onEditIncidente: (incidente: Solicitacao) => void;
   onNewIncidente: () => void;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'aberta': return 'bg-gray-100 text-gray-800';
-    case 'em_andamento': return 'bg-blue-100 text-blue-800';
-    case 'pendente': return 'bg-orange-100 text-orange-800';
-    case 'resolvida': return 'bg-green-100 text-green-800';
-    case 'fechada': return 'bg-green-200 text-green-900';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getUrgenciaColor = (urgencia: string) => {
-  switch (urgencia) {
-    case 'critica': return 'bg-black text-white';
-    case 'alta': return 'bg-red-100 text-red-800';
-    case 'media': return 'bg-yellow-100 text-yellow-800';
-    case 'baixa': return 'bg-green-100 text-green-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'aberta': return 'Aberta';
-    case 'em_andamento': return 'Em Andamento';
-    case 'pendente': return 'Aguardando';
-    case 'resolvida': return 'Resolvida';
-    case 'fechada': return 'Fechada';
-    default: return status;
-  }
-};
-
-const getUrgenciaLabel = (urgencia: string) => {
-  switch (urgencia) {
-    case 'critica': return 'Crítica';
-    case 'alta': return 'Alta';
-    case 'media': return 'Média';
-    case 'baixa': return 'Baixa';
-    default: return urgencia;
-  }
-};
 
 const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: IncidentesTableProps) => {
 
@@ -69,13 +29,10 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
           <p className="text-gray-500 text-center mb-6">
             Comece criando seu primeiro incidente para registrar ocorrências!
           </p>
-          <button
-            onClick={onNewIncidente}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded transition"
-          >
-            <Plus className="h-4 w-4" />
+          <Button onClick={onNewIncidente}>
+            <Plus className="mr-2 h-4 w-4" />
             Criar Primeiro Incidente
-          </button>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -84,7 +41,7 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Meus Incidentes ({incidentes.length})</CardTitle>
+        <CardTitle>Lista de Incidentes</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -94,57 +51,76 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
               <TableHead>Título</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Urgência</TableHead>
-              <TableHead>Categoria</TableHead>
+              <TableHead>Solicitante</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Grupo</TableHead>
               <TableHead>Data Abertura</TableHead>
+              <TableHead>SLA</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {incidentes.map((incidente) => (
-              <TableRow key={incidente.id}>
-                <TableCell>
-                  <button
-                    onClick={() => onEditIncidente(incidente)}
-                    className="font-medium text-primary hover:text-primary/80 hover:underline transition-colors cursor-pointer"
-                  >
-                    {incidente.numero}
-                  </button>
-                </TableCell>
-                <TableCell className="max-w-xs">
-                  <div className="truncate" title={incidente.titulo}>
+            {incidentes.map((incidente) => {
+              const slaStatus = getSLAStatus(incidente);
+              const IconComponent = slaStatus.icon;
+              
+              return (
+                <TableRow key={incidente.id}>
+                  <TableCell>
+                    <button
+                      onClick={() => onEditIncidente(incidente)}
+                      className="font-medium text-primary hover:text-primary/80 hover:underline transition-colors cursor-pointer"
+                    >
+                      {incidente.numero}
+                    </button>
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
                     {incidente.titulo}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(incidente.status)}>
-                    {getStatusLabel(incidente.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge className={getUrgenciaColor(incidente.urgencia)}>
-                    {getUrgenciaLabel(incidente.urgencia)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {incidente.categoria?.nome || '-'}
-                </TableCell>
-                <TableCell>
-                  {incidente.data_abertura
-                    ? format(new Date(incidente.data_abertura), 'dd/MM/yyyy HH:mm', { locale: ptBR })
-                    : format(new Date(incidente.criado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })
-                  }
-                </TableCell>
-                <TableCell className="text-right">
-                  <button
-                    className="inline-flex items-center p-2 rounded hover:bg-gray-100 transition"
-                    onClick={() => onEditIncidente(incidente)}
-                    title="Editar incidente"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(incidente.status)}>
+                      {incidente.status.replace('_', ' ')}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={getUrgenciaColor(incidente.urgencia)}>
+                      {incidente.urgencia}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {incidente.solicitante?.name || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {incidente.cliente?.name || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {incidente.grupo_responsavel?.name || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(incidente.data_abertura), 'dd/MM/yyyy HH:mm', {
+                      locale: ptBR,
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <IconComponent className="h-4 w-4" />
+                      <Badge className={slaStatus.color}>
+                        {slaStatus.label}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditIncidente(incidente)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>
