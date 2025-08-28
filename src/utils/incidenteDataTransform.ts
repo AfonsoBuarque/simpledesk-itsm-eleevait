@@ -22,13 +22,13 @@ export const transformIncidenteData = (data: any[]): Solicitacao[] => {
       : item.tags 
         ? [String(item.tags)] 
         : [],
-    // Mapear relacionamentos se existirem
-    categoria: item.categoria || null,
-    sla: item.sla || null,
-    solicitante: item.solicitante || null,
-    cliente: item.cliente || null,
-    grupo_responsavel: item.grupo_responsavel || null,
-    atendente: item.atendente || null,
+    // Definir relacionamentos como null por enquanto (sem foreign keys configuradas)
+    categoria: null,
+    sla: null,
+    solicitante: null,
+    cliente: null,
+    grupo_responsavel: null,
+    atendente: null,
   }));
 };
 

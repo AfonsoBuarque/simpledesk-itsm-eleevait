@@ -17,15 +17,7 @@ export const useIncidentesFetch = () => {
       
       const { data, error } = await supabase
         .from('incidentes')
-        .select(`
-          *,
-          categoria:categorias_servico(nome),
-          sla:slas(nome),
-          solicitante:users!incidentes_solicitante_id_fkey(name),
-          cliente:clients(name),
-          grupo_responsavel:groups(name),
-          atendente:users!incidentes_atendente_id_fkey(name)
-        `)
+        .select('*')
         .order('criado_em', { ascending: false });
 
       if (error) {
