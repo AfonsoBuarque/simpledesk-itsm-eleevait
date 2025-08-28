@@ -20,7 +20,8 @@ import {
   Tags,
   UserCheck,
   Clock,
-  Shield
+  Shield,
+  BarChart3
 } from 'lucide-react';
 
 export const menuItems = [
@@ -38,6 +39,7 @@ export const menuItems = [
     ]
   },
   { id: 'knowledge', label: 'Base de Conhecimento', icon: BookOpen },
+  { id: 'reports', label: 'Relatórios', icon: BarChart3 },
   { 
     id: 'cmdb', 
     label: 'CMDB', 

@@ -26,6 +26,7 @@ import { ChatBot } from '@/components/ChatBot/ChatBot';
 import IncidentesManagement from '@/components/Incidentes/IncidentesManagement';
 import ProblemasManagement from '@/components/Problemas/ProblemasManagement';
 import MudancasManagement from '@/components/Mudancas/MudancasManagement';
+import ReportsManagement from '@/components/Reports/ReportsManagement';
 
 const Index = () => {
   const { user, profile, loading, profileLoading } = useAuth();
@@ -60,6 +61,7 @@ const Index = () => {
       'problems': 'Carregando Problemas...',
       'changes': 'Carregando Mudanças...',
       'knowledge': 'Carregando Base de Conhecimento...',
+      'reports': 'Carregando Relatórios...',
       'users': 'Carregando Usuários...',
       'groups': 'Carregando Grupos...',
       'profiles': 'Carregando Perfis...',
@@ -102,6 +104,8 @@ const Index = () => {
         return <MudancasManagement />;
       case 'knowledge':
         return <KnowledgeBase />;
+      case 'reports':
+        return <ReportsManagement />;
       case 'users':
         return <UserManagement />;
       case 'groups':
