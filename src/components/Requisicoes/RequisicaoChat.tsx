@@ -64,8 +64,32 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
           tipo_arquivo: file.type,
         });
 
-        // Webhook notification
+        // Webhook notifications - both Supabase and direct
         await notifyRequisicaoUpdated(requisicao);
+        
+        // Direct webhook notification
+        try {
+          await fetch(
+            "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                solicitante_id: getSolicitanteId(),
+                solicitante_nome: getSolicitanteNome(),
+                analista_id: getAnalistaId(),
+                analista_nome: getAnalistaNome(),
+                grupo_nome: getGrupoNome(),
+                grupo_id: getGrupoId(),
+                mensagem: `📎 Imagem enviada: ${file.name}`,
+              }),
+            }
+          );
+        } catch (wberr) {
+          console.error("Falha ao enviar webhook direto de notificação de chat:", wberr);
+        }
       }
     } catch (error) {
       console.error("Erro ao enviar arquivo:", error);
@@ -99,8 +123,32 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
         mensagem: mensagem.trim(),
       });
 
-      // Webhook notification
+      // Webhook notifications - both Supabase and direct
       await notifyRequisicaoUpdated(requisicao);
+      
+      // Direct webhook notification
+      try {
+        await fetch(
+          "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              solicitante_id: getSolicitanteId(),
+              solicitante_nome: getSolicitanteNome(),
+              analista_id: getAnalistaId(),
+              analista_nome: getAnalistaNome(),
+              grupo_nome: getGrupoNome(),
+              grupo_id: getGrupoId(),
+              mensagem: mensagem.trim(),
+            }),
+          }
+        );
+      } catch (wberr) {
+        console.error("Falha ao enviar webhook direto de notificação de chat:", wberr);
+      }
 
       setMensagem("");
     } catch (e: any) {
