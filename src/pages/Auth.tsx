@@ -43,12 +43,12 @@ const Auth = () => {
       <div className="flex-1 flex items-center justify-center bg-white min-h-screen md:min-h-0">
         <div className="w-full max-w-md p-8 md:py-16 md:px-8 shadow-none md:shadow-xl md:rounded-xl border-none">
           <AuthTabs loading={loading} signIn={signIn} signUp={signUp} />
-          <p className="mt-6 text-xs text-blue-700 text-center">
+          {/* <p className="mt-6 text-xs text-blue-700 text-center">
             Recebeu convite?{" "}
             <Link to="/set-password" className="underline hover:text-blue-800">
               Clique aqui para cadastrar sua senha
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
     </div>
