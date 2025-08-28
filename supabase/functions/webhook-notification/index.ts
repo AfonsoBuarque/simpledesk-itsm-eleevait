@@ -14,6 +14,7 @@ interface NotificationPayload {
     titulo: string
     status: string
     prioridade: string
+    urgencia?: string
     solicitante: {
       id: string
       name: string
@@ -31,6 +32,17 @@ interface NotificationPayload {
       id: string
       name: string
     }
+    categoria?: {
+      id: string
+      name: string
+    }
+    sla?: {
+      id: string
+      name: string
+    }
+    data_abertura?: string
+    data_limite_resposta?: string
+    data_limite_resolucao?: string
     created_at?: string
     updated_at?: string
   }
@@ -48,6 +60,7 @@ interface WebhookData {
     title: string
     status: string
     priority: string
+    urgency?: string
     requester: {
       id: string
       name: string
@@ -65,8 +78,19 @@ interface WebhookData {
       id: string
       name: string
     }
+    category?: {
+      id: string
+      name: string
+    }
+    sla?: {
+      id: string
+      name: string
+    }
     dates: {
       created: string
+      opened?: string
+      response_deadline?: string
+      resolution_deadline?: string
       updated?: string
     }
   }
@@ -95,6 +119,7 @@ async function sendWebhookNotification(payload: NotificationPayload): Promise<bo
         title: payload.data.titulo,
         status: payload.data.status,
         priority: payload.data.prioridade,
+        ...(payload.data.urgencia && { urgency: payload.data.urgencia }),
         requester: {
           id: payload.data.solicitante.id,
           name: payload.data.solicitante.name,
@@ -116,8 +141,23 @@ async function sendWebhookNotification(payload: NotificationPayload): Promise<bo
             name: payload.data.grupo_responsavel.name
           }
         }),
+        ...(payload.data.categoria && {
+          category: {
+            id: payload.data.categoria.id,
+            name: payload.data.categoria.name
+          }
+        }),
+        ...(payload.data.sla && {
+          sla: {
+            id: payload.data.sla.id,
+            name: payload.data.sla.name
+          }
+        }),
         dates: {
           created: payload.data.created_at || new Date().toISOString(),
+          ...(payload.data.data_abertura && { opened: payload.data.data_abertura }),
+          ...(payload.data.data_limite_resposta && { response_deadline: payload.data.data_limite_resposta }),
+          ...(payload.data.data_limite_resolucao && { resolution_deadline: payload.data.data_limite_resolucao }),
           ...(payload.data.updated_at && { updated: payload.data.updated_at })
         }
       }

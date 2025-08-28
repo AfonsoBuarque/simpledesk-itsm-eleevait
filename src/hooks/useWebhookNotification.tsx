@@ -6,6 +6,7 @@ interface NotificationData {
   titulo: string;
   status: string;
   prioridade: string;
+  urgencia?: string;
   solicitante: {
     id: string;
     name: string;
@@ -23,6 +24,17 @@ interface NotificationData {
     id: string;
     name: string;
   };
+  categoria?: {
+    id: string;
+    name: string;
+  };
+  sla?: {
+    id: string;
+    name: string;
+  };
+  data_abertura?: string;
+  data_limite_resposta?: string;
+  data_limite_resolucao?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -62,6 +74,7 @@ export const useWebhookNotification = () => {
         titulo: requisicao.titulo,
         status: requisicao.status,
         prioridade: requisicao.prioridade,
+        urgencia: requisicao.urgencia,
         solicitante: {
           id: requisicao.solicitante_id,
           name: requisicao.solicitante?.name || 'N/A',
@@ -83,6 +96,21 @@ export const useWebhookNotification = () => {
             name: requisicao.grupo_responsavel?.name || 'N/A',
           },
         }),
+        ...(requisicao.categoria_id && {
+          categoria: {
+            id: requisicao.categoria_id,
+            name: requisicao.categoria?.name || 'N/A',
+          },
+        }),
+        ...(requisicao.sla_id && {
+          sla: {
+            id: requisicao.sla_id,
+            name: requisicao.sla?.nome || 'N/A',
+          },
+        }),
+        data_abertura: requisicao.data_abertura,
+        data_limite_resposta: requisicao.data_limite_resposta,
+        data_limite_resolucao: requisicao.data_limite_resolucao,
         created_at: requisicao.criado_em,
       },
     };
@@ -100,6 +128,7 @@ export const useWebhookNotification = () => {
         titulo: requisicao.titulo,
         status: requisicao.status,
         prioridade: requisicao.prioridade,
+        urgencia: requisicao.urgencia,
         solicitante: {
           id: requisicao.solicitante_id,
           name: requisicao.solicitante?.name || 'N/A',
@@ -121,6 +150,21 @@ export const useWebhookNotification = () => {
             name: requisicao.grupo_responsavel?.name || 'N/A',
           },
         }),
+        ...(requisicao.categoria_id && {
+          categoria: {
+            id: requisicao.categoria_id,
+            name: requisicao.categoria?.name || 'N/A',
+          },
+        }),
+        ...(requisicao.sla_id && {
+          sla: {
+            id: requisicao.sla_id,
+            name: requisicao.sla?.nome || 'N/A',
+          },
+        }),
+        data_abertura: requisicao.data_abertura,
+        data_limite_resposta: requisicao.data_limite_resposta,
+        data_limite_resolucao: requisicao.data_limite_resolucao,
         created_at: requisicao.criado_em,
         updated_at: requisicao.atualizado_em,
       },
@@ -139,6 +183,7 @@ export const useWebhookNotification = () => {
         titulo: incidente.titulo,
         status: incidente.status,
         prioridade: incidente.prioridade,
+        urgencia: incidente.urgencia,
         solicitante: {
           id: incidente.solicitante_id,
           name: incidente.solicitante?.name || 'N/A',
@@ -160,6 +205,21 @@ export const useWebhookNotification = () => {
             name: incidente.grupo_responsavel?.name || 'N/A',
           },
         }),
+        ...(incidente.categoria_id && {
+          categoria: {
+            id: incidente.categoria_id,
+            name: incidente.categoria?.name || 'N/A',
+          },
+        }),
+        ...(incidente.sla_id && {
+          sla: {
+            id: incidente.sla_id,
+            name: incidente.sla?.nome || 'N/A',
+          },
+        }),
+        data_abertura: incidente.data_abertura,
+        data_limite_resposta: incidente.data_limite_resposta,
+        data_limite_resolucao: incidente.data_limite_resolucao,
         created_at: incidente.criado_em,
       },
     };
@@ -177,6 +237,7 @@ export const useWebhookNotification = () => {
         titulo: incidente.titulo,
         status: incidente.status,
         prioridade: incidente.prioridade,
+        urgencia: incidente.urgencia,
         solicitante: {
           id: incidente.solicitante_id,
           name: incidente.solicitante?.name || 'N/A',
@@ -198,6 +259,21 @@ export const useWebhookNotification = () => {
             name: incidente.grupo_responsavel?.name || 'N/A',
           },
         }),
+        ...(incidente.categoria_id && {
+          categoria: {
+            id: incidente.categoria_id,
+            name: incidente.categoria?.name || 'N/A',
+          },
+        }),
+        ...(incidente.sla_id && {
+          sla: {
+            id: incidente.sla_id,
+            name: incidente.sla?.nome || 'N/A',
+          },
+        }),
+        data_abertura: incidente.data_abertura,
+        data_limite_resposta: incidente.data_limite_resposta,
+        data_limite_resolucao: incidente.data_limite_resolucao,
         created_at: incidente.criado_em,
         updated_at: incidente.atualizado_em,
       },
