@@ -480,7 +480,10 @@ const KnowledgeBase = () => {
             </DialogHeader>
             
             <div className="mt-6">
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: viewingArticle.conteudo }} />
+              <div 
+                className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:mb-3 [&>h3]:text-lg [&>h3]:font-medium [&>h3]:mb-2 [&>p]:mb-3 [&>ul]:mb-3 [&>ol]:mb-3 [&>li]:mb-1 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-200 [&>blockquote]:pl-4 [&>blockquote]:italic [&>pre]:bg-gray-100 [&>pre]:p-4 [&>pre]:rounded [&>code]:bg-gray-100 [&>code]:px-1 [&>code]:rounded"
+                dangerouslySetInnerHTML={{ __html: viewingArticle.conteudo }} 
+              />
             </div>
 
             {viewingArticle.tags && viewingArticle.tags.length > 0 && (
