@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { EditRequisicaoDialog } from '@/components/Requisicoes/EditRequisicaoDialog';
 import EditIncidenteDialog from '@/components/Incidentes/EditIncidenteDialog';
+import SLARiskTicketsModal from './SLARiskTicketsModal';
 import { 
   Ticket, 
   Clock, 
@@ -26,6 +27,7 @@ const DashboardOverview = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isSLARiskModalOpen, setIsSLARiskModalOpen] = useState(false);
   const itemsPerPage = 3;
 
   if (isLoading) {
@@ -98,6 +100,7 @@ const DashboardOverview = () => {
           icon={Clock}
           trend={{ value: "Crítico", direction: "down" }}
           className="border-l-4 border-l-red-500"
+          onClick={() => setIsSLARiskModalOpen(true)}
         />
         <MetricsCard
           title="Resolvidos Hoje"
@@ -278,6 +281,13 @@ const DashboardOverview = () => {
           )}
         </>
       )}
+
+      {/* SLA Risk Modal */}
+      <SLARiskTicketsModal
+        isOpen={isSLARiskModalOpen}
+        onClose={() => setIsSLARiskModalOpen(false)}
+        onTicketClick={handleTicketClick}
+      />
     </div>
   );
 };
