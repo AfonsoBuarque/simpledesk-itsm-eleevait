@@ -79,7 +79,6 @@ const KnowledgeBase = () => {
     .slice(0, 5);
 
   const handleArticleClick = async (article: any) => {
-    console.log('Article clicked:', article);
     await recordView(article.id);
     setViewingArticle(article);
   };
