@@ -479,11 +479,56 @@ const KnowledgeBase = () => {
               </div>
             </DialogHeader>
             
-            <div className="mt-6">
+            <div className="mt-6 px-2">
               <div 
-                className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:mb-3 [&>h3]:text-lg [&>h3]:font-medium [&>h3]:mb-2 [&>p]:mb-3 [&>ul]:mb-3 [&>ol]:mb-3 [&>li]:mb-1 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-200 [&>blockquote]:pl-4 [&>blockquote]:italic [&>pre]:bg-gray-100 [&>pre]:p-4 [&>pre]:rounded [&>code]:bg-gray-100 [&>code]:px-1 [&>code]:rounded"
-                dangerouslySetInnerHTML={{ __html: viewingArticle.conteudo }} 
-              />
+                className="text-gray-800 leading-relaxed space-y-4"
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  lineHeight: '1.6',
+                  fontSize: '16px'
+                }}
+              >
+                {viewingArticle.conteudo.split('\n').map((paragraph: string, index: number) => {
+                  if (paragraph.trim() === '') return <br key={index} />;
+                  
+                  // Check if it's a heading (starts with #)
+                  if (paragraph.startsWith('# ')) {
+                    return <h1 key={index} className="text-2xl font-bold mt-6 mb-4 text-gray-900">{paragraph.substring(2)}</h1>;
+                  }
+                  if (paragraph.startsWith('## ')) {
+                    return <h2 key={index} className="text-xl font-semibold mt-5 mb-3 text-gray-900">{paragraph.substring(3)}</h2>;
+                  }
+                  if (paragraph.startsWith('### ')) {
+                    return <h3 key={index} className="text-lg font-medium mt-4 mb-2 text-gray-900">{paragraph.substring(4)}</h3>;
+                  }
+                  
+                  // Check if it's a list item
+                  if (paragraph.trim().startsWith('- ') || paragraph.trim().startsWith('* ')) {
+                    return (
+                      <div key={index} className="flex items-start gap-2 mb-2">
+                        <span className="text-blue-600 mt-1">•</span>
+                        <span>{paragraph.trim().substring(2)}</span>
+                      </div>
+                    );
+                  }
+                  
+                  // Check if it's a numbered list
+                  if (/^\d+\./.test(paragraph.trim())) {
+                    const match = paragraph.trim().match(/^(\d+)\.\s*(.*)$/);
+                    if (match) {
+                      return (
+                        <div key={index} className="flex items-start gap-2 mb-2">
+                          <span className="text-blue-600 font-medium min-w-[20px]">{match[1]}.</span>
+                          <span>{match[2]}</span>
+                        </div>
+                      );
+                    }
+                  }
+                  
+                  // Regular paragraph
+                  return <p key={index} className="mb-4 text-justify">{paragraph}</p>;
+                })}
+              </div>
             </div>
 
             {viewingArticle.tags && viewingArticle.tags.length > 0 && (
