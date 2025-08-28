@@ -10,10 +10,10 @@ export const usePageTransition = () => {
   }, []);
 
   const endTransition = useCallback(() => {
-    // Pequeno delay para suavizar a transição
+    // Delay de 1.5 segundos para suavizar a transição
     setTimeout(() => {
       setIsLoading(false);
-    }, 300);
+    }, 1500);
   }, []);
 
   return {
