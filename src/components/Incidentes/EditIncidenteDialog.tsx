@@ -232,6 +232,7 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
                       form={form}
                       excludeFields={["status", "data_limite_resposta", "data_limite_resolucao"]}
                       filteredCategorias={categoriasIncidente}
+                      userSelectMode="searchable"
                     />
                     <EditRequisicaoDateFields form={form} />
                     <FileUpload

@@ -325,6 +325,7 @@ export const EditRequisicaoDialog = ({ requisicao, isOpen, onClose }: EditRequis
                         "data_limite_resolucao",
                         "status",
                       ]}
+                      userSelectMode="searchable"
                     />
                     <EditRequisicaoDateFields form={form} />
                     <FileUpload
