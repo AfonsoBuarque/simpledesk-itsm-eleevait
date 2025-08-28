@@ -1,7 +1,13 @@
 
 import { Solicitacao } from '@/types/solicitacao';
 
-export const transformIncidenteData = (data: any[]): Solicitacao[] => {
+export const transformIncidenteData = (data: any[], maps?: {
+  usersMap?: Map<string, any>,
+  clientsMap?: Map<string, any>,
+  groupsMap?: Map<string, any>,
+  categoriesMap?: Map<string, any>,
+  slasMap?: Map<string, any>
+}): Solicitacao[] => {
   return (data || []).map(item => ({
     ...item,
     // Garantir que tipo seja do tipo correto
@@ -22,13 +28,13 @@ export const transformIncidenteData = (data: any[]): Solicitacao[] => {
       : item.tags 
         ? [String(item.tags)] 
         : [],
-    // Definir relacionamentos como null por enquanto (sem foreign keys configuradas)
-    categoria: null,
-    sla: null,
-    solicitante: null,
-    cliente: null,
-    grupo_responsavel: null,
-    atendente: null,
+    // Mapear relacionamentos usando os dados buscados
+    categoria: maps?.categoriesMap?.get(item.categoria_id) || null,
+    sla: maps?.slasMap?.get(item.sla_id) || null,
+    solicitante: maps?.usersMap?.get(item.solicitante_id) || null,
+    cliente: maps?.clientsMap?.get(item.client_id) || null,
+    grupo_responsavel: maps?.groupsMap?.get(item.grupo_responsavel_id) || null,
+    atendente: maps?.usersMap?.get(item.atendente_id) || null,
   }));
 };
 
