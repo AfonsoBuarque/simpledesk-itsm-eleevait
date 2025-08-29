@@ -42,10 +42,37 @@ interface NotificationData {
   alterado_por_email?: string;
 }
 
+interface ChatMessageData {
+  id: string;
+  numero: string;
+  titulo: string;
+  mensagem: string;
+  solicitante: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  atendente?: {
+    id: string;
+    name: string;
+  };
+  client: {
+    id: string;
+    name: string;
+  };
+  grupo_responsavel?: {
+    id: string;
+    name: string;
+  };
+  alterado_por_id?: string;
+  alterado_por_nome?: string;
+  alterado_por_email?: string;
+}
+
 interface WebhookPayload {
-  type: 'requisicao' | 'incidente';
-  action: 'create' | 'update';
-  data: NotificationData;
+  type: 'requisicao' | 'incidente' | 'chat_message';
+  action: 'create' | 'update' | 'message_sent';
+  data: NotificationData | ChatMessageData;
 }
 
 export const useWebhookNotification = () => {
@@ -311,10 +338,52 @@ export const useWebhookNotification = () => {
     await sendNotification(payload);
   };
 
+  const notifyChatMessage = async (tipo: 'requisicao' | 'incidente', item: any, mensagem: string) => {
+    const currentUser = await getCurrentUserInfo();
+    
+    const payload: WebhookPayload = {
+      type: 'chat_message',
+      action: 'message_sent',
+      data: {
+        id: item.id,
+        numero: item.numero,
+        titulo: item.titulo,
+        mensagem: mensagem,
+        solicitante: {
+          id: item.solicitante_id,
+          name: item.solicitante?.name || 'N/A',
+          email: item.solicitante?.email || 'N/A',
+        },
+        ...(item.atendente_id && {
+          atendente: {
+            id: item.atendente_id,
+            name: item.atendente?.name || 'N/A',
+          },
+        }),
+        client: {
+          id: item.client_id,
+          name: item.cliente?.name || 'N/A',
+        },
+        ...(item.grupo_responsavel_id && {
+          grupo_responsavel: {
+            id: item.grupo_responsavel_id,
+            name: item.grupo_responsavel?.name || 'N/A',
+          },
+        }),
+        alterado_por_id: currentUser?.id,
+        alterado_por_nome: currentUser?.name,
+        alterado_por_email: currentUser?.email,
+      } as ChatMessageData,
+    };
+
+    await sendNotification(payload);
+  };
+
   return {
     notifyRequisicaoCreated,
     notifyRequisicaoUpdated,
     notifyIncidenteCreated,
     notifyIncidenteUpdated,
+    notifyChatMessage,
   };
 };

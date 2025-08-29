@@ -5,9 +5,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface ChatMessageData {
+  id: string
+  numero: string
+  titulo: string
+  mensagem: string
+  solicitante: {
+    id: string
+    name: string
+    email: string
+  }
+  atendente?: {
+    id: string
+    name: string
+  }
+  client: {
+    id: string
+    name: string
+  }
+  grupo_responsavel?: {
+    id: string
+    name: string
+  }
+  alterado_por_id?: string
+  alterado_por_nome?: string
+  alterado_por_email?: string
+}
+
 interface NotificationPayload {
-  type: 'requisicao' | 'incidente'
-  action: 'create' | 'update'
+  type: 'requisicao' | 'incidente' | 'chat_message'
+  action: 'create' | 'update' | 'message_sent'
   data: {
     id: string
     numero: string
@@ -104,7 +131,7 @@ interface WebhookData {
   }
 }
 
-async function sendWebhookNotification(payload: NotificationPayload): Promise<boolean> {
+async function sendWebhookNotification(payload: NotificationPayload | { type: 'chat_message'; action: 'message_sent'; data: ChatMessageData }): Promise<boolean> {
   try {
     const webhookUrl = Deno.env.get('WEBHOOK_URL')
     const webhookUser = Deno.env.get('WEBHOOK_USER')
@@ -115,6 +142,75 @@ async function sendWebhookNotification(payload: NotificationPayload): Promise<bo
       return false
     }
 
+    // Handle chat message notifications differently
+    if (payload.type === 'chat_message') {
+      const chatData = payload.data as ChatMessageData
+      const webhookData = {
+        timestamp: new Date().toISOString(),
+        source: 'ITSM_SYSTEM',
+        event_type: 'CHAT_MESSAGE_SENT',
+        module: 'CHAT',
+        action: 'MESSAGE_SENT',
+        entity: {
+          id: chatData.id,
+          number: chatData.numero,
+          title: chatData.titulo,
+          message: chatData.mensagem,
+          requester: {
+            id: chatData.solicitante.id,
+            name: chatData.solicitante.name,
+            email: chatData.solicitante.email
+          },
+          ...(chatData.atendente && {
+            assignee: {
+              id: chatData.atendente.id,
+              name: chatData.atendente.name
+            }
+          }),
+          client: {
+            id: chatData.client.id,
+            name: chatData.client.name
+          },
+          ...(chatData.grupo_responsavel && {
+            responsible_group: {
+              id: chatData.grupo_responsavel.id,
+              name: chatData.grupo_responsavel.name
+            }
+          }),
+          ...(chatData.alterado_por_id && {
+            modified_by: {
+              id: chatData.alterado_por_id,
+              name: chatData.alterado_por_nome || 'N/A',
+              email: chatData.alterado_por_email || 'N/A'
+            }
+          })
+        }
+      }
+
+      const credentials = btoa(`${webhookUser}:${webhookPassword}`)
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${credentials}`,
+          'User-Agent': 'ITSM-System/1.0'
+        },
+        body: JSON.stringify(webhookData)
+      })
+
+      if (!response.ok) {
+        console.error(`Chat webhook failed: ${response.status} - ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        return false
+      }
+
+      console.log(`Chat message webhook notification sent successfully`)
+      return true
+    }
+
+    // Handle regular notifications
     const webhookData: WebhookData = {
       timestamp: new Date().toISOString(),
       source: 'ITSM_SYSTEM',

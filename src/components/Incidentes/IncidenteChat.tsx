@@ -21,7 +21,7 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
     incidente.id
   );
   const { uploadFile, uploading } = useChatFileUpload();
-  const { notifyIncidenteUpdated } = useWebhookNotification();
+  const { notifyIncidenteUpdated, notifyChatMessage } = useWebhookNotification();
   const [mensagem, setMensagem] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,35 +62,8 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
           tipo_arquivo: file.type,
         });
 
-        // Webhook notifications - both Supabase and direct
-        await notifyIncidenteUpdated(incidente);
-        
-        // Direct webhook notification
-        try {
-          await fetch(
-            "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                solicitante_id: getSolicitanteId(),
-                solicitante_nome: getSolicitanteNome(),
-                analista_id: getAnalistaId(),
-                analista_nome: getAnalistaNome(),
-                grupo_nome: getGrupoNome(),
-                grupo_id: getGrupoId(),
-                mensagem: `📎 Imagem enviada: ${file.name}`,
-                alterado_por_id: user?.id,
-                alterado_por_nome: user?.email,
-                alterado_por_email: user?.email,
-              }),
-            }
-          );
-        } catch (wberr) {
-          console.error("Falha ao enviar webhook direto de notificação de chat:", wberr);
-        }
+        // Chat message webhook notification
+        await notifyChatMessage('incidente', incidente, `📎 Imagem enviada: ${file.name}`);
       }
     } catch (error) {
       console.error("Erro ao enviar arquivo:", error);
@@ -124,35 +97,8 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
         mensagem: mensagem.trim(),
       });
 
-      // Webhook notifications - both Supabase and direct
-      await notifyIncidenteUpdated(incidente);
-      
-      // Direct webhook notification
-      try {
-        await fetch(
-          "https://n8n-n8n-onlychurch.ibnltq.easypanel.host/webhook-test/notificacao-chat-solicitacao",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              solicitante_id: getSolicitanteId(),
-              solicitante_nome: getSolicitanteNome(),
-              analista_id: getAnalistaId(),
-              analista_nome: getAnalistaNome(),
-              grupo_nome: getGrupoNome(),
-              grupo_id: getGrupoId(),
-              mensagem: mensagem.trim(),
-              alterado_por_id: user?.id,
-              alterado_por_nome: user?.email,
-              alterado_por_email: user?.email,
-            }),
-          }
-        );
-      } catch (wberr) {
-        console.error("Falha ao enviar webhook direto de notificação de chat:", wberr);
-      }
+      // Chat message webhook notification
+      await notifyChatMessage('incidente', incidente, mensagem.trim());
       setMensagem("");
     } catch (e: any) {
       alert(
