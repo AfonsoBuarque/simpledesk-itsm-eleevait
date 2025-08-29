@@ -46,6 +46,8 @@ interface ChatMessageData {
   id: string;
   numero: string;
   titulo: string;
+  status: string;
+  prioridade: string;
   mensagem: string;
   solicitante: {
     id: string;
@@ -348,6 +350,8 @@ export const useWebhookNotification = () => {
         id: item.id,
         numero: item.numero,
         titulo: item.titulo,
+        status: item.status,
+        prioridade: item.prioridade,
         mensagem: mensagem,
         solicitante: {
           id: item.solicitante_id,

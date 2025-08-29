@@ -9,6 +9,8 @@ interface ChatMessageData {
   id: string
   numero: string
   titulo: string
+  status: string
+  prioridade: string
   mensagem: string
   solicitante: {
     id: string
@@ -155,6 +157,8 @@ async function sendWebhookNotification(payload: NotificationPayload | { type: 'c
           id: chatData.id,
           number: chatData.numero,
           title: chatData.titulo,
+          status: chatData.status,
+          priority: chatData.prioridade,
           message: chatData.mensagem,
           requester: {
             id: chatData.solicitante.id,
