@@ -82,6 +82,9 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
                 grupo_nome: getGrupoNome(),
                 grupo_id: getGrupoId(),
                 mensagem: `📎 Imagem enviada: ${file.name}`,
+                alterado_por_id: user?.id,
+                alterado_por_nome: user?.email,
+                alterado_por_email: user?.email,
               }),
             }
           );
@@ -141,6 +144,9 @@ export const IncidenteChat: React.FC<IncidenteChatProps> = ({ incidente }) => {
               grupo_nome: getGrupoNome(),
               grupo_id: getGrupoId(),
               mensagem: mensagem.trim(),
+              alterado_por_id: user?.id,
+              alterado_por_nome: user?.email,
+              alterado_por_email: user?.email,
             }),
           }
         );
