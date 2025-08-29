@@ -45,6 +45,9 @@ interface NotificationPayload {
     data_limite_resolucao?: string
     created_at?: string
     updated_at?: string
+    alterado_por_id?: string
+    alterado_por_nome?: string
+    alterado_por_email?: string
   }
 }
 
@@ -92,6 +95,11 @@ interface WebhookData {
       response_deadline?: string
       resolution_deadline?: string
       updated?: string
+    }
+    modified_by?: {
+      id: string
+      name: string
+      email: string
     }
   }
 }
@@ -159,7 +167,14 @@ async function sendWebhookNotification(payload: NotificationPayload): Promise<bo
           ...(payload.data.data_limite_resposta && { response_deadline: payload.data.data_limite_resposta }),
           ...(payload.data.data_limite_resolucao && { resolution_deadline: payload.data.data_limite_resolucao }),
           ...(payload.data.updated_at && { updated: payload.data.updated_at })
-        }
+        },
+        ...(payload.data.alterado_por_id && {
+          modified_by: {
+            id: payload.data.alterado_por_id,
+            name: payload.data.alterado_por_nome || 'N/A',
+            email: payload.data.alterado_por_email || 'N/A'
+          }
+        })
       }
     }
 

@@ -37,6 +37,9 @@ interface NotificationData {
   data_limite_resolucao?: string;
   created_at?: string;
   updated_at?: string;
+  alterado_por_id?: string;
+  alterado_por_nome?: string;
+  alterado_por_email?: string;
 }
 
 interface WebhookPayload {
@@ -62,6 +65,22 @@ export const useWebhookNotification = () => {
       console.error('Failed to send webhook notification:', error);
       // Não vamos lançar o erro para não quebrar o fluxo principal
     }
+  };
+
+  const getCurrentUserInfo = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        return {
+          id: user.id,
+          name: user.email || 'N/A',
+          email: user.email || 'N/A'
+        };
+      }
+    } catch (error) {
+      console.error('Error getting current user:', error);
+    }
+    return null;
   };
 
   const notifyRequisicaoCreated = async (requisicao: any) => {
@@ -119,6 +138,8 @@ export const useWebhookNotification = () => {
   };
 
   const notifyRequisicaoUpdated = async (requisicao: any) => {
+    const currentUser = await getCurrentUserInfo();
+    
     const payload: WebhookPayload = {
       type: 'requisicao',
       action: 'update',
@@ -167,6 +188,9 @@ export const useWebhookNotification = () => {
         data_limite_resolucao: requisicao.data_limite_resolucao,
         created_at: requisicao.criado_em,
         updated_at: requisicao.atualizado_em,
+        alterado_por_id: currentUser?.id,
+        alterado_por_nome: currentUser?.name,
+        alterado_por_email: currentUser?.email,
       },
     };
 
@@ -228,6 +252,8 @@ export const useWebhookNotification = () => {
   };
 
   const notifyIncidenteUpdated = async (incidente: any) => {
+    const currentUser = await getCurrentUserInfo();
+    
     const payload: WebhookPayload = {
       type: 'incidente',
       action: 'update',
@@ -276,6 +302,9 @@ export const useWebhookNotification = () => {
         data_limite_resolucao: incidente.data_limite_resolucao,
         created_at: incidente.criado_em,
         updated_at: incidente.atualizado_em,
+        alterado_por_id: currentUser?.id,
+        alterado_por_nome: currentUser?.name,
+        alterado_por_email: currentUser?.email,
       },
     };
 
