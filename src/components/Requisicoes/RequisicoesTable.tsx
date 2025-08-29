@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Plus, HelpCircle, Pencil } from 'lucide-react';
 import { Solicitacao } from '@/types/solicitacao';
 import { format } from 'date-fns';
@@ -17,6 +18,14 @@ interface RequisicoesTableProps {
 }
 
 const RequisicoesTable = ({ requisicoes, onEditRequisicao, onNewRequisicao }: RequisicoesTableProps) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  const totalPages = Math.ceil(requisicoes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRequisicoes = requisicoes.slice(startIndex, endIndex);
+
   if (requisicoes.length === 0) {
     return (
       <Card>
@@ -59,7 +68,7 @@ const RequisicoesTable = ({ requisicoes, onEditRequisicao, onNewRequisicao }: Re
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requisicoes.map((requisicao) => {
+            {currentRequisicoes.map((requisicao) => {
               const slaStatus = getSLAStatus(requisicao);
               const IconComponent = slaStatus.icon;
               
@@ -122,6 +131,40 @@ const RequisicoesTable = ({ requisicoes, onEditRequisicao, onNewRequisicao }: Re
             })}
           </TableBody>
         </Table>
+        
+        {totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

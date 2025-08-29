@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Plus, AlertCircle, Pencil } from 'lucide-react';
 import { Solicitacao } from '@/types/solicitacao';
 import { format } from 'date-fns';
@@ -17,6 +18,13 @@ interface IncidentesTableProps {
 }
 
 const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: IncidentesTableProps) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  const totalPages = Math.ceil(incidentes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentIncidentes = incidentes.slice(startIndex, endIndex);
 
   if (incidentes.length === 0) {
     return (
@@ -60,7 +68,7 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
             </TableRow>
           </TableHeader>
           <TableBody>
-            {incidentes.map((incidente) => {
+            {currentIncidentes.map((incidente) => {
               const slaStatus = getSLAStatus(incidente);
               const IconComponent = slaStatus.icon;
               
@@ -123,6 +131,40 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
             })}
           </TableBody>
         </Table>
+        
+        {totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
