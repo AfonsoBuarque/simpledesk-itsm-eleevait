@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleDesk ITSM - Notificação</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #f9fafb;
+        }
+
+        /* Container principal */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 120px;
+            height: 48px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo img {
+            width: 120px !important;
+            height: 48px !important;
+            max-width: 120px !important;
+            max-height: 48px !important;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Conteúdo principal */
+        .content {
+            padding: 32px 24px;
+        }
+
+        .notification-type {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .notification-type.incident {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .notification-type.request {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        .notification-type.problem {
+            background-color: #fefce8;
+            color: #ca8a04;
+            border: 1px solid #fde047;
+        }
+
+        .notification-type.change {
+            background-color: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #4b5563;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Card de informações */
+        .info-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: right;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-aberto {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-em-andamento {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-resolvido {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .status-fechado {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* Urgência badges */
+        .urgencia-baixa {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .urgencia-media {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .urgencia-alta {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .urgencia-critica {
+            background-color: #fecaca;
+            color: #991b1b;
+        }
+
+        /* Botão de ação */
+        .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            margin: 16px 0;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f8fafc;
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .content {
+                padding: 24px 16px;
+            }
+
+            .header {
+                padding: 20px 16px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .info-value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="https://idctavngatyyileoitgz.supabase.co/storage/v1/object/public/logo/logo_Aruan.png" alt="Vertice Aruan Logo">
+            </div>
+            <h1>Vertice Aruan</h1>
+            <p>Sistema de Gerenciamento de Serviços de TI</p>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="content">
+            <!-- Tipo de notificação -->
+            <span class="notification-type incident">Incidente</span>
+
+            <!-- Título -->
+            <h2 class="title">Novo Incidente Criado: INC-2024-001</h2>
+
+            <!-- Descrição -->
+            <p class="description">
+                Um novo incidente foi criado no sistema e requer sua atenção. 
+                Verifique os detalhes abaixo e tome as ações necessárias.
+            </p>
+
+            <!-- Card de informações -->
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Número:</span>
+                    <span class="info-value">INC-2024-001</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Título:</span>
+                    <span class="info-value">Sistema de email fora do ar</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value">
+                        <span class="status-badge status-aberto">Aberto</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Urgência:</span>
+                    <span class="info-value">
+                        <span class="status-badge urgencia-alta">Alta</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Solicitante:</span>
+                    <span class="info-value">João Silva</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Cliente:</span>
+                    <span class="info-value">Empresa ABC Ltda</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Grupo Responsável:</span>
+                    <span class="info-value">Suporte Técnico</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Data de Abertura:</span>
+                    <span class="info-value">29/08/2024 11:18</span>
+                </div>
+            </div>
+
+            <!-- Botão de ação -->
+            <div style="text-align: center;">
+                <a href="https://simpledesk.app.br/incidentes/INC-2024-001" class="action-button">
+                    Visualizar Incidente
+                </a>
+            </div>
+
+            <!-- Mensagem adicional -->
+            <p style="font-size: 14px; color: #6b7280; margin-top: 24px;">
+                <strong>Ação Necessária:</strong> Este incidente requer sua atenção imediata. 
+                Clique no botão acima para acessar o sistema e tomar as devidas providências.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Esta é uma notificação automática do SimpleDesk ITSM</p>
+            <p>
+                Se você não deseja mais receber estas notificações, 
+                <a href="#">clique aqui para gerenciar suas preferências</a>
+            </p>
+            <p style="margin-top: 16px;">
+                © 2024 SimpleDesk ITSM - Todos os direitos reservados
+            </p>
+        </div>
+    </div>
+</body>
+</html>

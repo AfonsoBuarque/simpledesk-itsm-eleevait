@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertice Aruan - Atualização de Solicitação</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #f9fafb;
+        }
+
+        /* Container principal */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 120px;
+            height: 48px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo img {
+            width: 120px !important;
+            height: 48px !important;
+            max-width: 120px !important;
+            max-height: 48px !important;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Conteúdo principal */
+        .content {
+            padding: 32px 24px;
+        }
+
+        .notification-type {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .notification-type.update-request {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde047;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #4b5563;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Card de informações */
+        .info-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: right;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-aberto {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-em-andamento {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-resolvido {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .status-fechado {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* Prioridade badges */
+        .prioridade-baixa {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .prioridade-media {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .prioridade-alta {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .prioridade-critica {
+            background-color: #fecaca;
+            color: #991b1b;
+        }
+
+        /* Botão de ação */
+        .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            margin: 16px 0;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Destaque de atualização */
+        .update-highlight {
+            background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+            border: 1px solid #fde047;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .update-highlight .icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #d97706;
+        }
+
+        .update-highlight h3 {
+            color: #92400e;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .update-highlight p {
+            color: #a16207;
+            font-size: 14px;
+        }
+
+        /* Card de mudanças */
+        .changes-card {
+            background-color: #fffbeb;
+            border: 1px solid #fde047;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .changes-card h4 {
+            color: #92400e;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .change-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #fde047;
+            font-size: 13px;
+        }
+
+        .change-item:last-child {
+            border-bottom: none;
+        }
+
+        .change-label {
+            font-weight: 500;
+            color: #92400e;
+        }
+
+        .change-values {
+            text-align: right;
+            color: #a16207;
+        }
+
+        .change-from {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .change-to {
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f8fafc;
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .content {
+                padding: 24px 16px;
+            }
+
+            .header {
+                padding: 20px 16px;
+            }
+
+            .info-row, .change-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .info-value, .change-values {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="https://idctavngatyyileoitgz.supabase.co/storage/v1/object/public/logo/logo_Aruan.png" alt="Vertice Aruan Logo">
+            </div>
+            <h1>Vertice Aruan</h1>
+            <p>Sistema de Gerenciamento de Serviços de TI</p>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="content">
+            <!-- Destaque de atualização -->
+            <div class="update-highlight">
+                <div class="icon">🔄</div>
+                <h3>Solicitação Atualizada</h3>
+                <p>Houve alterações importantes na solicitação</p>
+            </div>
+
+            <!-- Tipo de notificação -->
+            <span class="notification-type update-request">Atualização</span>
+
+            <!-- Título -->
+            <h2 class="title">Solicitação Atualizada: {{ $('Filtro update REQ').item.json['Numero Solicitacao'] }}</h2>
+
+            <!-- Descrição -->
+            <p class="description">
+                A solicitação foi atualizada no sistema. Verifique as alterações realizadas 
+                e tome as ações necessárias conforme o novo status ou informações.
+            </p>
+
+            <!-- Card de informações atuais -->
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Número:</span>
+                    <span class="info-value">{{ $('Filtro update REQ').item.json['Numero Solicitacao'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Título:</span>
+                    <span class="info-value">{{ $('Filtro update REQ').item.json['Titulo Solicitacao'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status Atual:</span>
+                    <span class="info-value">
+                        <span class="status-badge status-em-andamento">{{ $('Filtro update REQ').item.json.Status }}</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Prioridade Atual:</span>
+                    <span class="info-value">
+                        <span class="status-badge prioridade-alta">{{ $('Filtro update REQ').item.json.Prioridade }}</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Responsável:</span>
+                    <span class="info-value">{{ $json.data[3]['Nome Responsavel'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Solicitante:</span>
+                    <span class="info-value">{{ $json.data[2]['Nome Solicitante'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Cliente:</span>
+                    <span class="info-value">Eleeva IT</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Grupo Responsável:</span>
+                    <span class="info-value">{{ $json.data[1]['Grupo Responsavel'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Atualizado por:</span>
+                    <span class="info-value">João Administrador</span>
+                </div>
+            </div>
+
+            <!-- Botão de ação 
+            <div style="text-align: center;">
+                <a href="https://simpledesk.app.br/solicitacoes/REQ-2024-001" class="action-button">
+                    Visualizar Solicitação
+                </a>
+            </div>-->
+
+            <!-- Mensagem adicional -->
+            <p style="font-size: 14px; color: #6b7280; margin-top: 24px;">
+                <strong>Ação Requerida:</strong> Verifique as alterações realizadas e continue o atendimento 
+                conforme o novo status da solicitação. Clique no botão acima para acessar todos os detalhes.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Esta é uma notificação automática do Vertice Aruan</p>
+            <p>
+                Se você não deseja mais receber estas notificações, 
+                <a href="#">clique aqui para gerenciar suas preferências</a>
+            </p>
+            <p style="margin-top: 16px;">
+                © 2024 Vertice Aruan - Todos os direitos reservados
+            </p>
+        </div>
+    </div>
+</body>
+</html>
