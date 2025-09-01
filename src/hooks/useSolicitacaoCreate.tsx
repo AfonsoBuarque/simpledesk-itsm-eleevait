@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
 import { useSLACalculation } from './useSLACalculation';
+import { nowInBrazil } from '@/utils/timezone';
 
 export const useSolicitacaoCreate = () => {
   const { toast } = useToast();
@@ -18,7 +19,7 @@ export const useSolicitacaoCreate = () => {
       const slaDeadlines = await calculateAndSetSLADeadlines(
         formData.categoria_id,
         formData.grupo_responsavel_id,
-        new Date().toISOString()
+        nowInBrazil()
       );
       
       // Preparar dados para inserção, incluindo as datas limite calculadas

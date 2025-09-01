@@ -4,6 +4,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { SolicitacaoFormData } from '@/types/solicitacao';
+import { formatDateTimeLocalBrazil } from '@/utils/timezone';
 
 interface EditRequisicaoDateFieldsProps {
   form: UseFormReturn<SolicitacaoFormData>;
@@ -17,13 +18,14 @@ export const EditRequisicaoDateFields = ({ form }: EditRequisicaoDateFieldsProps
         name="data_limite_resposta"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Data Limite Resposta</FormLabel>
+            <FormLabel>Data Limite Resposta (Horário de Brasília)</FormLabel>
             <FormControl>
               <Input 
-                {...field} 
+                {...field}
+                value={field.value ? formatDateTimeLocalBrazil(field.value) : ''}
                 type="datetime-local" 
                 readOnly 
-                className="bg-gray-50" 
+                className="bg-muted" 
               />
             </FormControl>
             <FormMessage />
@@ -36,13 +38,14 @@ export const EditRequisicaoDateFields = ({ form }: EditRequisicaoDateFieldsProps
         name="data_limite_resolucao"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Data Limite Resolução</FormLabel>
+            <FormLabel>Data Limite Resolução (Horário de Brasília)</FormLabel>
             <FormControl>
               <Input 
-                {...field} 
+                {...field}
+                value={field.value ? formatDateTimeLocalBrazil(field.value) : ''}
                 type="datetime-local" 
                 readOnly 
-                className="bg-gray-50" 
+                className="bg-muted" 
               />
             </FormControl>
             <FormMessage />

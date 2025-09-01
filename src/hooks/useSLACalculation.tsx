@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { calculateSLADeadlines } from '@/utils/slaCalculator';
 import { SLA } from '@/types/sla';
 import { Group } from '@/types/group';
+import { nowInBrazil } from '@/utils/timezone';
 
 export const useSLACalculation = () => {
   const [loading, setLoading] = useState(false);
@@ -13,7 +14,7 @@ export const useSLACalculation = () => {
   const calculateAndSetSLADeadlines = async (
     categoriaId?: string,
     grupoResponsavelId?: string,
-    dataAbertura: string = new Date().toISOString()
+    dataAbertura: Date | string = nowInBrazil()
   ) => {
     if (!categoriaId || !grupoResponsavelId) {
       console.log('Missing categoria or grupo responsavel for SLA calculation');
@@ -25,7 +26,11 @@ export const useSLACalculation = () => {
 
     try {
       setLoading(true);
-      console.log('Starting SLA calculation:', { categoriaId, grupoResponsavelId, dataAbertura });
+      
+      // Converter dataAbertura para Date se for string
+      const dataAberturaDate = typeof dataAbertura === 'string' ? new Date(dataAbertura) : dataAbertura;
+      
+      console.log('Starting SLA calculation:', { categoriaId, grupoResponsavelId, dataAbertura: dataAberturaDate });
 
       // Buscar a categoria para obter o SLA associado
       const { data: categoria, error: categoriaError } = await supabase
@@ -74,7 +79,7 @@ export const useSLACalculation = () => {
 
       // Calcular as datas limite
       const deadlines = calculateSLADeadlines(
-        new Date(dataAbertura),
+        dataAberturaDate,
         sla as SLA,
         grupo as Group
       );

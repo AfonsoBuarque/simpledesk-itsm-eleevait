@@ -1,6 +1,7 @@
 
 import { Group } from '@/types/group';
 import { SLA } from '@/types/sla';
+import { nowInBrazil, toBrazilTime } from './timezone';
 
 export interface SLACalculationResult {
   data_limite_resposta: string;
@@ -12,14 +13,22 @@ export const calculateSLADeadlines = (
   sla: SLA,
   grupo: Group
 ): SLACalculationResult => {
-  console.log('Calculating SLA deadlines:', { dataAbertura, sla, grupo });
+  // Converter para timezone do Brasil para cálculos precisos
+  const dataAberturaBrasil = toBrazilTime(dataAbertura);
+  
+  console.log('Calculating SLA deadlines:', { 
+    dataAberturaOriginal: dataAbertura,
+    dataAberturaBrasil, 
+    sla, 
+    grupo 
+  });
   
   // Se não há configuração de turno, usar cálculo simples (24/7)
   if (!grupo.dias_semana || grupo.dias_semana.length === 0 || !grupo.inicio_turno || !grupo.fim_turno) {
-    const dataLimiteResposta = new Date(dataAbertura);
+    const dataLimiteResposta = new Date(dataAberturaBrasil);
     dataLimiteResposta.setMinutes(dataLimiteResposta.getMinutes() + sla.tempo_resposta_min);
     
-    const dataLimiteResolucao = new Date(dataAbertura);
+    const dataLimiteResolucao = new Date(dataAberturaBrasil);
     dataLimiteResolucao.setMinutes(dataLimiteResolucao.getMinutes() + sla.tempo_resolucao_min);
     
     return {
@@ -30,7 +39,7 @@ export const calculateSLADeadlines = (
 
   // Calcular considerando horários úteis
   const dataLimiteResposta = calculateBusinessDeadline(
-    dataAbertura,
+    dataAberturaBrasil,
     sla.tempo_resposta_min,
     grupo.dias_semana,
     grupo.inicio_turno,
@@ -38,7 +47,7 @@ export const calculateSLADeadlines = (
   );
 
   const dataLimiteResolucao = calculateBusinessDeadline(
-    dataAbertura,
+    dataAberturaBrasil,
     sla.tempo_resolucao_min,
     grupo.dias_semana,
     grupo.inicio_turno,
