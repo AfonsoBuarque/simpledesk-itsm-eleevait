@@ -140,7 +140,10 @@ const UserPortal = () => {
             <p className="text-sm text-green-700">Acompanhar status das solicitações</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+          <div 
+            onClick={() => setActiveTab('knowledge')}
+            className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 group"
+          >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-purple-600 rounded-lg group-hover:bg-purple-700 transition-colors">
                 <AlertTriangle className="h-5 w-5 text-white" />
