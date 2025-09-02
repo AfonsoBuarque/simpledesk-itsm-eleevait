@@ -55,10 +55,10 @@ export function useUserPortalTickets() {
           if (ticket.atendente_id) {
             const { data: atendenteData } = await supabase
               .from('users')
-              .select('email')
+              .select('name')
               .eq('id', ticket.atendente_id)
               .single();
-            atendente_nome = atendenteData?.email || null;
+            atendente_nome = atendenteData?.name || null;
           }
 
           return {
