@@ -9,6 +9,7 @@ import { Search, Filter, Calendar, Clock, User, MessageSquare } from 'lucide-rea
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useUserPortalTickets } from '@/hooks/useUserPortalTickets';
+import { TicketDetailsModal } from '@/components/UserPortal/TicketDetailsModal';
 
 interface Ticket {
   id: string;
@@ -33,6 +34,18 @@ export const UserTicketsList: React.FC = () => {
   const [urgencyFilter, setUrgencyFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewTicket = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTicket(null);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -213,7 +226,10 @@ export const UserTicketsList: React.FC = () => {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-md">
+                       <span 
+                        onClick={() => handleViewTicket(ticket)}
+                        className="font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-md cursor-pointer hover:bg-blue-100 transition-colors"
+                      >
                         {ticket.numero}
                       </span>
                       <Badge className={getStatusColor(ticket.status)}>
@@ -324,6 +340,13 @@ export const UserTicketsList: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Modal de Detalhes do Ticket */}
+      <TicketDetailsModal
+        ticket={selectedTicket}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };
