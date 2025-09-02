@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import MetricsCard from './MetricsCard';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useSLAPerformance } from '@/hooks/useSLAPerformance';
 import { getSLAStatus, getStatusColor, getUrgenciaColor } from '@/utils/slaStatus';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -26,7 +27,8 @@ import {
 } from 'lucide-react';
 
 const DashboardOverview = () => {
-  const { tickets, stats, slaMetrics, isLoading } = useDashboardData();
+  const { tickets, stats, isLoading: dashboardLoading } = useDashboardData();
+  const { data: slaMetrics, isLoading: slaLoading } = useSLAPerformance();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -35,6 +37,8 @@ const DashboardOverview = () => {
   const [isResolvedTodayModalOpen, setIsResolvedTodayModalOpen] = useState(false);
   const [isCriticalProblemsModalOpen, setIsCriticalProblemsModalOpen] = useState(false);
   const itemsPerPage = 3;
+
+  const isLoading = dashboardLoading || slaLoading;
 
   if (isLoading) {
     return (
@@ -237,34 +241,34 @@ const DashboardOverview = () => {
                         <span className={`text-lg font-bold ${metric.current >= metric.target ? 'text-green-600' : 'text-red-600'} transition-all duration-300 hover:scale-110`}>
                           {metric.current}%
                         </span>
-                        <span className="text-xs text-gray-400">({metric.total} tickets)</span>
+                        <span className="text-xs text-gray-400">({metric.total} total)</span>
                       </div>
                     </div>
                     <Progress 
                       value={metric.current} 
-                      className={`h-3 rounded-xl shadow-inner transition-all duration-300 ${metric.current >= metric.target ? 'bg-gradient-to-r from-green-500 to-green-300' : 'bg-gradient-to-r from-orange-500 to-orange-300'}`}
+                      className={`h-3 rounded-xl shadow-inner transition-all duration-300`}
                     />
                     <div className="flex justify-between items-center text-xs text-gray-500">
-                      <span>Meta: {metric.target}%</span>
+                      <div className="flex items-center gap-4">
+                        <span>Meta: {metric.target}%</span>
+                        <span className="text-green-600">
+                          ✓ {metric.onTime} no prazo
+                        </span>
+                        <span className="text-red-600">
+                          ⚠ {metric.breached} violados
+                        </span>
+                      </div>
                       <span className={`${metric.current >= metric.target ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} font-bold px-2 py-0.5 rounded-full text-xs`}>
-                        {metric.current >= metric.target ? (
-                          <span className="flex items-center gap-1">
-                            <img src="/logos/logo_Aruan_header.png" alt="Aruan" className="w-3 h-3" />
-                            ✓ Meta atingida
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1">
-                            <img src="/logos/logo_Aruan_header.png" alt="Aruan" className="w-3 h-3" />
-                            ⚠️ Abaixo da meta
-                          </span>
-                        )}
+                        {metric.current >= metric.target ? '✓ Meta atingida' : '⚠️ Abaixo da meta'}
                       </span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-4 text-gray-500">
-                  Nenhuma métrica de SLA disponível
+                <div className="text-center py-8 text-gray-500">
+                  <div className="mb-2">📊</div>
+                  <div className="font-medium">Calculando métricas de SLA...</div>
+                  <div className="text-sm">Dados sendo processados do sistema</div>
                 </div>
               )}
             </div>
