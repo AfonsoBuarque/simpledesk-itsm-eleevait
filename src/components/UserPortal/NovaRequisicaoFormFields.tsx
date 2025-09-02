@@ -18,9 +18,8 @@ export const NovaRequisicaoFormFields = ({ form }: NovaRequisicaoFormFieldsProps
   const { categorias } = useCategorias();
   const { profile } = useAuth();
 
-  // Como estamos usando um perfil simplificado, mostrar todas as categorias
-  // Em uma implementação futura, pode-se filtrar por cliente específico
-  const filteredCategorias = categorias;
+  // Filtrar categorias para mostrar apenas as do tipo "solicitacao"
+  const filteredCategorias = categorias.filter(categoria => categoria.tipo === 'solicitacao');
 
   return (
     <>
