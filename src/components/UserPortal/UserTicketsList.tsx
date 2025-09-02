@@ -32,7 +32,7 @@ export const UserTicketsList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 4;
 
   const getStatusColor = (status: string) => {
     switch (status) {
