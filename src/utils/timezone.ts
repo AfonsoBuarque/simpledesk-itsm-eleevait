@@ -44,8 +44,10 @@ export const formatBrazilTime = (
  * Formata uma data para input datetime-local no timezone do Brasil
  */
 export const formatDateTimeLocalBrazil = (date: Date | string): string => {
-  const inputDate = typeof date === 'string' ? parseISO(date) : date;
-  return formatInTimeZone(inputDate, BRAZIL_TIMEZONE, "yyyy-MM-dd'T'HH:mm");
+  if (!date) return '';
+  
+  // Garantir que estamos formatando no timezone do Brasil
+  return formatInTimeZone(date, BRAZIL_TIMEZONE, "yyyy-MM-dd'T'HH:mm");
 };
 
 /**
