@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useSLACalculation } from '@/hooks/useSLACalculation';
+import { useSLACalculation } from './useSLACalculation';
+import { nowInBrazil } from '@/utils/timezone';
 import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useClientFilter } from './useClientFilter';
 import { useWebhookNotification } from './useWebhookNotification';
@@ -148,11 +149,14 @@ export const useRequisicoes = () => {
         throw new Error(validationError || 'Dados inválidos para o cliente');
       }
       
+      // Usar a mesma data de abertura para cálculos de SLA
+      const dataAberturaBrasil = nowInBrazil();
+      
       // Calcular automaticamente as datas limite de SLA
       const slaDeadlines = await calculateAndSetSLADeadlines(
         validatedData.categoria_id,
         validatedData.grupo_responsavel_id,
-        new Date().toISOString()
+        dataAberturaBrasil
       );
       
       const insertData = {
@@ -170,6 +174,7 @@ export const useRequisicoes = () => {
         grupo_responsavel_id: validatedData.grupo_responsavel_id || null,
         atendente_id: validatedData.atendente_id || null,
         canal_origem: validatedData.canal_origem,
+        data_abertura: dataAberturaBrasil.toISOString(),
         data_limite_resposta: slaDeadlines.data_limite_resposta || validatedData.data_limite_resposta || null,
         data_limite_resolucao: slaDeadlines.data_limite_resolucao || validatedData.data_limite_resolucao || null,
         origem_id: validatedData.origem_id || null,
@@ -178,6 +183,7 @@ export const useRequisicoes = () => {
         tags: validatedData.tags || null,
       };
 
+      
       const { data, error } = await supabase
         .from('solicitacoes')
         .insert(insertData as any)
@@ -188,6 +194,8 @@ export const useRequisicoes = () => {
         console.error('Error creating requisição:', error);
         throw error;
       }
+
+      // Remover lógica de atualização forçada - deixar o Supabase gerenciar o timezone
 
       return data;
     },

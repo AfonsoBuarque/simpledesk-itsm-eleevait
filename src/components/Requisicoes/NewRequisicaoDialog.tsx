@@ -106,10 +106,13 @@ export const NewRequisicaoDialog = ({ isOpen, onClose }: NewRequisicaoDialogProp
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="nova-requisicao-description">
         <DialogHeader>
           <DialogTitle>Nova Requisição</DialogTitle>
         </DialogHeader>
+        <div id="nova-requisicao-description" className="sr-only">
+          Formulário para criar uma nova requisição no sistema
+        </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

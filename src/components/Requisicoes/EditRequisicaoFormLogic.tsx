@@ -31,44 +31,29 @@ export const useEditRequisicaoFormLogic = ({ form, requisicao }: EditRequisicaoF
 
   useEffect(() => {
     if (categoriaId && categorias.length > 0) {
-      console.log('Categoria selecionada:', categoriaId);
-      
       // Encontrar a categoria selecionada
       const categoriaSelecionada = categorias.find(cat => cat.id === categoriaId);
       
       if (categoriaSelecionada) {
-        console.log('Dados da categoria:', categoriaSelecionada);
-        
         // Preencher automaticamente os campos baseados na categoria
+        const updates: Array<{ field: keyof SolicitacaoFormData; value: string }> = [];
+        
         if (categoriaSelecionada.client_id) {
-          console.log('Preenchendo client_id:', categoriaSelecionada.client_id);
-          form.setValue('client_id', categoriaSelecionada.client_id, {
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
+          updates.push({ field: 'client_id', value: categoriaSelecionada.client_id });
         }
         
         if (categoriaSelecionada.sla_id) {
-          console.log('Preenchendo sla_id:', categoriaSelecionada.sla_id);
-          form.setValue('sla_id', categoriaSelecionada.sla_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
+          updates.push({ field: 'sla_id', value: categoriaSelecionada.sla_id });
         }
         
         if (categoriaSelecionada.grupo_id) {
-          console.log('Preenchendo grupo_responsavel_id:', categoriaSelecionada.grupo_id);
-          form.setValue('grupo_responsavel_id', categoriaSelecionada.grupo_id, { 
-            shouldValidate: true, 
-            shouldDirty: true,
-            shouldTouch: true 
-          });
+          updates.push({ field: 'grupo_responsavel_id', value: categoriaSelecionada.grupo_id });
         }
 
-        // Forçar re-render do formulário
-        form.trigger(['client_id', 'sla_id', 'grupo_responsavel_id']);
+        // Aplicar todas as atualizações de uma vez
+        updates.forEach(({ field, value }) => {
+          form.setValue(field, value, { shouldValidate: false, shouldDirty: true });
+        });
       }
     }
   }, [categoriaId, categorias, form]);

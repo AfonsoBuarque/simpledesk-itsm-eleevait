@@ -9,6 +9,7 @@ import { Plus, AlertCircle, Pencil } from 'lucide-react';
 import { Solicitacao } from '@/types/solicitacao';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatBrazilTime } from '@/utils/timezone';
 import { getSLAStatus, getStatusColor, getUrgenciaColor } from '@/utils/slaStatus';
 
 interface IncidentesTableProps {
@@ -105,9 +106,7 @@ const IncidentesTable = ({ incidentes, onEditIncidente, onNewIncidente }: Incide
                     {incidente.grupo_responsavel?.name || '-'}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(incidente.data_abertura), 'dd/MM/yyyy HH:mm', {
-                      locale: ptBR,
-                    })}
+                    {formatBrazilTime(incidente.data_abertura, 'dd/MM/yyyy HH:mm')}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">

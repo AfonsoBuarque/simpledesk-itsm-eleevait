@@ -5,7 +5,8 @@ import { SolicitacaoFormData } from '@/types/solicitacao';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { generateIncidenteNumber } from '@/utils/incidenteDataTransform';
-import { useSLACalculation } from '@/hooks/useSLACalculation';
+import { useSLACalculation } from './useSLACalculation';
+import { nowInBrazil } from '@/utils/timezone';
 import { useWebhookNotification } from './useWebhookNotification';
 
 export const useIncidentesMutations = () => {
@@ -26,6 +27,9 @@ export const useIncidentesMutations = () => {
       // Gerar número do incidente temporariamente até termos o trigger
       const numeroIncidente = generateIncidenteNumber();
 
+      // Usar a mesma data de abertura para cálculos de SLA
+      const dataAberturaBrasil = nowInBrazil();
+      
       // Cálculo de SLA (igual padrão de requisição)
       let data_limite_resposta = formData.data_limite_resposta;
       let data_limite_resolucao = formData.data_limite_resolucao;
@@ -38,7 +42,7 @@ export const useIncidentesMutations = () => {
         const slaDeadlines = await calculateAndSetSLADeadlines(
           formData.categoria_id,
           formData.grupo_responsavel_id,
-          new Date().toISOString()
+          dataAberturaBrasil
         );
         data_limite_resposta = slaDeadlines.data_limite_resposta || data_limite_resposta || null;
         data_limite_resolucao = slaDeadlines.data_limite_resolucao || data_limite_resolucao || null;
@@ -62,6 +66,7 @@ export const useIncidentesMutations = () => {
         grupo_responsavel_id: formData.grupo_responsavel_id,
         atendente_id: formData.atendente_id,
         canal_origem: formData.canal_origem,
+        data_abertura: dataAberturaBrasil.toISOString(),
         data_limite_resposta,
         data_limite_resolucao,
         origem_id: formData.origem_id,
@@ -71,6 +76,8 @@ export const useIncidentesMutations = () => {
         anexos: formData.anexos ? JSON.stringify(formData.anexos) : null,
       };
 
+      console.log('Inserting incident with data_abertura:', insertData.data_abertura);
+      
       const { data, error } = await supabase
         .from('incidentes')
         .insert(insertData)
@@ -80,6 +87,25 @@ export const useIncidentesMutations = () => {
       if (error) {
         console.error('Erro ao criar incidente:', error);
         throw error;
+      }
+
+      // Forçar atualização da data_abertura se o banco sobrescreveu
+      if (data && data.data_abertura !== insertData.data_abertura) {
+        console.log('Database overrode data_abertura for incident, forcing update...');
+        const { error: updateError } = await supabase
+          .from('incidentes')
+          .update({ 
+            data_abertura: insertData.data_abertura,
+            data_limite_resposta,
+            data_limite_resolucao
+          })
+          .eq('id', data.id);
+          
+        if (updateError) {
+          console.error('Error updating incident data_abertura:', updateError);
+        } else {
+          console.log('Successfully updated incident data_abertura to Brazil timezone');
+        }
       }
 
       console.log('Incidente criado com sucesso:', data);

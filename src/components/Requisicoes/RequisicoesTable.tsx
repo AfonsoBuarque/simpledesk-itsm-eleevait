@@ -9,6 +9,7 @@ import { Plus, HelpCircle, Pencil } from 'lucide-react';
 import { Solicitacao } from '@/types/solicitacao';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatBrazilTime } from '@/utils/timezone';
 import { getSLAStatus, getStatusColor, getUrgenciaColor } from '@/utils/slaStatus';
 
 interface RequisicoesTableProps {
@@ -62,7 +63,7 @@ const RequisicoesTable = ({ requisicoes, onEditRequisicao, onNewRequisicao }: Re
               <TableHead>Solicitante</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Grupo</TableHead>
-              <TableHead>Data Abertura</TableHead>
+              <TableHead>Data Criação</TableHead>
               <TableHead>SLA</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -105,9 +106,7 @@ const RequisicoesTable = ({ requisicoes, onEditRequisicao, onNewRequisicao }: Re
                     {requisicao.grupo_responsavel?.name || '-'}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(requisicao.data_abertura), 'dd/MM/yyyy HH:mm', {
-                      locale: ptBR,
-                    })}
+                    {formatBrazilTime(requisicao.criado_em, 'dd/MM/yyyy HH:mm')}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">

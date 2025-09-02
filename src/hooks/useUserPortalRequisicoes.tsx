@@ -24,11 +24,14 @@ export function useUserPortalRequisicoes() {
         .eq('id', formData.categoria_id)
         .single();
 
+      // Usar a mesma data de abertura para cálculos de SLA
+      const dataAberturaBrasil = nowInBrazil();
+      
       // Calcular automaticamente as datas limite de SLA
       const slaDeadlines = await calculateAndSetSLADeadlines(
         formData.categoria_id,
         categoria?.grupo_id,
-        nowInBrazil()
+        dataAberturaBrasil
       );
       
       const insertData = {
@@ -45,10 +48,13 @@ export function useUserPortalRequisicoes() {
         client_id: categoria?.client_id || null,
         grupo_responsavel_id: categoria?.grupo_id || null,
         canal_origem: 'portal' as const,
+        data_abertura: dataAberturaBrasil.toISOString(),
         data_limite_resposta: slaDeadlines.data_limite_resposta || null,
         data_limite_resolucao: slaDeadlines.data_limite_resolucao || null,
       };
 
+      console.log('Inserting data with data_abertura:', insertData.data_abertura);
+      
       const { data, error } = await supabase
         .from('solicitacoes')
         .insert(insertData as any)
@@ -58,6 +64,25 @@ export function useUserPortalRequisicoes() {
       if (error) {
         console.error('Error creating requisição:', error);
         throw error;
+      }
+
+      // Forçar atualização da data_abertura se o banco sobrescreveu
+      if (data && data.data_abertura !== insertData.data_abertura) {
+        console.log('Database overrode data_abertura, forcing update...');
+        const { error: updateError } = await supabase
+          .from('solicitacoes')
+          .update({ 
+            data_abertura: insertData.data_abertura,
+            data_limite_resposta: slaDeadlines.data_limite_resposta,
+            data_limite_resolucao: slaDeadlines.data_limite_resolucao
+          })
+          .eq('id', data.id);
+          
+        if (updateError) {
+          console.error('Error updating data_abertura:', updateError);
+        } else {
+          console.log('Successfully updated data_abertura to Brazil timezone');
+        }
       }
 
       return data;

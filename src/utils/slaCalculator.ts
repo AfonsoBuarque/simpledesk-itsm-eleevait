@@ -13,8 +13,8 @@ export const calculateSLADeadlines = (
   sla: SLA,
   grupo: Group
 ): SLACalculationResult => {
-  // Converter para timezone do Brasil para cálculos precisos
-  const dataAberturaBrasil = toBrazilTime(dataAbertura);
+  // Usar a data diretamente sem conversão de timezone para evitar problemas
+  const dataAberturaBrasil = new Date(dataAbertura);
   
   console.log('Calculating SLA deadlines:', { 
     dataAberturaOriginal: dataAbertura,
@@ -76,45 +76,75 @@ const calculateBusinessDeadline = (
   const [inicioHora, inicioMin] = inicioTurno.split(':').map(Number);
   const [fimHora, fimMin] = fimTurno.split(':').map(Number);
   
+  console.log('Parsed work hours:', { inicioHora, inicioMin, fimHora, fimMin });
+  
   const inicioMinutosDia = inicioHora * 60 + inicioMin;
   const fimMinutosDia = fimHora * 60 + fimMin;
   const minutosTrabalho = fimMinutosDia - inicioMinutosDia;
 
+  // Converter dias_semana para números se vier como string do banco
+  const diasSemanaNumbers = diasSemana.map(dia => typeof dia === 'string' ? parseInt(dia) : dia);
+  
+  console.log('Debug SLA:', { 
+    diasSemanaOriginal: diasSemana, 
+    diasSemanaNumbers, 
+    currentDay: currentDate.getDay(),
+    currentDate: currentDate.toISOString(),
+    localTime: currentDate.getHours() + ':' + currentDate.getMinutes()
+  });
+
   while (remainingMinutes > 0) {
     const diaSemana = currentDate.getDay(); // 0 = domingo, 1 = segunda, etc.
+    console.log('Checking day:', { diaSemana, diasSemanaNumbers, includes: diasSemanaNumbers.includes(diaSemana), currentTime: currentDate.getHours() + ':' + currentDate.getMinutes() });
     
     // Verificar se é dia útil
-    if (diasSemana.includes(diaSemana)) {
+    if (diasSemanaNumbers.includes(diaSemana)) {
       const minutosAtuais = currentDate.getHours() * 60 + currentDate.getMinutes();
+      console.log('Work hours check:', { minutosAtuais, inicioMinutosDia, fimMinutosDia, isAfterWork: minutosAtuais >= fimMinutosDia });
       
       // Se estamos antes do horário de trabalho, avançar para o início
       if (minutosAtuais < inicioMinutosDia) {
-        currentDate.setHours(inicioHora, inicioMin, 0, 0);
+        // Ajustar para timezone local (GMT-3): 8:00 local = 11:00 UTC
+        const horaUTC = inicioHora + 3; // Compensar timezone Brasil (GMT-3)
+        currentDate.setUTCHours(horaUTC, inicioMin, 0, 0);
+        console.log('Moved to start of work day:', currentDate.toISOString());
       }
       // Se estamos após o horário de trabalho, ir para o próximo dia útil
       else if (minutosAtuais >= fimMinutosDia) {
+        console.log('After work hours, moving to next day');
         currentDate.setDate(currentDate.getDate() + 1);
-        currentDate.setHours(0, 0, 0, 0);
+        console.log('Before setHours - currentDate:', currentDate.toISOString());
+        console.log('Setting hours to:', { inicioHora, inicioMin });
+        // Ajustar para timezone local (GMT-3): 8:00 local = 11:00 UTC
+        const horaUTC = inicioHora + 3; // Compensar timezone Brasil (GMT-3)
+        currentDate.setUTCHours(horaUTC, inicioMin, 0, 0);
+        console.log('After setUTCHours - currentDate:', currentDate.toISOString());
+        console.log('Moved to next work day:', currentDate.toISOString());
         continue;
       }
 
       // Calcular quantos minutos restam no dia de trabalho
-      const minutosRestantesDia = fimMinutosDia - (currentDate.getHours() * 60 + currentDate.getMinutes());
+      const minutosAtuaisDia = currentDate.getHours() * 60 + currentDate.getMinutes();
+      const minutosRestantesDia = fimMinutosDia - minutosAtuaisDia;
       
       if (remainingMinutes <= minutosRestantesDia) {
-        // Conseguimos terminar hoje
+        // Conseguimos terminar hoje dentro do horário comercial
         currentDate.setMinutes(currentDate.getMinutes() + remainingMinutes);
         remainingMinutes = 0;
       } else {
-        // Usar todo o resto do dia e continuar amanhã
+        // Usar todo o resto do dia e continuar no próximo dia útil
         remainingMinutes -= minutosRestantesDia;
         currentDate.setDate(currentDate.getDate() + 1);
-        currentDate.setHours(0, 0, 0, 0);
+        // Ajustar para timezone local (GMT-3): 8:00 local = 11:00 UTC
+        const horaUTC = inicioHora + 3; // Compensar timezone Brasil (GMT-3)
+        currentDate.setUTCHours(horaUTC, inicioMin, 0, 0); // Começar no início do próximo turno
       }
     } else {
       // Não é dia útil, avançar para o próximo dia
       currentDate.setDate(currentDate.getDate() + 1);
-      currentDate.setHours(0, 0, 0, 0);
+      // Ajustar para timezone local (GMT-3): 8:00 local = 11:00 UTC
+      const horaUTC = inicioHora + 3; // Compensar timezone Brasil (GMT-3)
+      currentDate.setUTCHours(horaUTC, inicioMin, 0, 0); // Começar no horário comercial
     }
   }
 

@@ -15,11 +15,14 @@ export const useSolicitacaoCreate = () => {
     mutationFn: async (formData: SolicitacaoFormData) => {
       console.log('Creating solicitação:', formData);
       
+      // Usar a mesma data de abertura para cálculos de SLA
+      const dataAberturaBrasil = nowInBrazil();
+      
       // Calcular automaticamente as datas limite de SLA
       const slaDeadlines = await calculateAndSetSLADeadlines(
         formData.categoria_id,
         formData.grupo_responsavel_id,
-        nowInBrazil()
+        dataAberturaBrasil
       );
       
       // Preparar dados para inserção, incluindo as datas limite calculadas
@@ -38,6 +41,7 @@ export const useSolicitacaoCreate = () => {
         grupo_responsavel_id: formData.grupo_responsavel_id || null,
         atendente_id: formData.atendente_id || null,
         canal_origem: formData.canal_origem,
+        data_abertura: dataAberturaBrasil.toISOString(),
         data_limite_resposta: slaDeadlines.data_limite_resposta || formData.data_limite_resposta || null,
         data_limite_resolucao: slaDeadlines.data_limite_resolucao || formData.data_limite_resolucao || null,
         origem_id: formData.origem_id || null,
@@ -46,6 +50,8 @@ export const useSolicitacaoCreate = () => {
         tags: formData.tags || null,
       };
 
+      console.log('Inserting data with data_abertura:', insertData.data_abertura);
+      
       const { data, error } = await supabase
         .from('solicitacoes')
         .insert(insertData as any)
@@ -55,6 +61,25 @@ export const useSolicitacaoCreate = () => {
       if (error) {
         console.error('Error creating solicitação:', error);
         throw error;
+      }
+
+      // Forçar atualização da data_abertura se o banco sobrescreveu
+      if (data && data.data_abertura !== insertData.data_abertura) {
+        console.log('Database overrode data_abertura, forcing update...');
+        const { error: updateError } = await supabase
+          .from('solicitacoes')
+          .update({ 
+            data_abertura: insertData.data_abertura,
+            data_limite_resposta: slaDeadlines.data_limite_resposta || formData.data_limite_resposta,
+            data_limite_resolucao: slaDeadlines.data_limite_resolucao || formData.data_limite_resolucao
+          })
+          .eq('id', data.id);
+          
+        if (updateError) {
+          console.error('Error updating data_abertura:', updateError);
+        } else {
+          console.log('Successfully updated data_abertura to Brazil timezone');
+        }
       }
 
       return data;

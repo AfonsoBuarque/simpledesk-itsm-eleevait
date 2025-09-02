@@ -1,5 +1,6 @@
+import { toZonedTime, formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import { format, parseISO } from 'date-fns';
-import { formatInTimeZone, toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { ptBR } from 'date-fns/locale';
 
 // Configuração do timezone do Brasil
 export const BRAZIL_TIMEZONE = 'America/Sao_Paulo';
@@ -21,9 +22,11 @@ export const fromBrazilTime = (date: Date): Date => {
 
 /**
  * Obtém a data/hora atual no timezone do Brasil
+ * Retorna uma Date correta para o timezone do Brasil
  */
 export const nowInBrazil = (): Date => {
-  return toZonedTime(new Date(), BRAZIL_TIMEZONE);
+  // Simplesmente retorna a data atual - o Supabase já trata o timezone corretamente
+  return new Date();
 };
 
 /**
@@ -33,8 +36,8 @@ export const formatBrazilTime = (
   date: Date | string, 
   formatString: string = "dd/MM/yyyy HH:mm"
 ): string => {
-  const inputDate = typeof date === 'string' ? parseISO(date) : date;
-  return formatInTimeZone(inputDate, BRAZIL_TIMEZONE, formatString);
+  // Sempre usar formatInTimeZone para garantir conversão correta
+  return formatInTimeZone(date, BRAZIL_TIMEZONE, formatString, { locale: ptBR });
 };
 
 /**
