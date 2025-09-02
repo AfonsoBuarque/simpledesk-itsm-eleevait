@@ -27,8 +27,7 @@ import {
 } from 'lucide-react';
 
 const DashboardOverview = () => {
-  const { tickets, stats, isLoading: dashboardLoading } = useDashboardData();
-  const { data: slaMetrics, isLoading: slaLoading } = useSLAPerformance();
+  const { tickets, stats, slaMetrics, isLoading } = useDashboardData();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -38,7 +37,6 @@ const DashboardOverview = () => {
   const [isCriticalProblemsModalOpen, setIsCriticalProblemsModalOpen] = useState(false);
   const itemsPerPage = 3;
 
-  const isLoading = dashboardLoading || slaLoading;
 
   if (isLoading) {
     return (
@@ -224,51 +222,126 @@ const DashboardOverview = () => {
 
         {/* SLA Performance */}
         <Card className="rounded-xl shadow-md hover:shadow-xl border border-gray-100 transition-all duration-300 hover:translate-y-[-2px]">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-600 text-lg md:text-xl font-bold">
-              <TrendingUp className="h-6 w-6" />
-              Performance SLA
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-green-600 text-lg md:text-xl font-bold">
+                <TrendingUp className="h-6 w-6" />
+                Performance SLA
+              </div>
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                Tempo Real
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-5">
+            <div className="space-y-4">
               {slaMetrics && slaMetrics.length > 0 ? (
-                slaMetrics.map((metric) => (
-                  <div key={metric.category} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-semibold text-gray-700">{metric.category}</span>
+                <>
+                  {/* SLA Geral Summary */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-gray-800">SLA Geral</h3>
                       <div className="flex items-center gap-2">
-                        <span className={`text-lg font-bold ${metric.current >= metric.target ? 'text-green-600' : 'text-red-600'} transition-all duration-300 hover:scale-110`}>
-                          {metric.current}%
+                        <span className={`text-2xl font-bold ${
+                          slaMetrics.reduce((acc, m) => acc + m.current * m.total, 0) / slaMetrics.reduce((acc, m) => acc + m.total, 0) >= 95 
+                            ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {Math.round(slaMetrics.reduce((acc, m) => acc + m.current * m.total, 0) / slaMetrics.reduce((acc, m) => acc + m.total, 0) || 0)}%
                         </span>
-                        <span className="text-xs text-gray-400">({metric.total} total)</span>
+                        <span className="text-sm text-gray-500">
+                          ({slaMetrics.reduce((acc, m) => acc + m.total, 0)} total)
+                        </span>
                       </div>
                     </div>
-                    <Progress 
-                      value={metric.current} 
-                      className={`h-3 rounded-xl shadow-inner transition-all duration-300`}
-                    />
-                    <div className="flex justify-between items-center text-xs text-gray-500">
-                      <div className="flex items-center gap-4">
-                        <span>Meta: {metric.target}%</span>
-                        <span className="text-green-600">
-                          ✓ {metric.onTime} no prazo
-                        </span>
-                        <span className="text-red-600">
-                          ⚠ {metric.breached} violados
-                        </span>
-                      </div>
-                      <span className={`${metric.current >= metric.target ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} font-bold px-2 py-0.5 rounded-full text-xs`}>
-                        {metric.current >= metric.target ? '✓ Meta atingida' : '⚠️ Abaixo da meta'}
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-gray-600">Meta: 95%</span>
+                      <span className="text-green-600 font-medium">
+                        ✓ {slaMetrics.reduce((acc, m) => acc + Math.round(m.current * m.total / 100), 0)} no prazo
+                      </span>
+                      <span className="text-red-600 font-medium">
+                        ⚠ {slaMetrics.reduce((acc, m) => acc + m.total - Math.round(m.current * m.total / 100), 0)} violados
                       </span>
                     </div>
                   </div>
-                ))
+
+                  {/* Individual Metrics */}
+                  {slaMetrics.map((metric) => {
+                    const onTime = Math.round(metric.current * metric.total / 100);
+                    const violated = metric.total - onTime;
+                    
+                    return (
+                      <div key={metric.category} className="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-md transition-all duration-200">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base font-semibold text-gray-800">{metric.category}</span>
+                            {metric.total === 0 && (
+                              <Badge variant="outline" className="text-xs text-gray-500">
+                                Sem dados
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xl font-bold ${
+                              metric.current >= metric.target ? 'text-green-600' : 
+                              metric.current === 0 ? 'text-gray-400' : 'text-red-600'
+                            } transition-all duration-300`}>
+                              {metric.current}%
+                            </span>
+                            <span className="text-sm text-gray-500">({metric.total} total)</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <Progress 
+                            value={metric.current} 
+                            className={`h-2 rounded-full ${
+                              metric.current >= metric.target ? 'bg-green-100' :
+                              metric.current === 0 ? 'bg-gray-100' : 'bg-red-100'
+                            }`}
+                          />
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className="text-gray-600">Meta: {metric.target}%</span>
+                            {metric.total > 0 && (
+                              <>
+                                <span className="text-green-600 font-medium">
+                                  ✓ {onTime} no prazo
+                                </span>
+                                <span className="text-red-600 font-medium">
+                                  ⚠ {violated} violados
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          <Badge 
+                            variant={metric.current >= metric.target ? "default" : "destructive"}
+                            className={`text-xs font-medium ${
+                              metric.current >= metric.target 
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                : metric.current === 0 
+                                  ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                  : 'bg-red-100 text-red-800 hover:bg-red-200'
+                            }`}
+                          >
+                            {metric.current >= metric.target ? '✓ Meta atingida' : 
+                             metric.current === 0 ? '📊 Sem dados' : '⚠️ Abaixo da meta'}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <div className="mb-2">📊</div>
-                  <div className="font-medium">Calculando métricas de SLA...</div>
-                  <div className="text-sm">Dados sendo processados do sistema</div>
+                  <div className="mb-3">
+                    <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                      <TrendingUp className="h-8 w-8 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="font-medium text-gray-700 mb-1">Calculando métricas de SLA...</div>
+                  <div className="text-sm text-gray-500">Dados sendo processados do sistema</div>
                 </div>
               )}
             </div>
