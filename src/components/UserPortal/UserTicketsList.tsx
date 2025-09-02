@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Search, Filter, Calendar, Clock, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -30,6 +31,8 @@ export const UserTicketsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -95,6 +98,17 @@ export const UserTicketsList: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesUrgency;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageTickets = filteredTickets.slice(startIndex, endIndex);
+
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, urgencyFilter]);
 
   if (isLoading) {
     return (
@@ -192,7 +206,7 @@ export const UserTicketsList: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredTickets.map((ticket: Ticket) => (
+              {currentPageTickets.map((ticket: Ticket) => (
                 <div
                   key={ticket.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-200 transition-all duration-200"
@@ -253,6 +267,63 @@ export const UserTicketsList: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {filteredTickets.length > itemsPerPage && (
+        <Card className="border-gray-200">
+          <CardContent className="flex justify-center py-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  const shouldShow = 
+                    page === 1 || 
+                    page === totalPages || 
+                    (page >= currentPage - 1 && page <= currentPage + 1);
+                  
+                  if (!shouldShow) {
+                    // Show ellipsis for gaps
+                    if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  }
+                  
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
