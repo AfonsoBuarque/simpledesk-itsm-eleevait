@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Control } from 'react-hook-form';
 import {
   FormControl,
@@ -18,6 +18,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Client {
   id: string;
@@ -57,6 +73,8 @@ const diasSemana = [
 ];
 
 export const GroupFormFields = ({ control, clients, users }: GroupFormFieldsProps) => {
+  const [openResponsible, setOpenResponsible] = useState(false);
+
   return (
     <>
       <FormField
@@ -123,21 +141,72 @@ export const GroupFormFields = ({ control, clients, users }: GroupFormFieldsProp
           render={({ field }) => (
             <FormItem>
               <FormLabel>Responsável</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">Sem responsável específico</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={openResponsible} onOpenChange={setOpenResponsible}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? field.value === "none"
+                          ? "Sem responsável específico"
+                          : users.find((user) => user.id === field.value)?.name
+                        : "Selecione um responsável"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar responsável..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum responsável encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value="none"
+                          onSelect={() => {
+                            field.onChange("none")
+                            setOpenResponsible(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              field.value === "none" ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          Sem responsável específico
+                        </CommandItem>
+                        {users.map((user) => (
+                          <CommandItem
+                            value={user.name}
+                            key={user.id}
+                            onSelect={() => {
+                              field.onChange(user.id)
+                              setOpenResponsible(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                user.id === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {user.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
