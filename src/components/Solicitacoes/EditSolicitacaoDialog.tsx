@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Solicitacao, SolicitacaoFormData } from '@/types/solicitacao';
 import { useSolicitacoes } from '@/hooks/useSolicitacoes';
+import { formatDateTimeLocalBrazil } from '@/utils/timezone';
 import SolicitacaoFormFields from './SolicitacaoFormFields';
 
 const solicitacaoSchema = z.object({
@@ -44,14 +45,12 @@ interface EditSolicitacaoDialogProps {
   onClose: () => void;
 }
 
-// Função para converter data ISO para formato datetime-local
+// Função para converter data ISO para formato datetime-local no timezone do Brasil
 const formatDateForInput = (isoDate?: string) => {
   if (!isoDate) return '';
   
   try {
-    // Remove timezone info e converte para formato datetime-local
-    const date = new Date(isoDate);
-    return date.toISOString().slice(0, 16);
+    return formatDateTimeLocalBrazil(isoDate);
   } catch (error) {
     console.error('Error formatting date:', error);
     return '';

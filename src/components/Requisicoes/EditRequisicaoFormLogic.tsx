@@ -3,20 +3,19 @@ import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { SolicitacaoFormData, Solicitacao } from '@/types/solicitacao';
 import { useCategorias } from '@/hooks/useCategorias';
+import { formatDateTimeLocalBrazil } from '@/utils/timezone';
 
 interface EditRequisicaoFormLogicProps {
   form: UseFormReturn<SolicitacaoFormData>;
   requisicao: Solicitacao;
 }
 
-// Função para converter data ISO para formato datetime-local
+// Função para converter data ISO para formato datetime-local no timezone do Brasil
 const formatDateForInput = (isoDate?: string) => {
   if (!isoDate) return '';
   
   try {
-    // Remove timezone info e converte para formato datetime-local
-    const date = new Date(isoDate);
-    return date.toISOString().slice(0, 16);
+    return formatDateTimeLocalBrazil(isoDate);
   } catch (error) {
     console.error('Error formatting date:', error);
     return '';
