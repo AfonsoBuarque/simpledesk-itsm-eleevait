@@ -80,46 +80,22 @@ interface WebhookPayload {
 export const useWebhookNotification = () => {
   const sendNotification = async (payload: WebhookPayload) => {
     try {
-      console.log('=== SENDING WEBHOOK NOTIFICATION ===');
-      console.log('Payload type:', payload.type);
-      console.log('Payload action:', payload.action);
-      console.log('Payload data:', JSON.stringify(payload.data, null, 2));
-
       const { data, error } = await supabase.functions.invoke('webhook-notification', {
         body: payload,
       });
 
-      console.log('Supabase response data:', data);
-      console.log('Supabase response error:', error);
-
       if (error) {
-        console.error('❌ Supabase error sending webhook:', error);
+        console.error('Erro ao enviar webhook:', error);
         return false;
       }
 
-      if (data) {
-        console.log('📊 Webhook result:', {
-          success: data.success,
-          message: data.message,
-          webhook_sent: data.webhook_sent,
-          entity_id: data.entity_id,
-          warning: data.warning
-        });
-
-        if (!data.webhook_sent) {
-          console.warn('⚠️ Webhook was not sent to external endpoint');
-          console.warn('This means the edge function processed but failed to deliver to the webhook URL');
-          
-          if (data.debug) {
-            console.warn('🔍 Debug info:', data.debug);
-          }
-        }
+      if (data && !data.webhook_sent && data.debug) {
+        console.warn('Webhook delivery falhou - Debug info:', data.debug);
       }
 
-      console.log('✅ Webhook notification sent successfully');
       return true;
     } catch (error) {
-      console.error('❌ Exception sending webhook notification:', error);
+      console.error('Erro ao enviar notificação webhook:', error);
       return false;
     }
   };

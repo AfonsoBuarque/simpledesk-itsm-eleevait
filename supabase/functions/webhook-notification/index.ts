@@ -196,11 +196,6 @@ async function sendWebhookNotification(payload) {
     const webhookUser = Deno.env.get('WEBHOOK_USER');
     const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD');
     
-    console.log('Webhook configuration check:', {
-      url_exists: !!webhookUrl,
-      user_exists: !!webhookUser,
-      password_exists: !!webhookPassword
-    });
 
     if (!webhookUrl || !webhookUser || !webhookPassword) {
       const missingConfig = [];
@@ -217,19 +212,12 @@ async function sendWebhookNotification(payload) {
     let webhookData;
     if (payload.type === 'chat_message') {
       webhookData = buildChatWebhookData(payload.data);
-      console.log('Sending chat message webhook');
     } else {
       webhookData = buildGeneralWebhookData(payload);
-      console.log(`Sending ${payload.type} ${payload.action} webhook`);
     }
 
     const credentials = btoa(`${webhookUser}:${webhookPassword}`);
     
-    // Log do payload (sem dados sensíveis em produção)
-    const isDevelopment = Deno.env.get('ENVIRONMENT') !== 'production';
-    if (isDevelopment) {
-      console.log('Webhook payload:', JSON.stringify(webhookData, null, 2));
-    }
 
     const requestOptions = {
       method: 'POST',
@@ -245,27 +233,21 @@ async function sendWebhookNotification(payload) {
     let lastError;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        console.log(`Webhook attempt ${attempt}/${MAX_RETRIES} to: ${webhookUrl}`);
-        
         const response = await fetchWithTimeout(webhookUrl, requestOptions);
         
         if (response.ok) {
-          console.log(`Webhook notification sent successfully on attempt ${attempt}`);
           return true;
         } else {
           const errorText = await response.text().catch(() => 'Unable to read error response');
           lastError = new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-          console.warn(`Webhook attempt ${attempt} failed: ${lastError.message}`);
         }
       } catch (error) {
         lastError = error;
-        console.warn(`Webhook attempt ${attempt} failed: ${error.message}`);
       }
 
       // Delay antes do próximo retry (exceto na última tentativa)
       if (attempt < MAX_RETRIES) {
         const delayTime = RETRY_DELAY * attempt; // Backoff exponencial simples
-        console.log(`Waiting ${delayTime}ms before retry...`);
         await delay(delayTime);
       }
     }
@@ -317,7 +299,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Processing ${payload.type} ${payload.action} for entity ${payload.data.id}`);
+    
 
     // Enviar notificação webhook
     const webhookResult = await sendWebhookNotification(payload);
@@ -332,7 +314,6 @@ Deno.serve(async (req) => {
     };
 
     if (!webhookResult) {
-      console.warn('Webhook failed but request completed');
       responseData.warning = 'Webhook delivery failed';
       
       // Add more debug info about the webhook failure
