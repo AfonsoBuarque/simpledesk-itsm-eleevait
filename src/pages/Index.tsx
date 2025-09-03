@@ -139,7 +139,16 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen min-h-screen bg-gray-50 flex w-full overflow-hidden">
+    <div className="h-screen min-h-screen bg-gray-50 flex w-full overflow-hidden relative">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-no-repeat bg-right bg-contain opacity-40 pointer-events-none z-0"
+        style={{
+          backgroundImage: 'url(/logos/images/fundo_apresentacao_eleeva.png)',
+          backgroundPosition: 'right center',
+          backgroundSize: 'auto 100%'
+        }}
+      />
         <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -149,7 +158,7 @@ const Index = () => {
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Header
           onMenuClick={() => setIsSidebarOpen(true)}
           isCollapsed={isCollapsed}

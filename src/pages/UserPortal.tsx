@@ -39,9 +39,18 @@ const UserPortal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 animate-fade-in relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-no-repeat bg-right bg-contain opacity-40 pointer-events-none z-0"
+        style={{
+          backgroundImage: 'url(/logos/images/fundo_apresentacao_eleeva.png)',
+          backgroundPosition: 'right center',
+          backgroundSize: 'auto 100%'
+        }}
+      />
       {/* Header moderno */}
-      <header className="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10 transition-all duration-300">
+      <header className="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-20 transition-all duration-300 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
@@ -92,7 +101,7 @@ const UserPortal = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in" style={{ '--tw-animation-delay': '0.1s' } as React.CSSProperties}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in relative z-10" style={{ '--tw-animation-delay': '0.1s' } as React.CSSProperties}>
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in" style={{ '--tw-animation-delay': '0.2s' } as React.CSSProperties}>
           <div>
             <h2 className="text-3xl font-bold gradient-heading mb-2">

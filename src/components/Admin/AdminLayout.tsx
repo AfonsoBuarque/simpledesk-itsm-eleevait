@@ -38,9 +38,18 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-no-repeat bg-right bg-contain opacity-40 pointer-events-none z-0"
+        style={{
+          backgroundImage: 'url(/logos/images/fundo_apresentacao_eleeva.png)',
+          backgroundPosition: 'right center',
+          backgroundSize: 'auto 100%'
+        }}
+      />
       {/* Header do Admin */}
-      <header className="border-b bg-card shadow-sm">
+      <header className="border-b bg-card shadow-sm relative z-20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Shield className="h-6 w-6 text-primary" />
@@ -65,7 +74,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </header>
 
       {/* Conteúdo Principal */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 relative z-10">
         {children}
       </main>
     </div>
