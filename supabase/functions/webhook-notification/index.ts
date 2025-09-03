@@ -219,24 +219,29 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('WEBHOOK FUNCTION - Request received')
     const payload: NotificationPayload = await req.json()
+    console.log('WEBHOOK FUNCTION - Payload parsed:', JSON.stringify(payload, null, 2))
     
     // Validate payload
     if (!payload.type || !payload.action || !payload.data) {
+      console.log('WEBHOOK FUNCTION - Invalid payload structure')
       return new Response(
         JSON.stringify({ 
           error: 'Invalid payload structure',
           debug: { received_payload: payload }
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
 
     // Send notification and get detailed response
+    console.log('WEBHOOK FUNCTION - Calling sendWebhookNotification')
     const result = await sendWebhookNotification(payload)
+    console.log('WEBHOOK FUNCTION - Result:', JSON.stringify(result, null, 2))
     
     return new Response(
       JSON.stringify({ 
@@ -246,19 +251,23 @@ Deno.serve(async (req) => {
         debug: result.debug
       }),
       { 
-        status: result.success ? 200 : 500, 
+        status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
   } catch (error) {
+    console.log('WEBHOOK FUNCTION - Error caught:', error.message)
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
         message: error.message,
-        debug: { error: error.message }
+        debug: { 
+          error: error.message,
+          stack: error.stack 
+        }
       }),
       { 
-        status: 500, 
+        status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
