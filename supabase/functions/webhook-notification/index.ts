@@ -134,27 +134,19 @@ interface WebhookData {
 }
 
 async function sendWebhookNotification(payload: NotificationPayload | { type: 'chat_message'; action: 'message_sent'; data: ChatMessageData }): Promise<boolean> {
+  console.log('WEBHOOK FUNCTION STARTED')
+  
   try {
-    // Get environment variables
     const webhookUrl = Deno.env.get('WEBHOOK_URL')
     const webhookUser = Deno.env.get('WEBHOOK_USER') 
     const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
     
-    console.log('=== WEBHOOK DEBUG START ===')
-    console.log('WEBHOOK_URL:', webhookUrl || 'UNDEFINED')
-    console.log('WEBHOOK_USER:', webhookUser || 'UNDEFINED')
-    console.log('WEBHOOK_PASSWORD:', webhookPassword ? 'DEFINED' : 'UNDEFINED')
-    
-    // List all environment variables for debugging
-    const allEnv = Deno.env.toObject()
-    console.log('All environment variables:', Object.keys(allEnv))
-    console.log('Webhook-related vars:', Object.keys(allEnv).filter(k => k.includes('WEBHOOK')))
+    console.log('URL:', webhookUrl ? 'FOUND' : 'NOT_FOUND')
+    console.log('USER:', webhookUser ? 'FOUND' : 'NOT_FOUND')  
+    console.log('PASSWORD:', webhookPassword ? 'FOUND' : 'NOT_FOUND')
     
     if (!webhookUrl || !webhookUser || !webhookPassword) {
-      console.error('Missing webhook configuration!')
-      console.error('URL exists:', !!webhookUrl)
-      console.error('User exists:', !!webhookUser) 
-      console.error('Password exists:', !!webhookPassword)
+      console.log('ERROR: Missing webhook credentials')
       return false
     }
 
