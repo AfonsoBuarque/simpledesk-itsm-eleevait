@@ -14,17 +14,26 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
   
   const { user, profile, profileLoading, signIn } = useAuth();
   const { toast } = useToast();
 
-  // Debug: Mostrar estado de autenticação (removido para evitar spam)
-  // useEffect(() => {
-  //   console.log("AdminLogin - Auth state:", { user, profile, profileLoading });
-  // }, [user, profile, profileLoading]);
+  // Controlar quando mostrar o formulário para evitar flickering
+  useEffect(() => {
+    if (!profileLoading) {
+      // Aguardar um tick para garantir que todos os estados estejam estabilizados
+      const timer = setTimeout(() => {
+        if (!user || (user && profile && profile.role !== 'admin')) {
+          setShowForm(true);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [profileLoading, user, profile]);
 
   // Aguardar carregamento do perfil antes de decidir redirecionamento
-  if (profileLoading) {
+  if (profileLoading || !showForm) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
