@@ -5,269 +5,193 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface ChatMessageData {
-  id: string
-  numero: string
-  titulo: string
-  status: string
-  prioridade: string
-  mensagem: string
-  solicitante: {
-    id: string
-    name: string
-    email: string
-  }
-  atendente?: {
-    id: string
-    name: string
-  }
-  client: {
-    id: string
-    name: string
-  }
-  grupo_responsavel?: {
-    id: string
-    name: string
-  }
-  alterado_por_id?: string
-  alterado_por_nome?: string
-  alterado_por_email?: string
-}
-
-interface NotificationPayload {
+interface WebhookPayload {
   type: 'requisicao' | 'incidente' | 'chat_message'
   action: 'create' | 'update' | 'message_sent'
-  data: {
-    id: string
-    numero: string
-    titulo: string
-    status: string
-    prioridade: string
-    urgencia?: string
-    solicitante: {
-      id: string
-      name: string
-      email: string
-    }
-    atendente?: {
-      id: string
-      name: string
-    }
-    client: {
-      id: string
-      name: string
-    }
-    grupo_responsavel?: {
-      id: string
-      name: string
-    }
-    categoria?: {
-      id: string
-      name: string
-    }
-    sla?: {
-      id: string
-      name: string
-    }
-    data_abertura?: string
-    data_limite_resposta?: string
-    data_limite_resolucao?: string
-    created_at?: string
-    updated_at?: string
-    alterado_por_id?: string
-    alterado_por_nome?: string
-    alterado_por_email?: string
-  }
+  data: any
 }
 
-async function sendWebhookNotification(payload: NotificationPayload | { type: 'chat_message'; action: 'message_sent'; data: ChatMessageData }): Promise<{ success: boolean; message: string; debug: any }> {
-  const debug: any = {
-    timestamp: new Date().toISOString(),
-    function_started: true
+async function sendWebhookToExternal(payload: WebhookPayload) {
+  console.log('=== WEBHOOK FUNCTION START ===')
+  console.log('Payload received:', JSON.stringify(payload, null, 2))
+
+  // Get environment variables
+  const webhookUrl = Deno.env.get('WEBHOOK_URL')
+  const webhookUser = Deno.env.get('WEBHOOK_USER') 
+  const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
+
+  console.log('Environment check:')
+  console.log('- URL exists:', !!webhookUrl)
+  console.log('- User exists:', !!webhookUser)
+  console.log('- Password exists:', !!webhookPassword)
+  console.log('- URL:', webhookUrl)
+  console.log('- User:', webhookUser)
+
+  if (!webhookUrl || !webhookUser || !webhookPassword) {
+    const error = 'Missing webhook configuration'
+    console.log('ERROR:', error)
+    return {
+      success: false,
+      message: error,
+      details: {
+        url_exists: !!webhookUrl,
+        user_exists: !!webhookUser,
+        password_exists: !!webhookPassword
+      }
+    }
   }
 
+  // Build webhook data
+  let webhookData: any = {
+    timestamp: new Date().toISOString(),
+    source: 'ITSM_SYSTEM',
+    event_type: `${payload.type.toUpperCase()}_${payload.action.toUpperCase()}`,
+    module: payload.type === 'requisicao' ? 'SERVICE_REQUEST' : 
+             payload.type === 'incidente' ? 'INCIDENT' : 'CHAT',
+    action: payload.action.toUpperCase(),
+    entity: payload.data
+  }
+
+  // Special handling for chat messages
+  if (payload.type === 'chat_message') {
+    webhookData.event_type = 'CHAT_MESSAGE_SENT'
+    webhookData.module = 'CHAT'
+    webhookData.entity = {
+      id: payload.data.id,
+      number: payload.data.numero,
+      title: payload.data.titulo,
+      status: payload.data.status,
+      priority: payload.data.prioridade,
+      message: payload.data.mensagem,
+      requester: payload.data.solicitante,
+      client: payload.data.client,
+      assignee: payload.data.atendente,
+      responsible_group: payload.data.grupo_responsavel
+    }
+  }
+
+  console.log('Webhook data prepared:', JSON.stringify(webhookData, null, 2))
+
   try {
-    // Get environment variables
-    const webhookUrl = Deno.env.get('WEBHOOK_URL')
-    const webhookUser = Deno.env.get('WEBHOOK_USER')
-    const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
-
-    debug.env_check = {
-      url_exists: !!webhookUrl,
-      user_exists: !!webhookUser,
-      password_exists: !!webhookPassword,
-      url_length: webhookUrl?.length || 0,
-      user_length: webhookUser?.length || 0,
-      password_length: webhookPassword?.length || 0
-    }
-
-    if (!webhookUrl || !webhookUser || !webhookPassword) {
-      return {
-        success: false,
-        message: 'Missing webhook configuration',
-        debug
-      }
-    }
-
-    // Build webhook payload
-    let webhookData: any = {}
-
-    if (payload.type === 'chat_message') {
-      const chatData = payload.data as ChatMessageData
-      webhookData = {
-        timestamp: new Date().toISOString(),
-        source: 'ITSM_SYSTEM',
-        event_type: 'CHAT_MESSAGE_SENT',
-        module: 'CHAT',
-        action: 'MESSAGE_SENT',
-        entity: {
-          id: chatData.id,
-          number: chatData.numero,
-          title: chatData.titulo,
-          status: chatData.status,
-          priority: chatData.prioridade,
-          message: chatData.mensagem,
-          requester: {
-            id: chatData.solicitante.id,
-            name: chatData.solicitante.name,
-            email: chatData.solicitante.email
-          },
-          client: {
-            id: chatData.client.id,
-            name: chatData.client.name
-          }
-        }
-      }
-    } else {
-      webhookData = {
-        timestamp: new Date().toISOString(),
-        source: 'ITSM_SYSTEM',
-        event_type: `${payload.type.toUpperCase()}_${payload.action.toUpperCase()}`,
-        module: payload.type === 'requisicao' ? 'SERVICE_REQUEST' : 'INCIDENT',
-        action: payload.action.toUpperCase(),
-        entity: {
-          id: payload.data.id,
-          number: payload.data.numero,
-          title: payload.data.titulo,
-          status: payload.data.status,
-          priority: payload.data.prioridade,
-          requester: {
-            id: payload.data.solicitante.id,
-            name: payload.data.solicitante.name,
-            email: payload.data.solicitante.email
-          },
-          client: {
-            id: payload.data.client.id,
-            name: payload.data.client.name
-          }
-        }
-      }
-    }
-
-    debug.webhook_data_prepared = true
-    debug.webhook_url = webhookUrl
-
-    // Send webhook
+    // Create authorization header
     const credentials = btoa(`${webhookUser}:${webhookPassword}`)
-    
+    console.log('Credentials created (length):', credentials.length)
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${credentials}`,
+      'User-Agent': 'ITSM-System/1.0',
+      'Accept': 'application/json'
+    }
+
+    console.log('Request headers:', JSON.stringify(headers, null, 2))
+    console.log('Sending request to:', webhookUrl)
+
     const response = await fetch(webhookUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${credentials}`,
-        'User-Agent': 'ITSM-System/1.0'
-      },
+      headers: headers,
       body: JSON.stringify(webhookData)
     })
 
-    debug.response_status = response.status
-    debug.response_ok = response.ok
+    console.log('Response status:', response.status)
+    console.log('Response ok:', response.ok)
+    console.log('Response headers:', JSON.stringify([...response.headers.entries()], null, 2))
+
+    const responseText = await response.text()
+    console.log('Response body:', responseText)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      debug.error_response = errorText
+      console.log('ERROR: Webhook request failed')
       return {
         success: false,
-        message: `Webhook failed: ${response.status} - ${response.statusText}`,
-        debug
+        message: `Webhook failed with status ${response.status}`,
+        details: {
+          status: response.status,
+          statusText: response.statusText,
+          responseBody: responseText,
+          requestUrl: webhookUrl,
+          requestHeaders: headers,
+          requestBody: webhookData
+        }
       }
     }
 
-    const responseText = await response.text()
-    debug.response_body = responseText
-
+    console.log('SUCCESS: Webhook sent successfully')
     return {
       success: true,
       message: 'Webhook sent successfully',
-      debug
+      details: {
+        status: response.status,
+        responseBody: responseText
+      }
     }
 
   } catch (error) {
-    debug.error = error.message
+    console.log('ERROR: Exception during webhook request:', error)
     return {
       success: false,
-      message: `Error: ${error.message}`,
-      debug
+      message: `Network error: ${error.message}`,
+      details: {
+        error: error.message,
+        stack: error.stack,
+        requestUrl: webhookUrl
+      }
     }
   }
 }
 
 Deno.serve(async (req) => {
+  console.log('=== WEBHOOK FUNCTION CALLED ===')
+  console.log('Method:', req.method)
+  console.log('URL:', req.url)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('CORS preflight request')
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('WEBHOOK FUNCTION - Request received')
-    const payload: NotificationPayload = await req.json()
-    console.log('WEBHOOK FUNCTION - Payload parsed:', JSON.stringify(payload, null, 2))
-    
-    // Validate payload
+    const payload = await req.json()
+    console.log('Request payload:', JSON.stringify(payload, null, 2))
+
+    // Validate payload structure
     if (!payload.type || !payload.action || !payload.data) {
-      console.log('WEBHOOK FUNCTION - Invalid payload structure')
+      console.log('Invalid payload structure')
       return new Response(
         JSON.stringify({ 
           error: 'Invalid payload structure',
-          debug: { received_payload: payload }
+          received: payload
         }),
         { 
-          status: 200, 
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
 
-    // Send notification and get detailed response
-    console.log('WEBHOOK FUNCTION - Calling sendWebhookNotification')
-    const result = await sendWebhookNotification(payload)
-    console.log('WEBHOOK FUNCTION - Result:', JSON.stringify(result, null, 2))
+    // Send webhook
+    const result = await sendWebhookToExternal(payload)
+    console.log('Final result:', JSON.stringify(result, null, 2))
     
     return new Response(
-      JSON.stringify({ 
-        success: result.success,
-        message: result.message,
-        webhook_sent: result.success,
-        debug: result.debug
-      }),
+      JSON.stringify(result),
       { 
-        status: 200, 
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
+
   } catch (error) {
-    console.log('WEBHOOK FUNCTION - Error caught:', error.message)
+    console.log('Exception in main handler:', error)
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
         message: error.message,
-        debug: { 
-          error: error.message,
-          stack: error.stack 
-        }
+        stack: error.stack
       }),
       { 
-        status: 200, 
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )

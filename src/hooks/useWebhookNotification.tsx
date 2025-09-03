@@ -80,19 +80,34 @@ interface WebhookPayload {
 export const useWebhookNotification = () => {
   const sendNotification = async (payload: WebhookPayload) => {
     try {
-      const { error } = await supabase.functions.invoke('webhook-notification', {
+      console.log('=== SENDING WEBHOOK NOTIFICATION ===');
+      console.log('Payload type:', payload.type);
+      console.log('Payload action:', payload.action);
+      console.log('Payload data:', JSON.stringify(payload.data, null, 2));
+
+      const { data, error } = await supabase.functions.invoke('webhook-notification', {
         body: payload,
       });
 
+      console.log('Supabase response data:', data);
+      console.log('Supabase response error:', error);
+
       if (error) {
-        console.error('Error sending webhook notification:', error);
-        throw error;
+        console.error('❌ Supabase error sending webhook:', error);
+        return false;
       }
 
-      console.log(`Webhook notification sent successfully for ${payload.type} ${payload.action}`);
+      if (data && !data.success) {
+        console.error('❌ Webhook failed:', data.message);
+        console.error('Details:', data.details);
+        return false;
+      }
+
+      console.log('✅ Webhook notification sent successfully');
+      return true;
     } catch (error) {
-      console.error('Failed to send webhook notification:', error);
-      // Não vamos lançar o erro para não quebrar o fluxo principal
+      console.error('❌ Exception sending webhook notification:', error);
+      return false;
     }
   };
 
