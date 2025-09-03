@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ClientProvider } from "@/contexts/ClientContext";
+import { WebhookTest } from "@/components/WebhookTest";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/set-password" element={<SetPassword />} />
+            <Route path="/webhook-test" element={<WebhookTest />} />
             <Route path="/portal" element={
               <UserOnlyRoute>
                 <UserPortal />
