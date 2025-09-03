@@ -1,267 +1,354 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+};
 
-interface WebhookPayload {
-  type: 'requisicao' | 'incidente' | 'chat_message'
-  action: 'create' | 'update' | 'message_sent'
-  data: any
-}
+const securityHeaders = {
+  ...corsHeaders,
+  'Content-Type': 'application/json',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY'
+};
 
-async function debugEnvironment() {
-  console.log('=== DEBUG ENVIRONMENT START ===')
-  
-  // List all environment variables (but not their values for security)
-  const allEnvKeys = Object.keys(Deno.env.toObject())
-  console.log('Available env keys:', allEnvKeys)
-  
-  // Check specific webhook variables
-  const webhookUrl = Deno.env.get('WEBHOOK_URL')
-  const webhookUser = Deno.env.get('WEBHOOK_USER') 
-  const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
-  
-  console.log('WEBHOOK_URL exists:', !!webhookUrl)
-  console.log('WEBHOOK_USER exists:', !!webhookUser)
-  console.log('WEBHOOK_PASSWORD exists:', !!webhookPassword)
-  
-  if (webhookUrl) {
-    console.log('WEBHOOK_URL length:', webhookUrl.length)
-    console.log('WEBHOOK_URL starts with:', webhookUrl.substring(0, 20) + '...')
+// Configurações
+const WEBHOOK_TIMEOUT = 15000; // 15 segundos
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 segundo
+
+/**
+ * Valida a estrutura do payload recebido
+ */
+function validatePayload(payload) {
+  if (!payload.type || !payload.action || !payload.data) {
+    return { valid: false, error: 'Missing required fields: type, action, data' };
   }
-  
-  if (webhookUser) {
-    console.log('WEBHOOK_USER length:', webhookUser.length)
-    console.log('WEBHOOK_USER value:', webhookUser)
-  }
-  
-  console.log('=== DEBUG ENVIRONMENT END ===')
-  
-  return {
-    url_exists: !!webhookUrl,
-    user_exists: !!webhookUser, 
-    password_exists: !!webhookPassword,
-    url_length: webhookUrl?.length || 0,
-    user_length: webhookUser?.length || 0,
-    password_length: webhookPassword?.length || 0,
-    total_env_vars: allEnvKeys.length
-  }
-}
 
-async function sendWebhookToExternal(payload: WebhookPayload) {
-  console.log('=== WEBHOOK FUNCTION START ===')
-  console.log('Timestamp:', new Date().toISOString())
-  console.log('Payload received:', JSON.stringify(payload, null, 2))
+  const data = payload.data;
 
-  // Debug environment first
-  const envDebug = await debugEnvironment()
-  console.log('Environment debug result:', envDebug)
-
-  // Get environment variables with additional debugging
-  const webhookUrl = Deno.env.get('WEBHOOK_URL')
-  const webhookUser = Deno.env.get('WEBHOOK_USER') 
-  const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
-
-  if (!webhookUrl || !webhookUser || !webhookPassword) {
-    const error = 'Missing webhook configuration'
-    console.log('❌ ERROR:', error)
-    console.log('Missing values:', {
-      url: !webhookUrl,
-      user: !webhookUser,
-      password: !webhookPassword
-    })
-    
-    return {
-      success: false,
-      message: error,
-      details: {
-        ...envDebug,
-        error_details: {
-          url_missing: !webhookUrl,
-          user_missing: !webhookUser,
-          password_missing: !webhookPassword
-        }
-      }
+  // Validações específicas por tipo
+  if (payload.type === 'chat_message') {
+    if (!data.id || !data.mensagem || !data.solicitante) {
+      return { valid: false, error: 'Chat message missing required fields: id, mensagem, solicitante' };
+    }
+  } else {
+    if (!data.id || !data.numero || !data.titulo || !data.solicitante) {
+      return { valid: false, error: 'Request missing required fields: id, numero, titulo, solicitante' };
     }
   }
 
-  // Build webhook data  
-  let webhookData: any = {
+  // Validar solicitante (permite N/A nos campos name e email)
+  if (!data.solicitante.id) {
+    return { valid: false, error: 'Invalid solicitante structure: missing id' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Constrói a entidade base comum entre diferentes tipos
+ */
+function buildBaseEntity(data) {
+  const entity = {
+    id: data.id,
+    number: data.numero,
+    title: data.titulo,
+    status: data.status,
+    priority: data.prioridade,
+    requester: {
+      id: data.solicitante.id,
+      name: data.solicitante.name,
+      email: data.solicitante.email
+    }
+  };
+
+  // Adicionar campos opcionais
+  if (data.atendente) {
+    entity.assignee = {
+      id: data.atendente.id,
+      name: data.atendente.name
+    };
+  }
+
+  if (data.client) {
+    entity.client = {
+      id: data.client.id,
+      name: data.client.name
+    };
+  }
+
+  if (data.grupo_responsavel) {
+    entity.responsible_group = {
+      id: data.grupo_responsavel.id,
+      name: data.grupo_responsavel.name
+    };
+  }
+
+  if (data.alterado_por_id) {
+    entity.modified_by = {
+      id: data.alterado_por_id,
+      name: data.alterado_por_nome || 'N/A',
+      email: data.alterado_por_email || 'N/A'
+    };
+  }
+
+  return entity;
+}
+
+/**
+ * Constrói o payload específico para chat messages
+ */
+function buildChatWebhookData(chatData) {
+  const entity = buildBaseEntity(chatData);
+  entity.message = chatData.mensagem;
+
+  return {
+    timestamp: new Date().toISOString(),
+    source: 'ITSM_SYSTEM',
+    event_type: 'CHAT_MESSAGE_SENT',
+    module: 'CHAT',
+    action: 'MESSAGE_SENT',
+    entity
+  };
+}
+
+/**
+ * Constrói o payload para requisições/incidentes
+ */
+function buildGeneralWebhookData(payload) {
+  const data = payload.data;
+  const entity = buildBaseEntity(data);
+
+  // Campos específicos para requisições/incidentes
+  if (data.urgencia) {
+    entity.urgency = data.urgencia;
+  }
+
+  if (data.categoria) {
+    entity.category = {
+      id: data.categoria.id,
+      name: data.categoria.name
+    };
+  }
+
+  if (data.sla) {
+    entity.sla = {
+      id: data.sla.id,
+      name: data.sla.name
+    };
+  }
+
+  // Datas
+  entity.dates = {
+    created: data.created_at || new Date().toISOString()
+  };
+
+  if (data.data_abertura) entity.dates.opened = data.data_abertura;
+  if (data.data_limite_resposta) entity.dates.response_deadline = data.data_limite_resposta;
+  if (data.data_limite_resolucao) entity.dates.resolution_deadline = data.data_limite_resolucao;
+  if (data.updated_at) entity.dates.updated = data.updated_at;
+
+  return {
     timestamp: new Date().toISOString(),
     source: 'ITSM_SYSTEM',
     event_type: `${payload.type.toUpperCase()}_${payload.action.toUpperCase()}`,
-    module: payload.type === 'requisicao' ? 'SERVICE_REQUEST' : 
-             payload.type === 'incidente' ? 'INCIDENT' : 'CHAT',
+    module: payload.type === 'requisicao' ? 'SERVICE_REQUEST' : 'INCIDENT',
     action: payload.action.toUpperCase(),
-    entity: payload.data
-  }
+    entity
+  };
+}
 
-  // Special handling for chat messages
-  if (payload.type === 'chat_message') {
-    webhookData.event_type = 'CHAT_MESSAGE_SENT'
-    webhookData.module = 'CHAT'
-    webhookData.entity = {
-      id: payload.data.id,
-      number: payload.data.numero,
-      title: payload.data.titulo,
-      status: payload.data.status,
-      priority: payload.data.prioridade,
-      message: payload.data.mensagem,
-      requester: payload.data.solicitante,
-      client: payload.data.client,
-      assignee: payload.data.atendente,
-      responsible_group: payload.data.grupo_responsavel
-    }
-  }
-
-  console.log('Webhook data prepared:', JSON.stringify(webhookData, null, 2))
+/**
+ * Executa requisição HTTP com timeout
+ */
+async function fetchWithTimeout(url, options, timeout = WEBHOOK_TIMEOUT) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    // Create authorization header
-    const credentials = btoa(`${webhookUser}:${webhookPassword}`)
-    console.log('✅ Credentials created successfully (length):', credentials.length)
-
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${credentials}`,
-      'User-Agent': 'ITSM-System/1.0',
-      'Accept': 'application/json'
-    }
-
-    console.log('🚀 Sending request to:', webhookUrl)
-    console.log('Request headers:', Object.keys(headers))
-
-    const startTime = Date.now()
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(webhookData)
-    })
-    const endTime = Date.now()
-
-    console.log('⏱️ Request took:', endTime - startTime, 'ms')
-    console.log('📊 Response status:', response.status)
-    console.log('📊 Response ok:', response.ok)
-    console.log('📊 Response status text:', response.statusText)
-
-    const responseText = await response.text()
-    console.log('📄 Response body:', responseText)
-
-    if (!response.ok) {
-      console.log('❌ ERROR: Webhook request failed')
-      return {
-        success: false,
-        message: `Webhook failed with status ${response.status}`,
-        details: {
-          status: response.status,
-          statusText: response.statusText,
-          responseBody: responseText,
-          requestUrl: webhookUrl.substring(0, 50) + '...',
-          requestDuration: endTime - startTime,
-          ...envDebug
-        }
-      }
-    }
-
-    console.log('✅ SUCCESS: Webhook sent successfully!')
-    return {
-      success: true,
-      message: 'Webhook sent successfully',
-      details: {
-        status: response.status,
-        responseBody: responseText,
-        requestDuration: endTime - startTime,
-        ...envDebug
-      }
-    }
-
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
   } catch (error) {
-    console.log('❌ EXCEPTION during webhook request:', error)
-    console.log('Error name:', error.name)
-    console.log('Error message:', error.message)
-    console.log('Error stack:', error.stack)
-    
-    return {
-      success: false,
-      message: `Network error: ${error.message}`,
-      details: {
-        error: error.message,
-        errorName: error.name,
-        stack: error.stack,
-        requestUrl: webhookUrl?.substring(0, 50) + '...',
-        ...envDebug
-      }
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeout}ms`);
     }
+    throw error;
   }
 }
 
+/**
+ * Implementa delay para retry
+ */
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Envia notificação webhook com retry logic
+ */
+async function sendWebhookNotification(payload) {
+  try {
+    const webhookUrl = Deno.env.get('WEBHOOK_URL');
+    const webhookUser = Deno.env.get('WEBHOOK_USER');
+    const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD');
+    
+    console.log('Webhook configuration check:', {
+      url_exists: !!webhookUrl,
+      user_exists: !!webhookUser,
+      password_exists: !!webhookPassword
+    });
+
+    if (!webhookUrl || !webhookUser || !webhookPassword) {
+      const missingConfig = [];
+      if (!webhookUrl) missingConfig.push('WEBHOOK_URL');
+      if (!webhookUser) missingConfig.push('WEBHOOK_USER');
+      if (!webhookPassword) missingConfig.push('WEBHOOK_PASSWORD');
+      
+      console.error('Missing webhook configuration:', missingConfig.join(', '));
+      console.error('Available environment variables:', Object.keys(Deno.env.toObject()));
+      return false;
+    }
+
+    // Construir dados do webhook baseado no tipo
+    let webhookData;
+    if (payload.type === 'chat_message') {
+      webhookData = buildChatWebhookData(payload.data);
+      console.log('Sending chat message webhook');
+    } else {
+      webhookData = buildGeneralWebhookData(payload);
+      console.log(`Sending ${payload.type} ${payload.action} webhook`);
+    }
+
+    const credentials = btoa(`${webhookUser}:${webhookPassword}`);
+    
+    // Log do payload (sem dados sensíveis em produção)
+    const isDevelopment = Deno.env.get('ENVIRONMENT') !== 'production';
+    if (isDevelopment) {
+      console.log('Webhook payload:', JSON.stringify(webhookData, null, 2));
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`,
+        'User-Agent': 'ITSM-System/1.0'
+      },
+      body: JSON.stringify(webhookData)
+    };
+
+    // Tentar enviar com retry logic
+    let lastError;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`Webhook attempt ${attempt}/${MAX_RETRIES} to: ${webhookUrl}`);
+        
+        const response = await fetchWithTimeout(webhookUrl, requestOptions);
+        
+        if (response.ok) {
+          console.log(`Webhook notification sent successfully on attempt ${attempt}`);
+          return true;
+        } else {
+          const errorText = await response.text().catch(() => 'Unable to read error response');
+          lastError = new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+          console.warn(`Webhook attempt ${attempt} failed: ${lastError.message}`);
+        }
+      } catch (error) {
+        lastError = error;
+        console.warn(`Webhook attempt ${attempt} failed: ${error.message}`);
+      }
+
+      // Delay antes do próximo retry (exceto na última tentativa)
+      if (attempt < MAX_RETRIES) {
+        const delayTime = RETRY_DELAY * attempt; // Backoff exponencial simples
+        console.log(`Waiting ${delayTime}ms before retry...`);
+        await delay(delayTime);
+      }
+    }
+
+    console.error(`All webhook attempts failed. Last error:`, lastError.message);
+    return false;
+
+  } catch (error) {
+    console.error('Critical error in webhook notification:', error);
+    return false;
+  }
+}
+
+/**
+ * Handler principal da Edge Function
+ */
 Deno.serve(async (req) => {
-  console.log('🎯 === WEBHOOK FUNCTION CALLED ===')
-  console.log('🕐 Timestamp:', new Date().toISOString())
-  console.log('🔧 Method:', req.method)
-  console.log('🌐 URL:', req.url)
-  console.log('🔍 Headers:', Object.fromEntries(req.headers.entries()))
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('✋ CORS preflight request')
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('📥 Parsing request body...')
-    const payload = await req.json()
-    console.log('✅ Request payload parsed successfully')
-    console.log('📋 Payload:', JSON.stringify(payload, null, 2))
-
-    // Validate payload structure
-    if (!payload.type || !payload.action || !payload.data) {
-      console.log('❌ Invalid payload structure')
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Invalid payload structure',
-          received: payload,
-          required: ['type', 'action', 'data']
-        }),
-        { 
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+    // Parse do payload
+    let payload;
+    try {
+      payload = await req.json();
+    } catch (error) {
+      console.error('Invalid JSON payload:', error.message);
+      return new Response(JSON.stringify({
+        error: 'Invalid JSON payload',
+        details: error.message
+      }), {
+        status: 400,
+        headers: securityHeaders
+      });
     }
 
-    console.log('🚀 Calling sendWebhookToExternal...')
-    const result = await sendWebhookToExternal(payload)
-    console.log('📤 Final result:', JSON.stringify(result, null, 2))
+    // Validar payload
+    const validation = validatePayload(payload);
+    if (!validation.valid) {
+      console.error('Payload validation failed:', validation.error);
+      return new Response(JSON.stringify({
+        error: 'Invalid payload structure',
+        details: validation.error
+      }), {
+        status: 400,
+        headers: securityHeaders
+      });
+    }
+
+    console.log(`Processing ${payload.type} ${payload.action} for entity ${payload.data.id}`);
+
+    // Enviar notificação webhook
+    const webhookResult = await sendWebhookNotification(payload);
     
-    return new Response(
-      JSON.stringify(result),
-      { 
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    const responseData = {
+      success: true,
+      message: 'Notification processed',
+      webhook_sent: webhookResult,
+      entity_id: payload.data.id,
+      type: payload.type,
+      action: payload.action
+    };
+
+    if (!webhookResult) {
+      console.warn('Webhook failed but request completed');
+      responseData.warning = 'Webhook delivery failed';
+    }
+
+    return new Response(JSON.stringify(responseData), {
+      status: 200,
+      headers: securityHeaders
+    });
 
   } catch (error) {
-    console.log('💥 EXCEPTION in main handler:')
-    console.log('Error name:', error.name)
-    console.log('Error message:', error.message)
-    console.log('Error stack:', error.stack)
-    
-    return new Response(
-      JSON.stringify({ 
-        success: false,
-        error: 'Internal server error',
-        message: error.message,
-        errorName: error.name,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      }),
-      { 
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    console.error('Critical error processing request:', error);
+    return new Response(JSON.stringify({
+      error: 'Internal server error',
+      timestamp: new Date().toISOString()
+    }), {
+      status: 500,
+      headers: securityHeaders
+    });
   }
-})
+});
