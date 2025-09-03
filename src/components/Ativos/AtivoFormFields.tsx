@@ -56,6 +56,7 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
   const { users } = useUsers();
   const { groups } = useGroups();
   const [proprietarioOpen, setProprietarioOpen] = useState(false);
+  const [donoNegocioOpen, setDonoNegocioOpen] = useState(false);
 
   const tipoAtivo = form.watch('tipo_id');
   
@@ -479,26 +480,59 @@ export const AtivoFormFields = ({ form }: AtivoFormFieldsProps) => {
               <FormField
                 control={form.control}
                 name="dono_negocio_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dono do Negócio</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o responsável" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {users?.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const selectedUser = sortedUsers.find(user => user.id === field.value);
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Dono do Negócio</FormLabel>
+                      <Popover open={donoNegocioOpen} onOpenChange={setDonoNegocioOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={donoNegocioOpen}
+                              className="w-full justify-between"
+                            >
+                              {selectedUser ? selectedUser.name : "Selecione o responsável..."}
+                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar usuário..." />
+                            <CommandList>
+                              <CommandEmpty>Nenhum usuário encontrado.</CommandEmpty>
+                              <CommandGroup>
+                                {sortedUsers.map((user) => (
+                                  <CommandItem
+                                    key={user.id}
+                                    value={user.name}
+                                    onSelect={() => {
+                                      field.onChange(user.id);
+                                      setDonoNegocioOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        field.value === user.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {user.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
