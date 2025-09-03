@@ -16,13 +16,6 @@ export const calculateSLADeadlines = (
   // Usar a data diretamente sem conversão de timezone para evitar problemas
   const dataAberturaBrasil = new Date(dataAbertura);
   
-  console.log('Calculating SLA deadlines:', { 
-    dataAberturaOriginal: dataAbertura,
-    dataAberturaBrasil, 
-    sla, 
-    grupo 
-  });
-  
   // Se não há configuração de turno, usar cálculo simples (24/7)
   if (!grupo.dias_semana || grupo.dias_semana.length === 0 || !grupo.inicio_turno || !grupo.fim_turno) {
     const dataLimiteResposta = new Date(dataAberturaBrasil);
@@ -67,8 +60,6 @@ const calculateBusinessDeadline = (
   inicioTurno: string,
   fimTurno: string
 ): Date => {
-  console.log('Calculating business deadline:', { startDate, minutes, diasSemana, inicioTurno, fimTurno });
-  
   // Converter para horário do Brasil para cálculos corretos
   const currentDate = toBrazilTime(startDate);
   let remainingMinutes = minutes;
@@ -77,43 +68,27 @@ const calculateBusinessDeadline = (
   const [inicioHora, inicioMin] = inicioTurno.split(':').map(Number);
   const [fimHora, fimMin] = fimTurno.split(':').map(Number);
   
-  console.log('Parsed work hours:', { inicioHora, inicioMin, fimHora, fimMin });
-  
   const inicioMinutosDia = inicioHora * 60 + inicioMin;
   const fimMinutosDia = fimHora * 60 + fimMin;
 
   // Converter dias_semana para números se vier como string do banco
   const diasSemanaNumbers = diasSemana.map(dia => typeof dia === 'string' ? parseInt(dia) : dia);
-  
-  console.log('Debug SLA:', { 
-    diasSemanaOriginal: diasSemana, 
-    diasSemanaNumbers, 
-    currentDay: currentDate.getDay(),
-    currentDate: currentDate.toISOString(),
-    localTime: currentDate.getHours() + ':' + currentDate.getMinutes(),
-    brazilTime: currentDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-  });
 
   while (remainingMinutes > 0) {
     const diaSemana = currentDate.getDay(); // 0 = domingo, 1 = segunda, etc.
-    console.log('Checking day:', { diaSemana, diasSemanaNumbers, includes: diasSemanaNumbers.includes(diaSemana), currentTime: currentDate.getHours() + ':' + currentDate.getMinutes() });
     
     // Verificar se é dia útil
     if (diasSemanaNumbers.includes(diaSemana)) {
       const minutosAtuais = currentDate.getHours() * 60 + currentDate.getMinutes();
-      console.log('Work hours check:', { minutosAtuais, inicioMinutosDia, fimMinutosDia, isAfterWork: minutosAtuais >= fimMinutosDia });
       
       // Se estamos antes do horário de trabalho, avançar para o início
       if (minutosAtuais < inicioMinutosDia) {
         currentDate.setHours(inicioHora, inicioMin, 0, 0);
-        console.log('Moved to start of work day:', currentDate.toISOString());
       }
       // Se estamos após o horário de trabalho, ir para o próximo dia útil
       else if (minutosAtuais >= fimMinutosDia) {
-        console.log('After work hours, moving to next day');
         currentDate.setDate(currentDate.getDate() + 1);
         currentDate.setHours(inicioHora, inicioMin, 0, 0);
-        console.log('Moved to next work day:', currentDate.toISOString());
         continue;
       }
 

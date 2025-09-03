@@ -118,8 +118,6 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
         const categoriaId = value.categoria_id;
         const grupoId = value.grupo_responsavel_id;
         
-        console.log('SLA calculation triggered for incidente:', { categoriaId, grupoId });
-        
         if (categoriaId && grupoId) {
           try {
             const deadlines = await calculateAndSetSLADeadlines(
@@ -128,17 +126,13 @@ const EditIncidenteDialog = ({ incidente, isOpen, onClose }: EditIncidenteDialog
               incidente.data_abertura || new Date().toISOString()
             );
             
-            console.log('Incident SLA deadlines received:', deadlines);
-            
             if (deadlines.data_limite_resposta) {
               const formattedResposta = deadlines.data_limite_resposta.slice(0, 16);
               form.setValue('data_limite_resposta', formattedResposta);
-              console.log('Setting data_limite_resposta:', formattedResposta);
             }
             if (deadlines.data_limite_resolucao) {
               const formattedResolucao = deadlines.data_limite_resolucao.slice(0, 16);
               form.setValue('data_limite_resolucao', formattedResolucao);
-              console.log('Setting data_limite_resolucao:', formattedResolucao);
             }
           } catch (error) {
             console.error('Error calculating SLA for incident:', error);

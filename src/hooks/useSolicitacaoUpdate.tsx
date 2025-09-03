@@ -135,7 +135,6 @@ export const useSolicitacaoUpdate = () => {
       const noSLABefore = !currentData.data_limite_resposta && !currentData.data_limite_resolucao;
 
       if ((categoriaChanged || grupoChanged) && noSLABefore) {
-        console.log('Recalculando SLA pois categoria/grupo mudou e não havia SLA antes');
         const calculatedDeadlines = await calculateAndSetSLADeadlines(
           data.categoria_id || currentData.categoria_id,
           data.grupo_responsavel_id || currentData.grupo_responsavel_id,
@@ -158,13 +157,11 @@ export const useSolicitacaoUpdate = () => {
 
         // Se mudou PARA pendente, pausar SLA (apenas registrar no log)
         if (novoStatus === 'pendente' && statusAnterior !== 'pendente') {
-          console.log('Status mudou para pendente - SLA deve ser pausado');
           // Nota: A pausa real seria implementada com campos adicionais no banco
         }
 
         // Se mudou DE pendente para outro status, retomar SLA (apenas registrar no log)
         if (statusAnterior === 'pendente' && novoStatus !== 'pendente') {
-          console.log('Status saiu de pendente - SLA deve ser retomado');
           // Nota: A retomada real seria implementada com campos adicionais no banco
         }
       }

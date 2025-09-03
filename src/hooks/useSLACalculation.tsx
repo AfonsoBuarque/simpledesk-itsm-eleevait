@@ -17,7 +17,6 @@ export const useSLACalculation = () => {
     dataAbertura: Date | string = nowInBrazil()
   ) => {
     if (!categoriaId || !grupoResponsavelId) {
-      console.log('Missing categoria or grupo responsavel for SLA calculation');
       return {
         data_limite_resposta: undefined,
         data_limite_resolucao: undefined,
@@ -29,8 +28,6 @@ export const useSLACalculation = () => {
       
       // Converter dataAbertura para Date se for string
       const dataAberturaDate = typeof dataAbertura === 'string' ? new Date(dataAbertura) : dataAbertura;
-      
-      console.log('Starting SLA calculation:', { categoriaId, grupoResponsavelId, dataAbertura: dataAberturaDate });
 
       // Buscar a categoria para obter o SLA associado
       const { data: categoria, error: categoriaError } = await supabase
@@ -40,7 +37,6 @@ export const useSLACalculation = () => {
         .single();
 
       if (categoriaError || !categoria?.sla_id) {
-        console.log('No SLA found for categoria:', categoriaError);
         return {
           data_limite_resposta: undefined,
           data_limite_resolucao: undefined,
@@ -55,7 +51,6 @@ export const useSLACalculation = () => {
         .single();
 
       if (slaError || !sla) {
-        console.log('Error fetching SLA:', slaError);
         return {
           data_limite_resposta: undefined,
           data_limite_resolucao: undefined,
@@ -70,7 +65,6 @@ export const useSLACalculation = () => {
         .single();
 
       if (grupoError || !grupo) {
-        console.log('Error fetching grupo:', grupoError);
         return {
           data_limite_resposta: undefined,
           data_limite_resolucao: undefined,
@@ -83,8 +77,6 @@ export const useSLACalculation = () => {
         sla as SLA,
         grupo as Group
       );
-
-      console.log('SLA deadlines calculated:', deadlines);
 
       return deadlines;
     } catch (error) {

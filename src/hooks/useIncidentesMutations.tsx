@@ -46,7 +46,6 @@ export const useIncidentesMutations = () => {
         );
         data_limite_resposta = slaDeadlines.data_limite_resposta || data_limite_resposta || null;
         data_limite_resolucao = slaDeadlines.data_limite_resolucao || data_limite_resolucao || null;
-        console.log('SLA deadlines calculados:', slaDeadlines);
       }
 
       // Preparar dados para inserção, removendo campos que não existem na tabela
@@ -275,7 +274,6 @@ export const useIncidentesMutations = () => {
       };
 
       if ((categoriaChanged || grupoChanged) && noSLABefore) {
-        console.log('Recalculando SLA pois categoria/grupo mudou e não havia SLA antes');
         const calculatedDeadlines = await calculateAndSetSLADeadlines(
           data.categoria_id || currentData.categoria_id,
           data.grupo_responsavel_id || currentData.grupo_responsavel_id,
@@ -287,7 +285,6 @@ export const useIncidentesMutations = () => {
         if (calculatedDeadlines.data_limite_resolucao) {
           updateData.data_limite_resolucao = calculatedDeadlines.data_limite_resolucao;
         }
-        console.log('SLA deadlines recalculados ao atualizar:', calculatedDeadlines);
       }
 
       // Remover campos que são undefined ou string vazia para evitar erro de UUID
