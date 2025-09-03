@@ -144,6 +144,8 @@ async function sendWebhookNotification(payload: NotificationPayload | { type: 'c
       user: webhookUser,
       password: webhookPassword ? '***' : 'missing'
     })
+    
+    console.log('All env variables:', Object.keys(Deno.env.toObject()))
 
     if (!webhookUrl || !webhookUser || !webhookPassword) {
       console.error('Webhook configuration missing:', { 
