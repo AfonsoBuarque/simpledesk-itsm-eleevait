@@ -136,16 +136,20 @@ interface WebhookData {
 async function sendWebhookNotification(payload: NotificationPayload | { type: 'chat_message'; action: 'message_sent'; data: ChatMessageData }): Promise<boolean> {
   try {
     const webhookUrl = Deno.env.get('WEBHOOK_URL')
-    const webhookUser = Deno.env.get('WEBHOOK_USER')
+    const webhookUser = Deno.env.get('WEBHOOK_USER') 
     const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
-
-    console.log('Webhook configuration:', { 
-      url: webhookUrl,
-      user: webhookUser,
-      password: webhookPassword ? '***' : 'missing'
+    
+    console.log('Webhook configuration check:', { 
+      url: webhookUrl ? 'SET' : 'MISSING',
+      user: webhookUser ? 'SET' : 'MISSING', 
+      password: webhookPassword ? 'SET' : 'MISSING'
     })
     
-    console.log('All env variables:', Object.keys(Deno.env.toObject()))
+    // Debug: List all available environment variables
+    const allEnvKeys = Object.keys(Deno.env.toObject())
+    console.log('Available environment variables:', allEnvKeys.filter(key => 
+      key.startsWith('WEBHOOK_') || key.startsWith('SUPABASE_')
+    ))
 
     if (!webhookUrl || !webhookUser || !webhookPassword) {
       console.error('Webhook configuration missing:', { 
