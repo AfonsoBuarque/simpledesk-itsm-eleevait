@@ -134,21 +134,34 @@ interface WebhookData {
 }
 
 async function sendWebhookNotification(payload: NotificationPayload | { type: 'chat_message'; action: 'message_sent'; data: ChatMessageData }): Promise<boolean> {
-  console.log('WEBHOOK FUNCTION STARTED')
+  console.log('=== WEBHOOK FUNCTION START ===')
   
   try {
-    const webhookUrl = Deno.env.get('WEBHOOK_URL')
-    const webhookUser = Deno.env.get('WEBHOOK_USER') 
-    const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
+    // Try different ways to access environment variables
+    const webhookUrl = Deno.env.get('WEBHOOK_URL') || ''
+    const webhookUser = Deno.env.get('WEBHOOK_USER') || ''
+    const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD') || ''
     
-    console.log('URL:', webhookUrl ? 'FOUND' : 'NOT_FOUND')
-    console.log('USER:', webhookUser ? 'FOUND' : 'NOT_FOUND')  
-    console.log('PASSWORD:', webhookPassword ? 'FOUND' : 'NOT_FOUND')
+    console.log('Environment check:')
+    console.log('- WEBHOOK_URL length:', webhookUrl.length)
+    console.log('- WEBHOOK_USER length:', webhookUser.length) 
+    console.log('- WEBHOOK_PASSWORD length:', webhookPassword.length)
+    
+    // Debug: Check all environment variables
+    const allEnv = Deno.env.toObject()
+    const envKeys = Object.keys(allEnv)
+    console.log('Total env vars:', envKeys.length)
+    console.log('Webhook vars found:', envKeys.filter(k => k.includes('WEBHOOK')))
     
     if (!webhookUrl || !webhookUser || !webhookPassword) {
-      console.log('ERROR: Missing webhook credentials')
+      console.error('CRITICAL: Missing webhook configuration')
+      console.error('URL empty:', webhookUrl === '')
+      console.error('User empty:', webhookUser === '')
+      console.error('Password empty:', webhookPassword === '')
       return false
     }
+    
+    console.log('Webhook config OK, proceeding...')
 
     // Handle chat message notifications differently
     if (payload.type === 'chat_message') {
