@@ -40,8 +40,16 @@ const Auth = () => {
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row">
       <AuthLeftPanel />
-      <div className="flex-1 flex items-center justify-center bg-white min-h-screen md:min-h-0">
-        <div className="w-full max-w-md p-8 md:py-16 md:px-8 shadow-none md:shadow-xl md:rounded-xl border-none">
+      <div 
+        className="flex-1 flex items-center justify-center bg-white min-h-screen md:min-h-0"
+        style={{
+          backgroundImage: 'url(/logos/images/fundo_apresentacao_eleeva.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="w-full max-w-md p-8 md:py-16 md:px-8 shadow-none md:shadow-xl md:rounded-xl border-none bg-white/95 backdrop-blur-sm">
           <AuthTabs loading={loading} signIn={signIn} signUp={signUp} />
           {/* <p className="mt-6 text-xs text-blue-700 text-center">
             Recebeu convite?{" "}
