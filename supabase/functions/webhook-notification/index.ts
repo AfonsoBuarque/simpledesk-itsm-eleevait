@@ -140,9 +140,9 @@ async function sendWebhookNotification(payload: NotificationPayload | { type: 'c
     const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
 
     console.log('Webhook configuration:', { 
-      url: webhookUrl ? 'configured' : 'missing',
-      user: webhookUser ? 'configured' : 'missing',
-      password: webhookPassword ? 'configured' : 'missing'
+      url: webhookUrl,
+      user: webhookUser,
+      password: webhookPassword ? '***' : 'missing'
     })
 
     if (!webhookUrl || !webhookUser || !webhookPassword) {
@@ -341,13 +341,18 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Enviar notificação webhook em background
-    EdgeRuntime.waitUntil(sendWebhookNotification(payload))
+    // Enviar notificação webhook e aguardar resposta para debug
+    const webhookResult = await sendWebhookNotification(payload)
+    
+    if (!webhookResult) {
+      console.error('Webhook failed to send')
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Notification queued successfully' 
+        message: 'Notification sent',
+        webhook_sent: webhookResult
       }),
       { 
         status: 200, 
