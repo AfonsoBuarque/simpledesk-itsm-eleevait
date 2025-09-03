@@ -109,6 +109,10 @@ export const useWebhookNotification = () => {
         if (!data.webhook_sent) {
           console.warn('⚠️ Webhook was not sent to external endpoint');
           console.warn('This means the edge function processed but failed to deliver to the webhook URL');
+          
+          if (data.debug) {
+            console.warn('🔍 Debug info:', data.debug);
+          }
         }
       }
 

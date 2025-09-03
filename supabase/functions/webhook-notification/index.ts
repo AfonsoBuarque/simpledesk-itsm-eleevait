@@ -334,6 +334,21 @@ Deno.serve(async (req) => {
     if (!webhookResult) {
       console.warn('Webhook failed but request completed');
       responseData.warning = 'Webhook delivery failed';
+      
+      // Add more debug info about the webhook failure
+      const webhookUrl = Deno.env.get('WEBHOOK_URL');
+      const webhookUser = Deno.env.get('WEBHOOK_USER');
+      const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD');
+      
+      responseData.debug = {
+        webhook_config_exists: {
+          url: !!webhookUrl,
+          user: !!webhookUser, 
+          password: !!webhookPassword
+        },
+        webhook_url: webhookUrl ? webhookUrl.substring(0, 50) + '...' : 'NOT_SET',
+        webhook_user: webhookUser || 'NOT_SET'
+      };
     }
 
     return new Response(JSON.stringify(responseData), {
