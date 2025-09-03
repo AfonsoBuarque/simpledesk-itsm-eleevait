@@ -23,6 +23,7 @@ import { FornecedorManagement } from '@/components/Fornecedores/FornecedorManage
 import { LocalizacaoManagement } from '@/components/Localizacoes/LocalizacaoManagement';
 import SLAManagement from '@/components/SLAs/SLAManagement';
 import { ChatBot } from '@/components/ChatBot/ChatBot';
+import { WebhookTest } from '@/components/WebhookTest';
 import IncidentesManagement from '@/components/Incidentes/IncidentesManagement';
 import ProblemasManagement from '@/components/Problemas/ProblemasManagement';
 import MudancasManagement from '@/components/Mudancas/MudancasManagement';
@@ -89,7 +90,14 @@ const Index = () => {
   const renderContent = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <DashboardOverview />;
+        return (
+          <div>
+            <DashboardOverview />
+            <div className="mt-6">
+              <WebhookTest />
+            </div>
+          </div>
+        );
       case 'admin':
         // Redirecionar para a página do console administrativo
         window.location.href = '/admin';
