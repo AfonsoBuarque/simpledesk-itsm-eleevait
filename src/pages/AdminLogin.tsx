@@ -24,8 +24,9 @@ const AdminLogin = () => {
     if (!profileLoading) {
       // Aguardar um tick para garantir que todos os estados estejam estabilizados
       const timer = setTimeout(() => {
-        // Mostrar formulário a menos que seja definitivamente um admin autenticado
-        if (!user || !profile || profile.role !== 'admin') {
+        // Mostrar formulário se não há usuário ou se não é admin autenticado
+        const isAuthenticatedAdmin = user && profile && profile.role === 'admin';
+        if (!isAuthenticatedAdmin) {
           setShowForm(true);
         }
       }, 100);
