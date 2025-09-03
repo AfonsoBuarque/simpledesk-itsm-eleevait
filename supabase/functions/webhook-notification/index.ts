@@ -139,8 +139,18 @@ async function sendWebhookNotification(payload: NotificationPayload | { type: 'c
     const webhookUser = Deno.env.get('WEBHOOK_USER')
     const webhookPassword = Deno.env.get('WEBHOOK_PASSWORD')
 
+    console.log('Webhook configuration:', { 
+      url: webhookUrl ? 'configured' : 'missing',
+      user: webhookUser ? 'configured' : 'missing',
+      password: webhookPassword ? 'configured' : 'missing'
+    })
+
     if (!webhookUrl || !webhookUser || !webhookPassword) {
-      console.error('Webhook configuration missing')
+      console.error('Webhook configuration missing:', { 
+        url: !!webhookUrl,
+        user: !!webhookUser,
+        password: !!webhookPassword
+      })
       return false
     }
 
@@ -192,6 +202,9 @@ async function sendWebhookNotification(payload: NotificationPayload | { type: 'c
       }
 
       const credentials = btoa(`${webhookUser}:${webhookPassword}`)
+      
+      console.log(`Sending chat message webhook to: ${webhookUrl}`)
+      console.log(`Webhook payload:`, JSON.stringify(webhookData, null, 2))
 
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -279,6 +292,9 @@ async function sendWebhookNotification(payload: NotificationPayload | { type: 'c
     }
 
     const credentials = btoa(`${webhookUser}:${webhookPassword}`)
+
+    console.log(`Sending webhook to: ${webhookUrl}`)
+    console.log(`Webhook payload:`, JSON.stringify(webhookData, null, 2))
 
     const response = await fetch(webhookUrl, {
       method: 'POST',
