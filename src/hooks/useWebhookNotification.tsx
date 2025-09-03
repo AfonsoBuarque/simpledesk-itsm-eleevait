@@ -97,10 +97,19 @@ export const useWebhookNotification = () => {
         return false;
       }
 
-      if (data && !data.success) {
-        console.error('❌ Webhook failed:', data.message);
-        console.error('Details:', data.details);
-        return false;
+      if (data) {
+        console.log('📊 Webhook result:', {
+          success: data.success,
+          message: data.message,
+          webhook_sent: data.webhook_sent,
+          entity_id: data.entity_id,
+          warning: data.warning
+        });
+
+        if (!data.webhook_sent) {
+          console.warn('⚠️ Webhook was not sent to external endpoint');
+          console.warn('This means the edge function processed but failed to deliver to the webhook URL');
+        }
       }
 
       console.log('✅ Webhook notification sent successfully');
