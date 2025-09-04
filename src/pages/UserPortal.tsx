@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, LogOut, BarChart3, Plus, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientContext } from '@/contexts/ClientContext';
+import { usePageTransition } from '@/hooks/usePageTransition';
+import { PageLoading } from '@/components/ui/page-loading';
 import { UserPortalForm } from '@/components/UserPortal/UserPortalForm';
 import UserPortalDashboard from '@/components/UserPortal/UserPortalDashboard';
 import { UserTicketsList } from '@/components/UserPortal/UserTicketsList';
@@ -18,6 +20,7 @@ const UserPortal = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isNovaRequisicaoModalOpen, setIsNovaRequisicaoModalOpen] = useState(false);
+  const { isLoading, loadingMessage, startTransition, endTransition } = usePageTransition();
 
   // Removido: Log de role do usuário logado (apenas este!)
   // if (profile) {
@@ -26,6 +29,7 @@ const UserPortal = () => {
 
   // Atualizar: garantir redirecionamento para /auth após logout
   const handleSignOut = async () => {
+    startTransition('Fazendo logout...');
     await signOut();
     navigate("/auth", { replace: true });
   };
@@ -35,7 +39,14 @@ const UserPortal = () => {
   };
 
   const handleAdminClick = () => {
+    startTransition('Acessando área administrativa...');
     navigate('/');
+  };
+
+  const handleTabChange = (value: string) => {
+    startTransition('Carregando...');
+    setActiveTab(value);
+    endTransition();
   };
 
   return (
@@ -137,7 +148,7 @@ const UserPortal = () => {
           </div>
 
           <div 
-            onClick={() => setActiveTab('tickets')}
+            onClick={() => handleTabChange('tickets')}
             className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3 mb-3">
@@ -150,7 +161,7 @@ const UserPortal = () => {
           </div>
 
           <div 
-            onClick={() => setActiveTab('knowledge')}
+            onClick={() => handleTabChange('knowledge')}
             className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3 mb-3">
@@ -163,7 +174,7 @@ const UserPortal = () => {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 animate-fade-in" style={{ '--tw-animation-delay': '0.4s' } as React.CSSProperties}>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6 animate-fade-in" style={{ '--tw-animation-delay': '0.4s' } as React.CSSProperties}>
           <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-white/50 backdrop-blur-sm border shadow-sm rounded-xl overflow-hidden">
             <TabsTrigger 
               value="dashboard" 
@@ -207,6 +218,9 @@ const UserPortal = () => {
         isOpen={isNovaRequisicaoModalOpen}
         onClose={() => setIsNovaRequisicaoModalOpen(false)}
       />
+
+      {/* Loading Screen */}
+      {isLoading && <PageLoading message={loadingMessage} />}
     </div>
   );
 };
