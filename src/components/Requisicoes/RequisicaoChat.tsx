@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRequisicaoParticipants } from "./useRequisicaoParticipants";
 import { useChatFileUpload } from "@/hooks/useChatFileUpload";
 import { useWebhookNotification } from "@/hooks/useWebhookNotification";
+import { useToast } from "@/hooks/use-toast";
 import { Solicitacao } from "@/types/solicitacao";
 
 interface RequisicaoChatProps {
@@ -17,6 +18,7 @@ interface RequisicaoChatProps {
 
 export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { chatMessages, isLoading, error, sendMessage, sendMessageWithFile } = useRequisicaoChat(
     requisicao.id
   );
@@ -48,7 +50,11 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
     if (!file || !user?.id) return;
 
     if (!pertenceAoChamado) {
-      alert("Você não está autorizado a enviar arquivos neste chamado.");
+      toast({
+        title: "Erro de Permissão",
+        description: "Você não tem permissão para enviar arquivos porque não faz parte do grupo responsável pelo caso.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -79,16 +85,12 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
   const handleEnviarMensagem = async () => {
     if (!mensagem.trim()) return;
     if (!user?.id) {
-      alert("É necessário estar autenticado para enviar mensagens.");
+      toast({
+        title: "Erro de Autenticação",
+        description: "É necessário estar autenticado para enviar mensagens.",
+        variant: "destructive",
+      });
       return;
-    }
-
-    if (!pertenceAoChamado) {
-      alert(
-        `Atenção: Seu usuário (${user.id}) NÃO está listado em solicitante_id nem atendente_id deste chamado!\n` +
-          "Isso irá bloquear o envio da mensagem pelo Supabase RLS.\n" +
-          "Verifique se você realmente está vinculado a esse chamado."
-      );
     }
 
     try {
@@ -105,9 +107,23 @@ export const RequisicaoChat: React.FC<RequisicaoChatProps> = ({ requisicao }) =>
       setMensagem("");
     } catch (e: any) {
       console.error("Erro ao enviar mensagem no chat:", e);
-      alert(
-        "Erro: Não foi possível enviar mensagem. Você não está autorizado para esse chamado (somente participantes podem enviar mensagens)."
-      );
+      
+      // Check for different types of permission errors
+      const isPermissionError = e?.code === '42501' || 
+                               e?.code === 42501 ||
+                               e?.message?.includes('row-level security policy') ||
+                               e?.message?.includes('Forbidden') ||
+                               e?.status === 403 ||
+                               (typeof e === 'object' && e !== null && 
+                                (String(e).includes('42501') || String(e).includes('row-level security')));
+      
+      toast({
+        title: "Erro de Permissão",
+        description: isPermissionError 
+          ? "Você não tem permissão para enviar mensagens porque não faz parte do grupo responsável pelo caso."
+          : `Erro ao enviar mensagem: ${e?.message || 'Erro desconhecido'}`,
+        variant: "destructive",
+      });
     }
   };
 
