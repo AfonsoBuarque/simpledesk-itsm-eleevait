@@ -316,11 +316,29 @@ export const useRequisicoes = () => {
         description: "Requisição atualizada com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating requisição:', error);
+      console.log('Error details:', {
+        code: error?.code,
+        message: error?.message,
+        status: error?.status,
+        details: error?.details
+      });
+      
+      // Check for different types of permission errors
+      const isPermissionError = error?.code === '42501' || 
+                               error?.code === 42501 ||
+                               error?.message?.includes('row-level security policy') ||
+                               error?.message?.includes('Forbidden') ||
+                               error?.status === 403 ||
+                               (typeof error === 'object' && error !== null && 
+                                (String(error).includes('42501') || String(error).includes('row-level security')));
+      
       toast({
-        title: "Erro",
-        description: "Erro ao atualizar requisição. Tente novamente.",
+        title: "Erro de Permissão",
+        description: isPermissionError 
+          ? "Você não tem permissão para editar esta requisição porque não faz parte do grupo responsável pelo caso."
+          : `Erro ao atualizar requisição: ${error?.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     },
