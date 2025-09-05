@@ -214,11 +214,17 @@ export const useSolicitacaoUpdate = () => {
         description: "Solicitação atualizada com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating solicitação:', error);
+      
+      // Check if it's a permission error
+      const isPermissionError = error?.code === '42501' || error?.message?.includes('row-level security policy');
+      
       toast({
         title: "Erro",
-        description: "Erro ao atualizar solicitação. Tente novamente.",
+        description: isPermissionError 
+          ? "Você não tem permissão para editar este caso. Apenas membros do grupo responsável podem fazer alterações."
+          : "Erro ao atualizar solicitação. Tente novamente.",
         variant: "destructive",
       });
     },

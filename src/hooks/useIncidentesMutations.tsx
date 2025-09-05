@@ -323,11 +323,17 @@ export const useIncidentesMutations = () => {
         description: "Incidente atualizado com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erro ao atualizar incidente:', error);
+      
+      // Check if it's a permission error
+      const isPermissionError = error?.code === '42501' || error?.message?.includes('row-level security policy');
+      
       toast({
         title: "Erro",
-        description: "Erro ao atualizar incidente.",
+        description: isPermissionError
+          ? "Você não tem permissão para editar este incidente. Apenas membros do grupo responsável podem fazer alterações."
+          : "Erro ao atualizar incidente.",
         variant: "destructive",
       });
     }
