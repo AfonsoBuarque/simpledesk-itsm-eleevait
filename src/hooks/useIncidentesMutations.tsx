@@ -325,15 +325,27 @@ export const useIncidentesMutations = () => {
     },
     onError: (error: any) => {
       console.error('Erro ao atualizar incidente:', error);
+      console.log('Error details:', {
+        code: error?.code,
+        message: error?.message,
+        status: error?.status,
+        details: error?.details
+      });
       
-      // Check if it's a permission error
-      const isPermissionError = error?.code === '42501' || error?.message?.includes('row-level security policy');
+      // Check for different types of permission errors
+      const isPermissionError = error?.code === '42501' || 
+                               error?.code === 42501 ||
+                               error?.message?.includes('row-level security policy') ||
+                               error?.message?.includes('Forbidden') ||
+                               error?.status === 403 ||
+                               (typeof error === 'object' && error !== null && 
+                                (String(error).includes('42501') || String(error).includes('row-level security')));
       
       toast({
-        title: "Erro",
+        title: "Erro de Permissão",
         description: isPermissionError
-          ? "Você não tem permissão para editar este incidente. Apenas membros do grupo responsável podem fazer alterações."
-          : "Erro ao atualizar incidente.",
+          ? "Você não tem permissão para editar este incidente porque não faz parte do grupo responsável pelo caso."
+          : `Erro ao atualizar incidente: ${error?.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     }
